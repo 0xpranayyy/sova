@@ -1,7 +1,7 @@
 import SwiftUI
 
-// Each step: a big, tight, left-aligned headline, one quiet supporting
-// line, and a single interactive idea. Lime only marks what's chosen.
+// Onboarding: big heavy headlines, Allo's colors as blocks and stickers,
+// and the owl as a character who greets you, asks your name and celebrates.
 
 private struct StepHeadline: View {
     let text: String
@@ -33,122 +33,50 @@ private struct StepBody: View {
     }
 }
 
-private var accent: Color { SovaTheme.current.accent.color }
+private var accent: Color { StickerTone.indigo.fill }
 
-// MARK: - 1. Welcome
-
-struct HelloStep: View {
-    var look: CGSize
-    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 92
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            WelcomeBlocks(look: look)
-                .padding(.top, 6)
-
-            Spacer(minLength: 20)
-
-            Text("Sova.")
-                .font(.hero(titleSize, weight: .heavy))
-                .tracking(-4.5)
-                .foregroundStyle(Color.ink)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .reveal(7)
-            Text("Your day, your rituals, your goals.\nPlanned in a minute.")
-                .font(.allo(size: 20, weight: .bold, relativeTo: .title3))
-                .tracking(-0.3)
-                .foregroundStyle(Color.inkSecondary)
-                .padding(.top, 8)
-                .padding(.bottom, 22)
-                .reveal(8)
-        }
-        .padding(.horizontal, 20)
-    }
-}
-
-/// A taste of the app, as blocks that pop in one by one.
-private struct WelcomeBlocks: View {
-    var look: CGSize
+/// A tilted pill sticker, as floats around the owl.
+private struct TiltPill: View {
+    let text: String
+    let tone: StickerTone
+    var tilt: Double = 0
+    var size: CGFloat = 15
 
     var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                VStack(alignment: .leading, spacing: 4) {
-                    MonoCaps(String(localized: "Today"), color: StickerTone.yellow.deep)
-                    Text("3/8")
-                        .font(.hero(56, weight: .heavy))
-                        .tracking(-2.4)
-                    Spacer(minLength: 0)
-                    DaySegments(done: 3, total: 8, color: StickerTone.yellow.deep, height: 8)
-                }
-                .foregroundStyle(StickerTone.yellow.deep)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .padding(16)
-                .background(StickerTone.yellow.fill, in: .rect(cornerRadius: 28, style: .continuous))
-                .pop(0)
-
-                VStack(spacing: 8) {
-                    Label("Meditate", systemImage: "checkmark")
-                        .font(.allo(size: 17, weight: .heavy, relativeTo: .headline))
-                        .foregroundStyle(StickerTone.mint.deep)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                        .padding(.horizontal, 16)
-                        .background(StickerTone.mint.fill, in: .rect(cornerRadius: 28, style: .continuous))
-                        .pop(1)
-                    VStack(alignment: .leading, spacing: 2) {
-                        MonoCaps(String(localized: "Goal"), color: StickerTone.pink.deep, size: 10)
-                        Text("Read 12 books")
-                            .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    }
-                    .foregroundStyle(StickerTone.pink.deep)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .background(StickerTone.pink.fill, in: .rect(cornerRadius: 28, style: .continuous))
-                    .pop(2)
-                }
-            }
-            .frame(height: 150)
-
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 6) {
-                    MonoCaps(String(localized: "Up next"), color: StickerTone.indigo.deep)
-                    Text("Call Mom\nat 6 PM")
-                        .font(.allo(size: 24, weight: .heavy, relativeTo: .title2))
-                        .tracking(-0.6)
-                        .foregroundStyle(.white)
-                }
-                .frame(maxHeight: .infinity, alignment: .top)
-                Spacer()
-                OwlMark(size: 76, look: look, bodyColor: Color.canvas,
-                        eyeColor: StickerTone.indigo.fill)
-            }
-            .padding(18)
-            .frame(height: 150)
-            .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 28, style: .continuous))
-            .pop(3)
-
-            HStack(spacing: 8) {
-                pill(String(localized: "Rituals"), .lilac).pop(4)
-                pill(String(localized: "12 days"), .orange).pop(5)
-                pill(String(localized: "Goals"), .cyan).pop(6)
-            }
-        }
-        .accessibilityHidden(true)
-    }
-
-    private func pill(_ text: String, _ tone: StickerTone) -> some View {
         Text(text)
-            .font(.allo(size: 17, weight: .heavy, relativeTo: .headline))
-            .foregroundStyle(tone.deep)
-            .frame(maxWidth: .infinity, minHeight: 58)
+            .font(.allo(size: size, weight: .heavy, relativeTo: .subheadline))
+            .tracking(-0.3)
+            .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+            .padding(.horizontal, size * 0.95)
+            .padding(.vertical, size * 0.6)
             .background(tone.fill, in: .capsule)
+            .rotationEffect(.degrees(tilt))
+            .fixedSize()
     }
 }
 
-/// Springs a block in from slightly smaller, a beat after the one before.
+/// A sparkle at a spot, in a color.
+private struct SparkleDot: View {
+    let color: Color
+    var size: CGFloat = 24
+    @State private var twinkle = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        Sparkle()
+            .fill(color)
+            .frame(width: size, height: size)
+            .scaleEffect(twinkle ? 1 : 0.7)
+            .onAppear {
+                guard !reduceMotion else { twinkle = true; return }
+                withAnimation(.easeInOut(duration: Double.random(in: 1.2...2.0)).repeatForever(autoreverses: true)) {
+                    twinkle = true
+                }
+            }
+    }
+}
+
+/// Springs a view in from slightly smaller, a beat after the one before.
 private struct Pop: ViewModifier {
     let index: Int
     @State private var shown = false
@@ -156,10 +84,10 @@ private struct Pop: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .scaleEffect(shown || reduceMotion ? 1 : 0.85)
+            .scaleEffect(shown || reduceMotion ? 1 : 0.6)
             .opacity(shown ? 1 : 0)
             .onAppear {
-                withAnimation(.spring(response: 0.55, dampingFraction: 0.62).delay(0.08 + Double(index) * 0.06)) {
+                withAnimation(.spring(response: 0.55, dampingFraction: 0.6).delay(0.15 + Double(index) * 0.07)) {
                     shown = true
                 }
             }
@@ -168,6 +96,73 @@ private struct Pop: ViewModifier {
 
 private extension View {
     func pop(_ index: Int) -> some View { modifier(Pop(index: index)) }
+}
+
+// MARK: - 1. Welcome
+
+struct HelloStep: View {
+    var look: CGSize
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 88
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            OwlStage(look: look)
+                .padding(.top, 4)
+                .reveal(0)
+
+            Spacer(minLength: 18)
+
+            Text("Sova.")
+                .font(.hero(titleSize, weight: .heavy))
+                .tracking(-4.2)
+                .foregroundStyle(Color.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .reveal(2)
+            Text("Your day, your rituals, your goals.\nPlanned in a minute.")
+                .font(.allo(size: 20, weight: .bold, relativeTo: .title3))
+                .tracking(-0.3)
+                .foregroundStyle(Color.inkSecondary)
+                .padding(.top, 8)
+                .padding(.bottom, 22)
+                .reveal(3)
+        }
+        .padding(.horizontal, 16)
+    }
+}
+
+/// The welcome stage: the owl on indigo, with the things a Sova day is
+/// made of floating around it.
+private struct OwlStage: View {
+    var look: CGSize
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            ZStack {
+                StickerTone.indigo.fill
+
+                OwlMark(size: 150, look: look, bodyColor: StickerTone.yellow.fill,
+                        eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
+                        bellyColor: Color(hex: 0xFFF4A8))
+                    .position(x: w / 2, y: h * 0.42)
+
+                TiltPill(text: String(localized: "Meditate ✓"), tone: .mint, tilt: -8).position(x: w * 0.24, y: h * 0.13).pop(0)
+                TiltPill(text: String(localized: "12 days"), tone: .orange, tilt: 7).position(x: w * 0.82, y: h * 0.27).pop(1)
+                TiltPill(text: String(localized: "Read 12 books"), tone: .pink, tilt: -5).position(x: w * 0.25, y: h * 0.66).pop(2)
+                TiltPill(text: String(localized: "Call Mom · 6 PM"), tone: .cyan, tilt: 6).position(x: w * 0.74, y: h * 0.78).pop(3)
+                TiltPill(text: String(localized: "3/8 today"), tone: .lilac, tilt: 3).position(x: w * 0.28, y: h * 0.88).pop(4)
+
+                SparkleDot(color: StickerTone.yellow.fill, size: 30).position(x: w * 0.88, y: h * 0.11)
+                SparkleDot(color: StickerTone.mint.fill, size: 20).position(x: w * 0.13, y: h * 0.45)
+                SparkleDot(color: StickerTone.pink.fill, size: 16).position(x: w * 0.84, y: h * 0.58)
+            }
+        }
+        .frame(height: 400)
+        .clipShape(.rect(cornerRadius: 40, style: .continuous))
+        .accessibilityHidden(true)
+    }
 }
 
 // MARK: - 2. How it works
@@ -278,7 +273,7 @@ private struct PillarCard<Content: View>: View {
 
 // MARK: - Shared field
 
-/// A large text field on a quiet card, edged with the accent on focus.
+/// A big white field with a soft ring that turns indigo on focus.
 struct GlassField: View {
     let placeholder: String
     @Binding var text: String
@@ -286,14 +281,14 @@ struct GlassField: View {
     var autofocus = true
     var onSubmit: () -> Void
     @FocusState private var focused: Bool
-    @ScaledMetric(relativeTo: .title) private var size: CGFloat = 26
+    @ScaledMetric(relativeTo: .title) private var size: CGFloat = 28
 
     var body: some View {
         TextField("", text: $text, prompt: Text(placeholder).foregroundStyle(Color.inkTertiary), axis: .vertical)
             .font(.hero(size, weight: .heavy))
-            .tracking(-0.6)
+            .tracking(-0.8)
             .foregroundStyle(Color.ink)
-            .tint(StickerTone.indigo.fill)
+            .tint(accent)
             .lineLimit(1...3)
             .textContentType(contentType)
             .textInputAutocapitalization(.sentences)
@@ -305,12 +300,11 @@ struct GlassField: View {
                     onSubmit()
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 20)
-            .background(Color.white, in: .rect(cornerRadius: 26, style: .continuous))
+            .padding(22)
+            .background(Color.white, in: .rect(cornerRadius: 28, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .strokeBorder(focused ? StickerTone.indigo.fill : Color.hairline, lineWidth: focused ? 2.5 : 1.5)
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .strokeBorder(focused ? accent : Color.hairline, lineWidth: focused ? 2.5 : 1.5)
             }
             .animation(.smooth(duration: 0.25), value: focused)
             .task {
@@ -339,31 +333,55 @@ struct NameStep: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            StepHeadline(text: String(localized: "What should we call you?"))
-            StepBody(text: String(localized: "Used for your greeting. Stored only on this iPhone."))
-                .padding(.top, 10)
+            // The owl asks.
+            HStack(alignment: .top, spacing: 10) {
+                OwlMark(size: 76, happy: !trimmed.isEmpty)
+                    .reveal(0)
+                Text(trimmed.isEmpty ? String(localized: "Hi, I'm Sova! What should I call you?")
+                                     : String(localized: "Nice to meet you, \(trimmed)!"))
+                    .font(.allo(size: 19, weight: .heavy, relativeTo: .title3))
+                    .tracking(-0.4)
+                    .foregroundStyle(StickerTone.lilac.deep)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 16)
+                    .background(StickerTone.lilac.fill,
+                                in: UnevenRoundedRectangle(topLeadingRadius: 26, bottomLeadingRadius: 8,
+                                                           bottomTrailingRadius: 26, topTrailingRadius: 26,
+                                                           style: .continuous))
+                    .contentTransition(.opacity)
+                    .animation(.smooth(duration: 0.3), value: trimmed.isEmpty)
+                    .padding(.top, 6)
+                    .reveal(1)
+            }
+            .padding(.top, 12)
 
             GlassField(placeholder: String(localized: "Your name"), text: $name,
                        contentType: .givenName, onSubmit: onSubmit)
                 .padding(.top, 28)
                 .reveal(2)
 
-            HStack(spacing: 8) {
-                MonoCaps(String(localized: "Preview"), size: 10)
+            HStack(spacing: 10) {
+                MonoCaps(String(localized: "Preview"))
                 Text(trimmed.isEmpty ? greeting : "\(greeting), \(trimmed)")
-                    .font(.allo(.callout))
-                    .foregroundStyle(Color.inkSecondary)
+                    .font(.allo(size: 17, weight: .heavy, relativeTo: .headline))
+                    .foregroundStyle(Color.ink)
                     .contentTransition(.opacity)
             }
-            .padding(.top, 14)
+            .padding(.top, 18)
             .padding(.leading, 4)
             .animation(.smooth(duration: 0.25), value: trimmed)
             .reveal(3)
 
+            Text("Just for your greeting. Stays on this iPhone.")
+                .font(.allo(.subheadline, .bold))
+                .foregroundStyle(Color.inkSecondary)
+                .padding(.top, 10)
+                .padding(.leading, 4)
+                .reveal(4)
+
             Spacer()
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 8)
+        .padding(.horizontal, 20)
     }
 }
 
@@ -375,14 +393,18 @@ struct RitualsStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "Pick your\nrituals."))
-                StepBody(text: String(localized: "Small things you want to do regularly."))
-                    .padding(.top, 10)
+                HStack(alignment: .bottom) {
+                    StepHeadline(text: String(localized: "Pick your\nrituals."))
+                    OwlMark(size: 50, happy: selection.count >= 3)
+                        .rotationEffect(.degrees(8))
+                        .padding(.bottom, 2)
+                        .reveal(1)
+                }
 
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                     ForEach(Array(RitualOption.all.enumerated()), id: \.element.id) { index, ritual in
-                        RitualTile(ritual: ritual, selected: selection.contains(ritual.id)) {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                        RitualTile(ritual: ritual, selected: selection.contains(ritual.id), tilt: index.isMultiple(of: 2) ? -1.5 : 1.5) {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
                                 if selection.contains(ritual.id) { selection.remove(ritual.id) }
                                 else { selection.insert(ritual.id) }
                             }
@@ -390,7 +412,7 @@ struct RitualsStep: View {
                         .reveal(2 + index / 2)
                     }
                 }
-                .padding(.top, 22)
+                .padding(.top, 20)
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -402,11 +424,12 @@ struct RitualsStep: View {
     }
 }
 
-/// A ritual tile: white with a colored dot until chosen, then a full block
-/// of its color.
+/// A ritual tile: white with a colored dot until chosen, then a full,
+/// slightly tilted block of its color.
 private struct RitualTile: View {
     let ritual: RitualOption
     let selected: Bool
+    var tilt: Double = 0
     let action: () -> Void
 
     private var tone: StickerTone { StickerTone(ritual.accent) }
@@ -417,9 +440,9 @@ private struct RitualTile: View {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
                     Image(systemName: ritual.symbol)
-                        .font(.system(size: selected ? 24 : 19, weight: .semibold))
-                        .foregroundStyle(selected ? ink : ink)
-                        .frame(width: 40, height: 40)
+                        .font(.system(size: selected ? 25 : 19, weight: .semibold))
+                        .foregroundStyle(ink)
+                        .frame(width: 42, height: 42)
                         .background(selected ? Color.clear : tone.fill, in: .circle)
                         .padding(selected ? -8 : 0)
                     Spacer()
@@ -433,12 +456,12 @@ private struct RitualTile: View {
                             .opacity(selected ? 1 : 0)
                         CheckmarkShape()
                             .trim(from: 0, to: selected ? 1 : 0)
-                            .stroke(tone.fill, style: StrokeStyle(lineWidth: 2.8, lineCap: .round, lineJoin: .round))
-                            .padding(7.5)
+                            .stroke(tone.fill, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                            .padding(8)
                     }
-                    .frame(width: 28, height: 28)
+                    .frame(width: 30, height: 30)
                 }
-                Spacer(minLength: 16)
+                Spacer(minLength: 14)
                 Text(ritual.title)
                     .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
                     .tracking(-0.4)
@@ -446,16 +469,17 @@ private struct RitualTile: View {
                     .multilineTextAlignment(.leading)
             }
             .padding(16)
-            .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
+            .frame(maxWidth: .infinity, minHeight: 112, alignment: .topLeading)
             .background(selected ? tone.fill : Color.white, in: .rect(cornerRadius: 28, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
                     .strokeBorder(Color.ink.opacity(0.08), lineWidth: 1.5)
                     .opacity(selected ? 0 : 1)
             }
+            .rotationEffect(.degrees(selected ? tilt : 0))
         }
         .buttonStyle(.pressable)
-        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: selected)
+        .animation(.spring(response: 0.35, dampingFraction: 0.6), value: selected)
         .accessibilityLabel(ritual.title)
         .accessibilityValue(ritual.period.name)
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -471,52 +495,47 @@ struct GoalStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "Set a goal"))
-                StepBody(text: String(localized: "Something to work toward over the next few months. Optional."))
+                StepHeadline(text: String(localized: "One goal for\nthis season."))
+                StepBody(text: String(localized: "Something to work toward. You get 90 days."))
                     .padding(.top, 10)
 
                 GlassField(placeholder: String(localized: "My goal is to…"), text: $title,
                            autofocus: false, onSubmit: onSubmit)
-                    .padding(.top, 28)
+                    .padding(.top, 22)
                     .reveal(2)
 
-                MonoCaps(String(localized: "Suggestions"))
-                    .padding(.top, 24)
-                    .padding(.bottom, 10)
-                    .padding(.leading, 4)
-                    .reveal(3)
-
                 FlowLayout(spacing: 8) {
-                    ForEach(GoalSuggestion.all) { suggestion in
+                    ForEach(Array(GoalSuggestion.all.enumerated()), id: \.element.id) { index, suggestion in
                         let selected = title == suggestion.title
+                        let tone = suggestion.tone
                         Button {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
                                 title = selected ? "" : suggestion.title
                             }
                         } label: {
-                            HStack(spacing: 7) {
+                            HStack(spacing: 8) {
                                 Image(systemName: suggestion.symbol)
-                                    .font(.allo(.footnote, .semibold))
+                                    .font(.system(size: 15, weight: .bold))
                                 Text(suggestion.title)
                                     .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
+                                    .tracking(-0.3)
                             }
-                            .foregroundStyle(selected ? StickerTone.indigo.deep : suggestion.tone.deep)
+                            .foregroundStyle(tone == .indigo ? tone.deep : tone.deep)
                             .padding(.horizontal, 16)
                             .frame(height: 46)
-                            .background(selected ? StickerTone.indigo.fill : suggestion.tone.fill, in: .capsule)
+                            .background(tone.fill, in: .capsule)
+                            .overlay(Capsule().strokeBorder(Color.ink, lineWidth: selected ? 3 : 0))
+                            .rotationEffect(.degrees(index.isMultiple(of: 2) ? -2.5 : 2.5))
+                            .scaleEffect(selected ? 1.05 : 1)
                         }
                         .buttonStyle(.pressable)
                         .accessibilityAddTraits(selected ? .isSelected : [])
                     }
                 }
+                .padding(.top, 20)
                 .reveal(3)
-
-                MonoCaps(String(localized: "Due in 90 days. You can change this later."), size: 10)
-                    .padding(.top, 22)
-                    .padding(.leading, 4)
-                    .reveal(4)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
             .padding(.top, 8)
             .padding(.bottom, 24)
         }
@@ -578,28 +597,25 @@ struct RhythmStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "Want reminders?"))
-                StepBody(text: String(localized: "One in the morning to plan the day, one in the evening to check it off. That's all Sova will ever send."))
-                    .padding(.top, 10)
+                StepHeadline(text: String(localized: "A little nudge,\ntwice a day."))
 
-                NotificationPreview()
-                    .padding(.top, 28)
-                    .offset(y: dropped ? 0 : -20)
+                NotificationPreview(name: name)
+                    .rotationEffect(.degrees(-2))
+                    .padding(.top, 24)
+                    .offset(y: dropped ? 0 : -24)
                     .opacity(dropped ? 1 : 0)
-                    .scaleEffect(dropped ? 1 : 0.96)
+                    .scaleEffect(dropped ? 1 : 0.95)
 
-                VStack(spacing: 0) {
+                VStack(spacing: 10) {
                     reminderRow(title: String(localized: "Morning plan"), symbol: "sunrise",
-                                isOn: $morningOn, time: $morning)
-                    Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, 48)
+                                tone: .yellow, isOn: $morningOn, time: $morning)
                     reminderRow(title: String(localized: "Evening review"), symbol: "moon",
-                                isOn: $eveningOn, time: $evening)
+                                tone: .lilac, isOn: $eveningOn, time: $evening)
                 }
-                .surface(cornerRadius: 20, padding: 0)
-                .padding(.top, 16)
-                .reveal(3)
+                .padding(.top, 22)
+                .reveal(2)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
             .padding(.top, 8)
             .padding(.bottom, 24)
         }
@@ -607,59 +623,66 @@ struct RhythmStep: View {
         .scrollIndicators(.hidden)
         .task {
             try? await Task.sleep(for: .milliseconds(450))
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.75)) { dropped = true }
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { dropped = true }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: dropped)
     }
 
-    private func reminderRow(title: String, symbol: String, isOn: Binding<Bool>, time: Binding<Date>) -> some View {
-        HStack(spacing: 10) {
+    private func reminderRow(title: String, symbol: String, tone: StickerTone,
+                             isOn: Binding<Bool>, time: Binding<Date>) -> some View {
+        HStack(spacing: 12) {
             Image(systemName: symbol)
-                .font(.allo(.callout, .medium))
-                .foregroundStyle(isOn.wrappedValue ? accent : Color.inkTertiary)
-                .frame(width: 22)
-            Text(title).font(.allo(.callout, .medium)).foregroundStyle(Color.ink)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
+                .font(.system(size: 22, weight: .semibold))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
+                    .tracking(-0.4)
+                DatePicker(title, selection: time, displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                    .tint(tone.deep)
+                    .disabled(!isOn.wrappedValue)
+                    .opacity(isOn.wrappedValue ? 1 : 0.4)
+            }
             Spacer(minLength: 0)
-            DatePicker(title, selection: time, displayedComponents: .hourAndMinute)
-                .labelsHidden()
-                .disabled(!isOn.wrappedValue)
-                .opacity(isOn.wrappedValue ? 1 : 0.35)
             Toggle(title, isOn: isOn.animation(.smooth))
                 .labelsHidden()
-                .tint(accent)
+                .tint(tone.deep)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .foregroundStyle(tone.deep)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
+        .background(tone.fill, in: .rect(cornerRadius: 28, style: .continuous))
     }
 }
 
 /// What the morning notification will look like.
 private struct NotificationPreview: View {
+    var name: String
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            OwlMark(size: 22, blinks: false)
-                .frame(width: 38, height: 38)
-                .background(Color(hex: 0x0B0B0D), in: .rect(cornerRadius: 9, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).strokeBorder(Color.hairline))
+            OwlMark(size: 24, blinks: false)
+                .frame(width: 40, height: 40)
+                .background(StickerTone.yellow.fill, in: .rect(cornerRadius: 10, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    Text("Sova").font(.allo(.footnote, .semibold)).foregroundStyle(Color.inkSecondary)
+                    Text("SOVA").font(.allo(.caption, .bold)).foregroundStyle(Color.inkSecondary)
                     Spacer()
-                    Text("now").font(.allo(.footnote)).foregroundStyle(Color.inkTertiary)
+                    Text("now").font(.allo(.caption, .bold)).foregroundStyle(Color.inkSecondary)
                 }
-                Text("Good morning").font(.allo(.subheadline, .semibold)).foregroundStyle(Color.ink)
-                Text("Your day is ready. Take a minute to plan it.")
-                    .font(.allo(.subheadline))
+                Text(name.isEmpty ? String(localized: "Good morning ☀️") : String(localized: "Good morning, \(name) ☀️"))
+                    .font(.allo(.subheadline, .heavy))
+                    .foregroundStyle(Color.ink)
+                Text("Your day is ready. Let's go.")
+                    .font(.allo(.subheadline, .semibold))
                     .foregroundStyle(Color.inkSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(14)
-        .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
+        .background(Color.white, in: .rect(cornerRadius: 26, style: .continuous))
+        .shadow(color: Color.ink.opacity(0.12), radius: 16, y: 8)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Example notification: Good morning. Your day is ready. Take a minute to plan it.")
+        .accessibilityLabel("Example notification: Good morning. Your day is ready.")
     }
 }
 
@@ -766,55 +789,75 @@ struct FinishStep: View {
     var remindersOn: Bool
     var theme: SovaTheme
     @State private var hop = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 52
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 44
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
-                OwlMark(size: 96, happy: true, blinks: false, bodyColor: Color.canvas, eyeColor: StickerTone.indigo.fill)
-                    .keyframeAnimator(initialValue: 0.0, trigger: hop) { view, y in
-                        view.offset(y: y)
-                    } keyframes: { _ in
-                        KeyframeTrack {
-                            CubicKeyframe(-18, duration: 0.22)
-                            SpringKeyframe(0, duration: 0.5, spring: .bouncy)
+            GeometryReader { geo in
+                let w = geo.size.width
+                let h = geo.size.height
+                ZStack {
+                    StickerTone.indigo.fill
+                    OwlMark(size: 140, happy: true, blinks: false, bodyColor: StickerTone.yellow.fill,
+                            eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
+                            bellyColor: Color(hex: 0xFFF4A8))
+                        .keyframeAnimator(initialValue: 0.0, trigger: hop) { view, y in
+                            view.offset(y: y)
+                        } keyframes: { _ in
+                            KeyframeTrack {
+                                CubicKeyframe(-22, duration: 0.22)
+                                SpringKeyframe(0, duration: 0.5, spring: .bouncy)
+                            }
                         }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 30, style: .continuous))
-                VStack(spacing: 8) {
-                    summary(ritualCount == 0 ? String(localized: "No rituals") :
-                            ritualCount == 1 ? String(localized: "1 ritual") : String(localized: "\(ritualCount) rituals"),
-                            label: String(localized: "Set up"), tone: .mint)
-                    summary(remindersOn ? String(localized: "On") : String(localized: "Off"),
-                            label: String(localized: "Reminders"), tone: .yellow)
+                        .position(x: w / 2, y: h * 0.52)
+                    SparkleDot(color: StickerTone.mint.fill, size: 40).position(x: w * 0.16, y: h * 0.22).pop(0)
+                    SparkleDot(color: StickerTone.pink.fill, size: 28).position(x: w * 0.84, y: h * 0.18).pop(1)
+                    SparkleDot(color: StickerTone.yellow.fill, size: 44).position(x: w * 0.88, y: h * 0.74).pop(2)
+                    SparkleDot(color: StickerTone.lilac.fill, size: 24).position(x: w * 0.14, y: h * 0.78).pop(3)
+                    SparkleDot(color: StickerTone.orange.fill, size: 16).position(x: w * 0.28, y: h * 0.47).pop(4)
+                    SparkleDot(color: StickerTone.cyan.fill, size: 20).position(x: w * 0.72, y: h * 0.46).pop(5)
                 }
             }
-            .frame(height: 176)
-            .padding(.top, 10)
+            .frame(height: 290)
+            .clipShape(.rect(cornerRadius: 40, style: .continuous))
+            .padding(.top, 6)
             .reveal(0)
 
+            HStack(spacing: 8) {
+                summary(ritualCount == 0 ? "0" : "\(ritualCount)", label: String(localized: "Rituals"), tone: .mint)
+                summary(remindersOn ? String(localized: "On") : String(localized: "Off"), label: String(localized: "Reminders"), tone: .yellow)
+            }
+            .frame(height: 96)
+            .reveal(1)
+
             if !goalTitle.isEmpty {
-                summary(goalTitle, label: String(localized: "Your goal · 90 days"), tone: .pink)
-                    .frame(height: 84)
-                    .reveal(1)
+                VStack(alignment: .leading, spacing: 4) {
+                    MonoCaps(String(localized: "Your goal · 90 days"), color: StickerTone.pink.deep, size: 10)
+                    Text(goalTitle)
+                        .font(.allo(size: 21, weight: .heavy, relativeTo: .title3))
+                        .tracking(-0.5)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .foregroundStyle(StickerTone.pink.deep)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 16)
+                .background(StickerTone.pink.fill, in: .rect(cornerRadius: 28, style: .continuous))
+                .reveal(2)
             }
 
-            Spacer(minLength: 16)
+            Spacer(minLength: 12)
 
             Text(name.isEmpty ? String(localized: "You're all set.") : String(localized: "You're all set,\n\(name)."))
                 .font(.hero(size, weight: .heavy))
-                .tracking(-2.4)
+                .tracking(-2)
                 .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
-                .reveal(2)
-            Text("Your first day starts now.")
-                .font(.allo(size: 20, weight: .bold, relativeTo: .title3))
-                .foregroundStyle(Color.inkSecondary)
-                .padding(.bottom, 20)
+                .padding(.bottom, 18)
                 .reveal(3)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 16)
         .sensoryFeedback(.success, trigger: hop)
         .task {
             try? await Task.sleep(for: .milliseconds(500))
@@ -826,14 +869,14 @@ struct FinishStep: View {
         VStack(alignment: .leading, spacing: 4) {
             MonoCaps(label, color: tone.deep, size: 10)
             Text(value)
-                .font(.allo(size: 20, weight: .heavy, relativeTo: .title3))
-                .tracking(-0.5)
+                .font(.hero(40, weight: .heavy))
+                .tracking(-1.6)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .foregroundStyle(tone.deep)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(.horizontal, 18)
-        .background(tone.fill, in: .rect(cornerRadius: 30, style: .continuous))
+        .background(tone.fill, in: .rect(cornerRadius: 28, style: .continuous))
     }
 }

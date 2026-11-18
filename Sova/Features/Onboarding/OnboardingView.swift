@@ -157,7 +157,7 @@ struct OnboardingView: View {
                         .animation(.smooth(duration: 0.3), value: primaryTitle)
                         .opacity(isRequesting ? 0 : 1)
                     if isRequesting { ProgressView().tint(StickerTone.indigo.deep) }
-                    if !isRequesting && step == .hello {
+                    if !isRequesting && (step == .hello || step == .finish) {
                         Image(systemName: "arrow.right").font(.system(size: 17, weight: .heavy))
                     }
                 }
@@ -177,12 +177,6 @@ struct OnboardingView: View {
                 .transition(.opacity)
             }
 
-            if step == .hello {
-                Text("Your data stays on this iPhone.")
-                    .font(.allo(.footnote))
-                    .foregroundStyle(Color.inkSecondary)
-                    .transition(.opacity)
-            }
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 12)

@@ -11,7 +11,7 @@ Bold, modern and colorful, built on the palette and type of [Allo](https://allo.
 - **Big, pretty buttons.** 60pt rounded buttons with heavy text, like indigo with yellow text. Checkboxes take the color of their ritual.
 - **Today.** A yellow progress block (3/8 with chunky ticks and the owl), an indigo **Up next** block with **Done** and **Tomorrow**, then rituals as blocks in their own color and tasks as white cards, all with swipe actions.
 - **Goals, Rituals, Insights.** Every goal and ritual has its own color. Insights shows the 30-day number on indigo with fat week bars, big stat blocks and a mint heatmap.
-- **The owl** blinks, follows your finger on the welcome screen and smiles when your day is done. The app icon is the indigo owl on Allo yellow.
+- **The owl** has a belly, wings, orange feet and pink cheeks. It blinks, follows your finger on the welcome screen and smiles when your day is done. The app icon is the owl as a tilted sticker on Allo yellow, with two sparkles.
 
 ![Today](screenshots/3-today.png)
 
@@ -19,13 +19,13 @@ Bold, modern and colorful, built on the palette and type of [Allo](https://allo.
 
 Short, colorful steps with big buttons and a chunky progress bar. Swipe right to go back.
 
-1. **Welcome.** Color blocks that preview the app pop in one by one, then a huge "Sova.".
+1. **Welcome.** The owl on an indigo stage, with tilted stickers of a Sova day popping in around it, then a huge "Sova.".
 2. **How it works.** Tasks, rituals (mint) and goals (pink), with a live task you can tick.
-3. **Your name.**
-4. **Rituals.** Tiles fill with their color when you choose them; each becomes a real ritual.
-5. **A goal**, written yourself or picked from colorful suggestions. It gets 90 days.
-6. **Reminders**, previewing the real notification before the system asks for permission.
-7. **All set.** A celebration in blocks: the happy owl, your rituals, reminders and goal.
+3. **Your name.** The owl asks in a speech bubble ("Hi, I'm Sova! What should I call you?") and smiles once you answer.
+4. **Rituals.** Tiles fill with their color and tilt when you choose them; each becomes a real ritual.
+5. **A goal**, written yourself or picked from tilted, colorful suggestions. It gets 90 days.
+6. **Reminders.** A preview of the real notification, then morning and evening blocks with their times.
+7. **All set.** The owl hops and smiles among twinkling sparkles, with your rituals, reminders and goal as blocks.
 
 Onboarding creates only what you choose; there is no sample or placeholder data. Inside the app, TipKit carries on teaching: first quick capture, then swiping.
 
