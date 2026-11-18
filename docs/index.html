@@ -767,6 +767,45 @@ html.lenis,html.lenis body{height:auto}
   .trust{flex-direction:column;align-items:center;gap:10px}
 }
 
+/* ===================== v8: FAQ ===================== */
+.faq-sec{margin-top:clamp(90px,11vw,140px)}
+.faq-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(28px,5vw,72px);align-items:start}
+.faq-side{position:sticky;top:110px}
+.faq-owl{width:84px;margin-bottom:10px}
+.faq-side .lead{color:var(--ink2);margin-top:12px;max-width:380px}
+.faq-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.faq-tabs button{font:inherit;font-weight:800;font-size:15px;border:1.5px solid var(--hair);background:var(--surface);color:var(--ink2);padding:9px 15px;border-radius:999px;cursor:pointer;transition:background .25s,color .25s,border-color .25s,transform .25s var(--ease)}
+.faq-tabs button:active{transform:scale(.95)}
+.faq-tabs button.on{background:var(--ink);color:var(--canvas);border-color:var(--ink)}
+.faq-help{display:flex;align-items:center;gap:14px;margin-top:30px;padding:16px;border-radius:24px;background:#2B1677;color:#fff;max-width:420px;transition:transform .3s var(--ease)}
+@media (hover:hover){.faq-help:hover{transform:translateY(-3px)}.faq-help:hover .fh-go{transform:translateX(4px)}}
+.fh-ic{width:44px;height:44px;border-radius:14px;background:#FFE94D;color:#2B1677;display:grid;place-items:center;flex:none;rotate:-6deg}
+.faq-help b{display:block;font-weight:900;font-size:17px}
+.faq-help small{display:block;font-weight:600;font-size:14px;color:rgba(255,255,255,.72)}
+.fh-go{margin-left:auto;transition:transform .3s var(--ease)}
+.faq-list{display:grid;gap:10px}
+.qa{position:relative;background:var(--surface);border:1.5px solid var(--hair);border-radius:24px;overflow:hidden;transition:border-color .3s,box-shadow .3s,background .3s}
+.qa::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:4px;border-radius:0 4px 4px 0;background:var(--qc,#FFE94D);transform:scaleY(0);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.qa[open]{background:var(--surface);border-color:transparent;box-shadow:0 22px 48px -28px rgba(20,10,60,.45)}
+.qa[open]::before{transform:scaleY(1)}
+.qa[data-cat=app]{--qc:#4DF2B0}.qa[data-cat=plus]{--qc:#FFE94D}.qa[data-cat=privacy]{--qc:#D9CEFF}
+.qa summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 22px 22px 26px;font-weight:900;font-size:clamp(17px,1.6vw,20px);letter-spacing:-.02em}
+.qa summary::-webkit-details-marker{display:none}
+.qa .pm{position:relative;width:36px;height:36px;border-radius:12px;background:var(--well);flex:none;transition:background .3s,transform .4s cubic-bezier(.2,.9,.2,1.3)}
+.qa .pm i{position:absolute;left:50%;top:50%;width:14px;height:2.5px;margin:-1.25px 0 0 -7px;border-radius:2px;background:var(--ink);transition:transform .35s,background .3s}
+.qa .pm i:last-child{transform:rotate(90deg)}
+.qa[open] .pm{background:var(--qc);transform:rotate(135deg)}
+.qa[open] .pm i{background:#15102E}
+@media (hover:hover){.qa:not([open]):hover{border-color:var(--ink3)}.qa:not([open]):hover .pm{transform:rotate(90deg)}}
+.qa .ans{overflow:hidden}
+.qa .ans p{padding:0 26px 24px;color:var(--ink2);font-weight:600;font-size:16.5px;line-height:1.55;max-width:640px}
+.qa.hide{display:none}
+@media (max-width:900px){
+  .faq-grid{grid-template-columns:1fr}
+  .faq-side{position:static}
+  .faq-help{margin-top:22px}
+}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
@@ -1171,9 +1210,10 @@ html.lenis,html.lenis body{height:auto}
   </section>
 
   <!-- FAQ -->
-  <section class="wrap" id="faq">
-    <div class="section-head reveal">
-      <div style="display:flex;justify-content:center"><svg class="owl track" viewBox="-14 -6 128 136" width="84" height="89" aria-hidden="true">
+  <section class="wrap faq-sec" id="faq">
+    <div class="faq-grid">
+      <aside class="faq-side">
+        <div class="faq-owl"><svg class="owl track" viewBox="-14 -6 128 136" width="84" height="89" aria-hidden="true">
 <ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
 <path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
 <path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
@@ -1183,15 +1223,31 @@ html.lenis,html.lenis body{height:auto}
 <g class="eyes"><circle cx="30" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="31.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="34.5" cy="45.5" r="2.8" fill="#FFE94D"/></g><circle cx="70" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="71.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="74.5" cy="45.5" r="2.8" fill="#FFE94D"/></g></g>
 <circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
 <path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg></div>
-      <h2 class="h-lg" style="margin-top:10px">Questions</h2>
-    </div>
-    <div class="faq">
-      <details class="reveal"><summary>Is Sova free?<span class="pm"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg></span></summary><p>Yes. Unlimited tasks, 3 rituals, 1 goal, widgets, Siri and dark mode are free forever. Sova Plus unlocks unlimited rituals and goals, iCloud sync and extra app icons.</p></details>
-      <details class="reveal"><summary>Do I need an account?<span class="pm"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg></span></summary><p>No. Open the app and start. There's no sign-up, no email and no password.</p></details>
-      <details class="reveal"><summary>Where is my data stored?<span class="pm"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg></span></summary><p>On your iPhone. With Sova Plus you can turn on iCloud sync, which keeps it in your own private iCloud. We never see your data.</p></details>
-      <details class="reveal"><summary>What can quick capture understand?<span class="pm"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg></span></summary><p>Days and times (“tomorrow 6pm”, “Friday”), repeats (“every Monday”, “daily”) and priority (“!!” or “!!!”). Try “Water plants every Sunday 9am”.</p></details>
-      <details class="reveal"><summary>How do I cancel Sova Plus?<span class="pm"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg></span></summary><p>Open iPhone Settings → your name → Subscriptions → Sova. You keep Plus until the end of the period you paid for.</p></details>
-      <details class="reveal"><summary>Is there an iPad or Mac version?<span class="pm"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg></span></summary><p>Sova 1.0 is made for iPhone. More is on the owl's wish list.</p></details>
+        <h2 class="h-lg">Questions</h2>
+        <p class="lead">Quick answers about using Sova, Plus and your data.</p>
+        <div class="faq-tabs" role="tablist" aria-label="Filter questions">
+          <button type="button" class="on" data-cat="all">All</button>
+          <button type="button" data-cat="app">Using Sova</button>
+          <button type="button" data-cat="plus">Plus</button>
+          <button type="button" data-cat="privacy">Privacy</button>
+        </div>
+        <a class="faq-help" href="support.html">
+          <span class="fh-ic"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg></span>
+          <span><b>Still stuck?</b><small>The support page has more answers and a way to reach us.</small></span>
+          <span class="fh-go"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span>
+        </a>
+      </aside>
+      <div class="faq-list">
+        <details class="qa" data-cat="app"><summary><span>How do I add a task fast?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>Tap + and type the way you would say it, like “Call Mom tomorrow 6pm !!”. Sova reads the day, the time, repeats like “every Monday” and priority from !! or !!!.</p></div></details>
+        <details class="qa" data-cat="app"><summary><span>How do repeating tasks work?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>Pick daily, weekdays, weekly, monthly or yearly. When you finish one, Sova creates the next one automatically. Tap Undo if you didn't mean to.</p></div></details>
+        <details class="qa" data-cat="app"><summary><span>How do I add the widgets?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>Touch and hold your Home Screen, tap Edit, then Add Widget and search for Sova. The Rituals widget lets you tick habits off without opening the app.</p></div></details>
+        <details class="qa" data-cat="app"><summary><span>Does Sova work offline?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>Yes. Everything works without a connection. With Sova Plus and iCloud sync on, changes sync the next time you're online.</p></div></details>
+        <details class="qa" data-cat="plus"><summary><span>Is Sova free?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>Yes. Unlimited tasks, 3 rituals, 1 active goal, widgets, Siri, Insights and dark mode are free with no time limit.</p></div></details>
+        <details class="qa" data-cat="plus"><summary><span>What happens if I cancel Plus?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>You keep Plus until the end of the period you paid for. After that, nothing is deleted. You just can't add more than 3 rituals or 1 active goal.</p></div></details>
+        <details class="qa" data-cat="plus"><summary><span>How do I cancel or restore?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>Cancel in iPhone Settings → your name → Subscriptions → Sova. To restore on a new iPhone, open Sova → Settings → Restore purchases.</p></div></details>
+        <details class="qa" data-cat="privacy"><summary><span>Do I need an account?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>No. There's no sign-up, email or password. Open the app and start.</p></div></details>
+        <details class="qa" data-cat="privacy"><summary><span>Where is my data stored?</span><span class="pm" aria-hidden="true"><i></i><i></i></span></summary><div class="ans"><p>On your iPhone. If you turn on iCloud sync with Plus, it's kept in your own private iCloud. We never see your data, and there is no tracking or ads.</p></div></details>
+      </div>
     </div>
   </section>
 
@@ -1520,6 +1576,44 @@ markDot();
     update();
   }));
   update();
+})();
+
+// FAQ: smooth accordion (one open at a time) and topic tabs
+(() => {
+  const items = [...document.querySelectorAll(".qa")];
+  if (!items.length) return;
+  const animate = (d, open) => {
+    const ans = d.querySelector(".ans");
+    if (reduce) { d.open = open; return; }
+    if (open) {
+      d.open = true;
+      const h = ans.scrollHeight;
+      ans.animate([{ height: "0px", opacity: 0 }, { height: h + "px", opacity: 1 }], { duration: 380, easing: "cubic-bezier(.2,.8,.2,1)" });
+    } else {
+      const h = ans.scrollHeight;
+      const a = ans.animate([{ height: h + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { duration: 280, easing: "cubic-bezier(.4,0,.2,1)" });
+      a.onfinish = () => { d.open = false; };
+    }
+  };
+  items.forEach(d => d.querySelector("summary").addEventListener("click", e => {
+    e.preventDefault();
+    const willOpen = !d.open;
+    items.forEach(o => { if (o !== d && o.open) animate(o, false); });
+    animate(d, willOpen);
+  }));
+  const tabs = [...document.querySelectorAll(".faq-tabs button")];
+  tabs.forEach(t => t.addEventListener("click", () => {
+    tabs.forEach(x => { x.classList.toggle("on", x === t); x.setAttribute("aria-selected", String(x === t)); });
+    const cat = t.dataset.cat;
+    items.forEach(d => {
+      const show = cat === "all" || d.dataset.cat === cat;
+      d.classList.toggle("hide", !show);
+      if (show && !reduce) d.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], { duration: 320, easing: "ease-out" });
+      if (!show) d.open = false;
+    });
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }));
+  items[0].open = true;
 })();
 </script>
 </body>
