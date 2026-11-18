@@ -36,54 +36,57 @@ struct TaskEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    TextField("What needs doing?", text: $title, axis: .vertical)
-                        .font(.display(.title3))
-                        .focused($titleFocused)
-                    TextField("Notes", text: $notes, axis: .vertical)
-                        .lineLimit(2...6)
-                }
-
-                Section("When") {
-                    Toggle(isOn: $hasDue.animation(.snappy)) {
-                        Label("Due Date", systemImage: "calendar")
-                    }
-                    if hasDue {
-                        DatePicker("Date", selection: $due,
-                                   displayedComponents: hasTime ? [.date, .hourAndMinute] : [.date])
-                        Toggle(isOn: $hasTime.animation(.snappy)) {
-                            Label("Time", systemImage: "clock")
-                        }
-                    }
-                }
-
-                Section("Priority") {
-                    Picker("Priority", selection: $priority) {
-                        ForEach(Priority.allCases) { Text($0.label).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-                }
-
-                if !goals.isEmpty {
-                    Section("Goal") {
-                        Picker(selection: $goal) {
-                            Text("None").tag(Goal?.none)
-                            ForEach(goals) { goal in
-                                Label(goal.title, systemImage: goal.symbol).tag(Optional(goal))
-                            }
-                        } label: {
-                            Label("Linked Goal", systemImage: "target")
-                        }
-                    }
-                }
-
-                if task != nil {
+                Group {
                     Section {
-                        Button("Delete Task", systemImage: "trash", role: .destructive) { confirmDelete = true }
+                        TextField("What needs doing?", text: $title, axis: .vertical)
+                            .font(.display(.title3))
+                            .focused($titleFocused)
+                        TextField("Notes", text: $notes, axis: .vertical)
+                            .lineLimit(2...6)
+                    }
+
+                    Section("When") {
+                        Toggle(isOn: $hasDue.animation(.snappy)) {
+                            Label("Due Date", systemImage: "calendar")
+                        }
+                        if hasDue {
+                            DatePicker("Date", selection: $due,
+                                       displayedComponents: hasTime ? [.date, .hourAndMinute] : [.date])
+                            Toggle(isOn: $hasTime.animation(.snappy)) {
+                                Label("Time", systemImage: "clock")
+                            }
+                        }
+                    }
+
+                    Section("Priority") {
+                        Picker("Priority", selection: $priority) {
+                            ForEach(Priority.allCases) { Text($0.label).tag($0) }
+                        }
+                        .pickerStyle(.segmented)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                    }
+
+                    if !goals.isEmpty {
+                        Section("Goal") {
+                            Picker(selection: $goal) {
+                                Text("None").tag(Goal?.none)
+                                ForEach(goals) { goal in
+                                    Label(goal.title, systemImage: goal.symbol).tag(Optional(goal))
+                                }
+                            } label: {
+                                Label("Linked Goal", systemImage: "target")
+                            }
+                        }
+                    }
+
+                    if task != nil {
+                        Section {
+                            Button("Delete Task", systemImage: "trash", role: .destructive) { confirmDelete = true }
+                        }
                     }
                 }
+                .listRowBackground(Color.surface)
             }
             .scrollContentBackground(.hidden)
             .background { CanvasBackground() }

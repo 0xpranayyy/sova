@@ -29,53 +29,56 @@ struct RoutineEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    HStack(spacing: 14) {
-                        IconTile(symbol: symbol, accent: accent, size: 56, filled: true)
-                            .contentTransition(.symbolEffect(.replace))
-                        TextField("New habit", text: $title)
-                            .font(.display(.title3))
-                    }
-                    .padding(.vertical, 4)
-                }
-
-                Section("Time of Day") {
-                    Picker("Time of Day", selection: $period) {
-                        ForEach(DayPeriod.allCases) { p in
-                            Text(p.name).tag(p)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-                }
-
-                Section {
-                    WeekdayPicker(selection: $weekdays, accent: accent)
-                } header: {
-                    Text("Repeat")
-                } footer: {
-                    Text(Weekdays.summary(for: weekdays))
-                }
-
-                Section("Icon") {
-                    SymbolPicker(selection: $symbol, accent: accent, symbols: SymbolPicker.routineSymbols)
-                }
-
-                if let routine {
+                Group {
                     Section {
-                        LabeledContent("Current streak") {
-                            Label("\(routine.streak) days", systemImage: "flame.fill")
-                                .foregroundStyle(Accent.ember.color)
+                        HStack(spacing: 14) {
+                            IconTile(symbol: symbol, accent: accent, size: 56, filled: true)
+                                .contentTransition(.symbolEffect(.replace))
+                            TextField("New habit", text: $title)
+                                .font(.display(.title3))
                         }
-                        LabeledContent("Last 30 days") {
-                            Text(routine.consistency(days: 30), format: .percent.precision(.fractionLength(0)))
-                        }
+                        .padding(.vertical, 4)
                     }
+
+                    Section("Time of Day") {
+                        Picker("Time of Day", selection: $period) {
+                            ForEach(DayPeriod.allCases) { p in
+                                Text(p.name).tag(p)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                    }
+
                     Section {
-                        Button("Delete Routine", systemImage: "trash", role: .destructive) { confirmDelete = true }
+                        WeekdayPicker(selection: $weekdays, accent: accent)
+                    } header: {
+                        Text("Repeat")
+                    } footer: {
+                        Text(Weekdays.summary(for: weekdays))
+                    }
+
+                    Section("Icon") {
+                        SymbolPicker(selection: $symbol, accent: accent, symbols: SymbolPicker.routineSymbols)
+                    }
+
+                    if let routine {
+                        Section {
+                            LabeledContent("Current streak") {
+                                Label("\(routine.streak) days", systemImage: "flame.fill")
+                                    .foregroundStyle(Accent.ember.color)
+                            }
+                            LabeledContent("Last 30 days") {
+                                Text(routine.consistency(days: 30), format: .percent.precision(.fractionLength(0)))
+                            }
+                        }
+                        Section {
+                            Button("Delete Routine", systemImage: "trash", role: .destructive) { confirmDelete = true }
+                        }
                     }
                 }
+                .listRowBackground(Color.surface)
             }
             .scrollContentBackground(.hidden)
             .background { CanvasBackground() }

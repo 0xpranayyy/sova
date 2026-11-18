@@ -166,7 +166,7 @@ struct CircleAction: View {
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(Color.ink)
                 .frame(width: 44, height: 44)
-                .background(Color.white, in: .circle)
+                .background(Color.surface, in: .circle)
                 .overlay(Circle().strokeBorder(Color.hairline, lineWidth: 1.5))
         }
         .buttonStyle(.pressable)

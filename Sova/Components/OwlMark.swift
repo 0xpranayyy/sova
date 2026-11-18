@@ -13,8 +13,9 @@ struct OwlMark: View {
     var look: CGSize = .zero
     var happy = false
     var blinks = true
-    var bodyColor: Color = StickerTone.indigo.fill
-    var eyeColor: Color = StickerTone.yellow.fill
+    /// Indigo with yellow eyes by day; a glowing yellow night owl after dark.
+    var bodyColor: Color = Color(light: 0x2B1677, dark: 0xFFE94D)
+    var eyeColor: Color = Color(light: 0xFFE94D, dark: 0x2B1677)
     var pupilColor: Color? = nil
     var bellyColor: Color? = nil
     var beakColor: Color = StickerTone.orange.fill

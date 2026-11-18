@@ -111,7 +111,7 @@ struct TaskSwipeActions: ViewModifier {
                     } label: {
                         Label("Tomorrow", systemImage: "arrow.turn.up.right")
                     }
-                    .tint(Color(hex: 0x3A3A40))
+                    .tint(StickerTone.indigo.fill)
                 }
             }
     }

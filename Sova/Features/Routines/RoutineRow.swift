@@ -1,36 +1,58 @@
 import SwiftUI
 
-/// A ritual as a block in its color: icon, name, schedule, the last seven
-/// days, and a big check.
+/// A ritual as a block in its color: a tilted icon tile, its name and
+/// schedule, the last seven days as chunky dots, a streak chip and a big
+/// check that wiggles when ticked.
 struct RoutineRow: View {
     let routine: Routine
     var onOpen: () -> Void
+
+    @State private var wiggle = 0
 
     var body: some View {
         let tone = StickerTone(routine.accent)
         let ink = tone == .indigo ? Color.white : tone.deep
         let done = routine.isDone(on: .now)
-        HStack(spacing: 12) {
+        let scheduled = routine.isScheduled(on: .now)
+        HStack(spacing: 14) {
             Image(systemName: routine.symbol)
-                .font(.system(size: 21, weight: .semibold))
-                .frame(width: 26)
-            VStack(alignment: .leading, spacing: 6) {
-                Text(routine.title)
-                    .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
-                    .tracking(-0.4)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(ink)
+                .frame(width: 48, height: 48)
+                .background(ink.opacity(0.12), in: .rect(cornerRadius: 16, style: .continuous))
+                .rotationEffect(.degrees(-6))
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(spacing: 6) {
+                    Text(routine.title)
+                        .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
+                        .tracking(-0.4)
+                        .lineLimit(2)
+                    if routine.streak > 1 {
+                        Text("🔥 \(routine.streak)")
+                            .font(.allo(size: 12, weight: .heavy, relativeTo: .caption))
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(ink.opacity(0.12), in: .capsule)
+                            .rotationEffect(.degrees(-4))
+                            .accessibilityLabel(String(localized: "\(routine.streak) day streak"))
+                    }
+                }
                 HStack(spacing: 8) {
                     WeekTrack(routine: routine, color: ink)
-                    Text(routine.streak > 1 ? String(localized: "\(routine.streak) days") : Weekdays.summary(for: routine.weekdays))
+                    Text(Weekdays.summary(for: routine.weekdays))
                         .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
                         .tracking(1.2)
                         .textCase(.uppercase)
-                        .opacity(0.75)
+                        .opacity(0.7)
+                        .lineLimit(1)
                 }
             }
             Spacer(minLength: 0)
-            if routine.isScheduled(on: .now) {
-                CheckButton(isOn: done, color: tone.deep, round: true, size: 32, checkColor: tone.fill, label: routine.title) {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { routine.toggle(on: .now) }
+            if scheduled {
+                CheckButton(isOn: done, color: ink, round: true, size: 36, emphasized: true,
+                            checkColor: tone.fill, label: routine.title) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.toggle(on: .now) }
+                    if routine.isDone(on: .now) { wiggle += 1 }
                 }
             } else {
                 MonoCaps(String(localized: "Rest"), color: ink.opacity(0.6))
@@ -38,34 +60,52 @@ struct RoutineRow: View {
             }
         }
         .foregroundStyle(ink)
-        .padding(.leading, 16)
-        .padding(.trailing, 6)
-        .padding(.vertical, 10)
-        .background(tone.fill, in: .rect(cornerRadius: 24, style: .continuous))
+        .padding(.leading, 14)
+        .padding(.trailing, 8)
+        .padding(.vertical, 14)
+        .background(tone.fill, in: .rect(cornerRadius: 28, style: .continuous))
+        .opacity(done ? 0.78 : 1)
+        .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { view, t in
+            view.scaleEffect(1 + abs(t) * 0.01).rotationEffect(.degrees(t * 0.6))
+        } keyframes: { _ in
+            KeyframeTrack {
+                SpringKeyframe(-4, duration: 0.09, spring: .snappy)
+                SpringKeyframe(3, duration: 0.1, spring: .snappy)
+                SpringKeyframe(-1.5, duration: 0.1, spring: .snappy)
+                SpringKeyframe(0, duration: 0.3, spring: .bouncy)
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: done)
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(String(localized: "Opens the ritual"))
+        .accessibilityAction(named: done ? String(localized: "Mark as not done") : String(localized: "Mark as done")) {
+            guard scheduled else { return }
+            withAnimation { routine.toggle(on: .now) }
+        }
     }
 }
 
-/// The last seven days as tiny cells; today is outlined.
+/// The last seven days as chunky dots; today is outlined.
 struct WeekTrack: View {
     let routine: Routine
     var color: Color = .ink
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 4) {
             ForEach(-6...0, id: \.self) { offset in
                 let day = Date.now.adding(days: offset)
                 let done = routine.isDone(on: day)
                 let scheduled = routine.isScheduled(on: day)
-                RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .fill(done ? color : color.opacity(scheduled ? 0.18 : 0.06))
+                Circle()
+                    .fill(done ? color : color.opacity(scheduled ? 0.2 : 0.07))
                     .overlay {
                         if offset == 0 {
-                            RoundedRectangle(cornerRadius: 3, style: .continuous).strokeBorder(color, lineWidth: 1.5)
+                            Circle().strokeBorder(color, lineWidth: 1.8)
                         }
                     }
-                    .frame(width: 10, height: 10)
+                    .frame(width: 11, height: 11)
             }
         }
         .accessibilityElement()

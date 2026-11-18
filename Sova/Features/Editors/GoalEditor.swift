@@ -31,55 +31,58 @@ struct GoalEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    HStack(spacing: 14) {
-                        IconTile(symbol: symbol, accent: accent, size: 56, filled: true)
-                            .contentTransition(.symbolEffect(.replace))
-                        TextField("What do you want to achieve?", text: $title, axis: .vertical)
-                            .font(.display(.title3))
-                    }
-                    .padding(.vertical, 4)
-                }
-
-                Section("Icon") {
-                    SymbolPicker(selection: $symbol, accent: accent, symbols: SymbolPicker.goalSymbols)
-                }
-
-                Section("Deadline") {
-                    Toggle(isOn: $hasDeadline.animation(.snappy)) {
-                        Label("Target Date", systemImage: "flag.checkered")
-                    }
-                    if hasDeadline {
-                        DatePicker("Date", selection: $deadline, in: Date.now.startOfDay..., displayedComponents: .date)
-                            .datePickerStyle(.graphical)
-                    }
-                }
-
-                if goal == nil {
+                Group {
                     Section {
-                        ForEach(newMilestones.indices, id: \.self) { index in
-                            Label(newMilestones[index], systemImage: "circle")
+                        HStack(spacing: 14) {
+                            IconTile(symbol: symbol, accent: accent, size: 56, filled: true)
+                                .contentTransition(.symbolEffect(.replace))
+                            TextField("What do you want to achieve?", text: $title, axis: .vertical)
+                                .font(.display(.title3))
                         }
-                        .onDelete { newMilestones.remove(atOffsets: $0) }
-                        TextField("Add a step", text: $milestoneDraft)
-                            .submitLabel(.next)
-                            .onSubmit {
-                                let t = milestoneDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-                                guard !t.isEmpty else { return }
-                                withAnimation { newMilestones.append(t) }
-                                milestoneDraft = ""
+                        .padding(.vertical, 4)
+                    }
+
+                    Section("Icon") {
+                        SymbolPicker(selection: $symbol, accent: accent, symbols: SymbolPicker.goalSymbols)
+                    }
+
+                    Section("Deadline") {
+                        Toggle(isOn: $hasDeadline.animation(.snappy)) {
+                            Label("Target Date", systemImage: "flag.checkered")
+                        }
+                        if hasDeadline {
+                            DatePicker("Date", selection: $deadline, in: Date.now.startOfDay..., displayedComponents: .date)
+                                .datePickerStyle(.graphical)
+                        }
+                    }
+
+                    if goal == nil {
+                        Section {
+                            ForEach(newMilestones.indices, id: \.self) { index in
+                                Label(newMilestones[index], systemImage: "circle")
                             }
-                    } header: {
-                        Text("Steps")
-                    } footer: {
-                        Text("Optional. Progress follows the steps you finish.")
+                            .onDelete { newMilestones.remove(atOffsets: $0) }
+                            TextField("Add a step", text: $milestoneDraft)
+                                .submitLabel(.next)
+                                .onSubmit {
+                                    let t = milestoneDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                                    guard !t.isEmpty else { return }
+                                    withAnimation { newMilestones.append(t) }
+                                    milestoneDraft = ""
+                                }
+                        } header: {
+                            Text("Steps")
+                        } footer: {
+                            Text("Optional. Progress follows the steps you finish.")
+                        }
+                    }
+
+                    Section("Notes") {
+                        TextField("Why does this matter?", text: $notes, axis: .vertical)
+                            .lineLimit(3...8)
                     }
                 }
-
-                Section("Notes") {
-                    TextField("Why does this matter?", text: $notes, axis: .vertical)
-                        .lineLimit(3...8)
-                }
+                .listRowBackground(Color.surface)
             }
             .scrollContentBackground(.hidden)
             .background { CanvasBackground() }

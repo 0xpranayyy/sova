@@ -74,16 +74,6 @@ struct TodayView: View {
                 if !todaysRituals.isEmpty {
                     HStack {
                         SectionLabel(String(localized: "Rituals · \(ritualsDone) of \(todaysRituals.count)"))
-                        if streak > 1 {
-                            Text(String(localized: "\(streak)-day streak"))
-                                .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
-                                .tracking(1.2)
-                                .textCase(.uppercase)
-                                .foregroundStyle(StickerTone.mint.deep)
-                                .padding(.horizontal, 9)
-                                .padding(.vertical, 5)
-                                .background(StickerTone.mint.fill.opacity(0.45), in: .rect(cornerRadius: 9, style: .continuous))
-                        }
                     }
                     .cardRow(top: 18, bottom: 10)
 
@@ -318,7 +308,7 @@ struct UpNextCard: View {
                                                            bottomTrailingRadius: 6, topTrailingRadius: 18,
                                                            style: .continuous))
                     .padding(.top, 14)
-                OwlMark(size: 50)
+                OwlMark(size: 50, bodyColor: Color(hex: 0x2B1677), eyeColor: StickerTone.yellow.fill)
                     .rotationEffect(.degrees(6))
             }
             .offset(x: -12, y: -58)
@@ -355,6 +345,8 @@ struct UpNextCard: View {
     }
 
     private func complete() {
+        Haptics.success()
+        Sounds.play(.check)
         switch entry.source {
         case .task(let t): TaskActions.toggle(t, router: router)
         case .routine(let r):
@@ -452,16 +444,16 @@ struct DayRow: View {
                 if let time = time(t) {
                     Text(time)
                         .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline).monospacedDigit())
-                        .foregroundStyle(Color.ink)
+                        .foregroundStyle(t.isOverdue ? Color.ember : Color.ink)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(Color(hex: 0xF3F1EA), in: .rect(cornerRadius: 12, style: .continuous))
+                        .background(Color.surfaceMuted, in: .rect(cornerRadius: 12, style: .continuous))
                 }
             }
             .padding(.leading, 14)
             .padding(.trailing, 14)
             .padding(.vertical, 9)
-            .background(Color.white, in: .rect(cornerRadius: 26, style: .continuous))
+            .background(Color.surface, in: .rect(cornerRadius: 26, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
             .contentShape(.rect)
             .onTapGesture(perform: onOpen)

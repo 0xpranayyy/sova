@@ -8,6 +8,8 @@ struct InsightsView: View {
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
 
     private static let weeks = 17
+    static let mintInk = Color.positive
+    static let mintWash = Color(light: 0xC9FAE6, dark: 0x10332B)
     private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
 
     // MARK: Data
@@ -134,12 +136,12 @@ struct InsightsView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 12) {
-                        MonoCaps(String(localized: "Every day, \(Self.weeks) weeks"), color: StickerTone.mint.deep)
+                        MonoCaps(String(localized: "Every day, \(Self.weeks) weeks"), color: Self.mintInk)
                         heatmap
                     }
                     .padding(18)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(StickerTone.mint.fill.opacity(0.35), in: .rect(cornerRadius: 30, style: .continuous))
+                    .background(Self.mintWash, in: .rect(cornerRadius: 30, style: .continuous))
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -207,28 +209,18 @@ struct InsightsView: View {
         }
     }
 
-    /// Four steps of sunlight, from pale to deep gold.
-    static func sunScale(_ level: Double) -> Color {
-        switch level {
-        case ..<0.3: Color(hex: 0xFBE7A6)
-        case ..<0.55: Color(hex: 0xF6D261)
-        case ..<0.8: Color(hex: 0xEDB821)
-        default: Color(hex: 0xC9940A)
-        }
-    }
-
     @ViewBuilder
     private func cell(for day: Date?, peak: Int) -> some View {
         if let day {
             let count = activity(on: day)
             let level = count == 0 ? 0 : Double(count) / Double(peak)
             RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .fill(count == 0 ? StickerTone.mint.deep.opacity(0.08) : Self.greenScale(level))
+                .fill(count == 0 ? Color.well : Self.greenScale(level))
                 .frame(width: 15, height: 15)
                 .overlay {
                     if day.isSameDay(as: .now) {
                         RoundedRectangle(cornerRadius: 5, style: .continuous)
-                            .strokeBorder(StickerTone.mint.deep, lineWidth: 1.5)
+                            .strokeBorder(InsightsView.mintInk, lineWidth: 1.5)
                     }
                 }
         } else {

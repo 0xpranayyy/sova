@@ -9,6 +9,8 @@ struct SettingsView: View {
 
     @AppStorage("userName") private var userName = ""
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("appearance") private var appearanceRaw = Appearance.system.rawValue
+    @AppStorage("soundsOn") private var soundsOn = true
     @AppStorage("hasOnboarded") private var hasOnboarded = true
     @AppStorage("morningReminderOn") private var morningOn = false
     @AppStorage("morningReminderMinutes") private var morningMinutes = 8 * 60
@@ -28,62 +30,84 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    HStack(spacing: 16) {
-                        OwlMark(size: 44)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Sova").font(.display(.title2)).foregroundStyle(Color.ink)
-                            Text("Version \(version)").font(.allo(.footnote)).foregroundStyle(Color.inkSecondary)
-                        }
-                    }
-                    .padding(.vertical, 6)
-                }
-
-                Section("Your name") {
-                    TextField("Used in your greeting", text: $userName)
-                        .textContentType(.givenName)
-                        .textInputAutocapitalization(.words)
-                }
-
-                Section("Theme") {
-                    ThemeSwatches(themeRaw: $themeRaw)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-                }
-
-                Section {
-                    reminderRow(title: String(localized: "Morning plan"), symbol: "sun.max", accent: .marigold,
-                                isOn: $morningOn, minutes: $morningMinutes)
-                    reminderRow(title: String(localized: "Evening review"), symbol: "moon", accent: .plum,
-                                isOn: $eveningOn, minutes: $eveningMinutes)
-                } header: {
-                    Text("Reminders")
-                } footer: {
-                    if notificationsDenied {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Notifications are turned off for Sova.")
-                            Button("Open iPhone Settings") {
-                                if let url = URL(string: UIApplication.openNotificationSettingsURLString) { openURL(url) }
+                Group {
+                    Section {
+                        HStack(spacing: 16) {
+                            OwlMark(size: 44)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Sova").font(.display(.title2)).foregroundStyle(Color.ink)
+                                Text("Version \(version)").font(.allo(.footnote)).foregroundStyle(Color.inkSecondary)
                             }
-                            .font(.allo(.footnote, .semibold))
                         }
-                    } else {
-                        Text("Two quiet notes a day, at the times you choose. Nothing else.")
+                        .padding(.vertical, 6)
+                    }
+
+                    Section("Your name") {
+                        TextField("Used in your greeting", text: $userName)
+                            .textContentType(.givenName)
+                            .textInputAutocapitalization(.words)
+                    }
+
+                    Section("Appearance") {
+                        Picker("Appearance", selection: $appearanceRaw) {
+                            ForEach(Appearance.allCases) { Text($0.name).tag($0.rawValue) }
+                        }
+                        .pickerStyle(.segmented)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                        .sensoryFeedback(.selection, trigger: appearanceRaw)
+                    }
+
+                    Section("Theme") {
+                        ThemeSwatches(themeRaw: $themeRaw)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                    }
+
+                    Section {
+                        Toggle(isOn: $soundsOn) {
+                            Label("Little sounds", systemImage: "speaker.wave.2")
+                        }
+                        .onChange(of: soundsOn) { if soundsOn { Sounds.play(.tick) } }
+                    } footer: {
+                        Text("Soft taps when you check things off. They follow your silent switch.")
+                    }
+
+                    Section {
+                        reminderRow(title: String(localized: "Morning plan"), symbol: "sun.max", accent: .marigold,
+                                    isOn: $morningOn, minutes: $morningMinutes)
+                        reminderRow(title: String(localized: "Evening review"), symbol: "moon", accent: .plum,
+                                    isOn: $eveningOn, minutes: $eveningMinutes)
+                    } header: {
+                        Text("Reminders")
+                    } footer: {
+                        if notificationsDenied {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Notifications are turned off for Sova.")
+                                Button("Open iPhone Settings") {
+                                    if let url = URL(string: UIApplication.openNotificationSettingsURLString) { openURL(url) }
+                                }
+                                .font(.allo(.footnote, .semibold))
+                            }
+                        } else {
+                            Text("Two quiet notes a day, at the times you choose. Nothing else.")
+                        }
+                    }
+
+                    Section {
+                        Button("Replay Welcome", systemImage: "hand.wave") {
+                            dismiss()
+                            withAnimation(.smooth(duration: 0.6)) { hasOnboarded = false }
+                        }
+                        .foregroundStyle(Color.ink)
+                    }
+
+                    Section {
+                        Button("Erase All Data", systemImage: "trash", role: .destructive) { confirmErase = true }
+                    } footer: {
+                        Text("Everything you add stays on this iPhone.")
                     }
                 }
-
-                Section {
-                    Button("Replay Welcome", systemImage: "hand.wave") {
-                        dismiss()
-                        withAnimation(.smooth(duration: 0.6)) { hasOnboarded = false }
-                    }
-                    .foregroundStyle(Color.ink)
-                }
-
-                Section {
-                    Button("Erase All Data", systemImage: "trash", role: .destructive) { confirmErase = true }
-                } footer: {
-                    Text("Everything you add stays on this iPhone.")
-                }
+                .listRowBackground(Color.surface)
             }
             .scrollContentBackground(.hidden)
             .background { CanvasBackground() }

@@ -38,6 +38,8 @@ enum TaskActions {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { task.toggle() }
         guard task.isDone, let router else { return }
         router.show(Toast(message: String(localized: "Done: \(task.title)")) {
+            // Only reopen it if it's still done (it may have been unticked since).
+            guard task.isDone else { return }
             withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { task.toggle() }
         })
     }

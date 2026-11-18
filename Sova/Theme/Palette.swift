@@ -18,6 +18,15 @@ extension Color {
     init(hex: UInt32, opacity: Double = 1) {
         self.init(uiColor: UIColor(hex: hex, alpha: opacity))
     }
+
+    /// A color that follows the system appearance.
+    init(light: UIColor, dark: UIColor) {
+        self.init(uiColor: UIColor { $0.userInterfaceStyle == .dark ? dark : light })
+    }
+
+    init(light: UInt32, dark: UInt32) {
+        self.init(light: UIColor(hex: light), dark: UIColor(hex: dark))
+    }
 }
 
 // MARK: - Semantic tokens
@@ -26,20 +35,26 @@ extension Color {
 // used as big flat blocks with tonal text.
 
 extension Color {
-    static let ink = Color(hex: 0x15102E)
+    static let ink = Color(light: 0x15102E, dark: 0xF4F1FF)
     static let night = Color.ink
     /// Priority marks and overdue text.
     static let ember = Color(hex: 0xE63E2E)
 
-    static let canvas = Color(hex: 0xFCFCFA)
+    /// Near-white paper by day, deep indigo night after dark.
+    static let canvas = Color(light: 0xFCFCFA, dark: 0x0E0B1F)
     static let inkSecondary = Color.ink.opacity(0.5)
     static let inkTertiary = Color.ink.opacity(0.3)
-    static let inkInverse = Color.white
+    static let inkInverse = Color(light: 0xFFFFFF, dark: 0x15102E)
     static let well = Color.ink.opacity(0.06)
-    static let surface = Color.white
-    static let surfaceRaised = Color.white
-    static let hairline = Color.ink.opacity(0.07)
+    /// Cards, fields and round buttons.
+    static let surface = Color(light: 0xFFFFFF, dark: 0x1B1636)
+    static let surfaceRaised = Color(light: 0xFFFFFF, dark: 0x231D42)
+    /// Small chips inside a card (time labels).
+    static let surfaceMuted = Color(light: 0xF3F1EA, dark: 0x2A2347)
+    static let hairline = Color(light: UIColor(hex: 0x15102E, alpha: 0.07), dark: UIColor(white: 1, alpha: 0.08))
     static let danger = Color.ember
+    /// Green for good news, readable on the page in both modes.
+    static let positive = Color(light: 0x0B5A3C, dark: 0x4DF2B0)
 
     static let skyMorning = StickerTone.orange.fill
     static let skyAfternoon = StickerTone.yellow.fill
@@ -130,5 +145,30 @@ enum SovaTheme: String, CaseIterable, Identifiable {
 
     static var current: SovaTheme {
         SovaTheme(rawValue: UserDefaults.standard.string(forKey: "theme") ?? "") ?? .ember
+    }
+}
+
+// MARK: - Appearance
+
+/// Light, dark, or whatever the iPhone is set to.
+enum Appearance: String, CaseIterable, Identifiable {
+    case system, light, dark
+
+    var id: String { rawValue }
+
+    var name: String {
+        switch self {
+        case .system: String(localized: "System")
+        case .light: String(localized: "Light")
+        case .dark: String(localized: "Dark")
+        }
+    }
+
+    var scheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
     }
 }

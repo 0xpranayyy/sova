@@ -65,7 +65,7 @@ struct TimelineEntry: Identifiable {
 
     let source: Source
     let section: DaySection
-    let sortKey: Int
+    let sortKey: Double
 
     var id: String {
         switch source {
@@ -101,18 +101,19 @@ struct TimelineEntry: Identifiable {
                 : task.isDueTodayOrEarlier
             guard relevant else { continue }
             let section: DaySection
-            var key: Int
+            var key: Double
             if !task.isDone, let due = task.dueDate, due < Date.now.startOfDay {
                 section = .overdue
-                key = Int(due.timeIntervalSince1970 / 60)
+                key = due.timeIntervalSince1970 / 60
             } else if task.hasTime, let due = task.dueDate {
                 let comps = cal.dateComponents([.hour, .minute], from: due)
                 section = .forHour(comps.hour ?? 9)
-                key = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+                key = Double((comps.hour ?? 0) * 60 + (comps.minute ?? 0))
             } else {
                 section = .anytime
-                key = DaySection.anytime.startMinutes + 500
-                    + Int(task.createdAt.timeIntervalSince1970.truncatingRemainder(dividingBy: 10_000))
+                // Oldest first, as a fraction so it never outweighs priority.
+                key = Double(DaySection.anytime.startMinutes + 500)
+                    + task.createdAt.timeIntervalSince1970 / 1e10
             }
             if task.priority == .high && section == .anytime { key -= 400 }
             entries.append(TimelineEntry(source: .task(task), section: section, sortKey: key))
@@ -120,7 +121,7 @@ struct TimelineEntry: Identifiable {
         for routine in routines where routine.isScheduled(on: .now) {
             let section = DaySection.forPeriod(routine.period)
             entries.append(TimelineEntry(source: .routine(routine), section: section,
-                                         sortKey: section.startMinutes + 1 + routine.order))
+                                         sortKey: Double(section.startMinutes + 1 + routine.order)))
         }
         return entries.sorted { ($0.section.rawValue, $0.sortKey) < ($1.section.rawValue, $1.sortKey) }
     }

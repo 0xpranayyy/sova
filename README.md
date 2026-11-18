@@ -31,6 +31,15 @@ Small, physical details everywhere:
   - A "pop pop pop" as the welcome stickers land.
   - A tick when quick capture recognizes a date or priority.
 - **Tactile pieces.** Buttons squish slightly darker when pressed, ritual tiles wiggle and swell when checked, and checkmarks draw themselves in. Every motion respects Reduce Motion.
+- **Little sounds.** Tiny tones made in code, with no audio files:
+  - a rising "ding" when you check something off, and a soft low note when you uncheck it
+  - an arpeggio when the day is done
+  - a "hoo-hoo" when you poke the owl
+  - pops as the welcome stickers land
+
+  They follow the silent switch, mix with your music, and can be turned off in Settings.
+- **Dark mode.** A deep indigo night page with dark indigo cards, so the Allo colors glow. The owl turns into a yellow night owl, and there's a matching dark app icon. It follows the iPhone by default, or you can pick System, Light or Dark in Settings.
+- **Rituals.** The week on indigo: day columns fill with yellow, the owl perches on today, and your best streak sits on a mint starburst. Rituals are grouped under Morning, Afternoon, Evening and Anytime pills, each a color block with a 7-day dot track, a 🔥 streak and a big check that wiggles.
 
 ## Onboarding
 

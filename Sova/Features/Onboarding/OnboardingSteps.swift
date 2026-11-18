@@ -52,7 +52,7 @@ private struct Pop: ViewModifier {
                 }
                 Task { @MainActor in
                     try? await Task.sleep(for: .milliseconds(Int((delay + 0.08) * 1000)))
-                    Haptics.pop(0.35 + Double(index % 3) * 0.08)
+                    Haptics.pop(0.35 + Double(index % 3) * 0.08, sound: true)
                 }
             }
     }
@@ -236,7 +236,7 @@ private struct PillarCard<Content: View>: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(tone?.fill ?? Color.white, in: .rect(cornerRadius: 28, style: .continuous))
+        .background(tone?.fill ?? Color.surface, in: .rect(cornerRadius: 28, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(Color.hairline, lineWidth: tone == nil ? 1.5 : 0))
     }
 }
@@ -271,7 +271,7 @@ struct GlassField: View {
                 }
             }
             .padding(22)
-            .background(Color.white, in: .rect(cornerRadius: 28, style: .continuous))
+            .background(Color.surface, in: .rect(cornerRadius: 28, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
                     .strokeBorder(focused ? accent : Color.hairline, lineWidth: focused ? 2.5 : 1.5)
@@ -455,7 +455,7 @@ private struct RitualTile: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, minHeight: 112, alignment: .topLeading)
-            .background(selected ? tone.fill : Color.white, in: .rect(cornerRadius: 28, style: .continuous))
+            .background(selected ? tone.fill : Color.surface, in: .rect(cornerRadius: 28, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
                     .strokeBorder(Color.ink.opacity(0.08), lineWidth: 1.5)
@@ -664,7 +664,7 @@ private struct NotificationPreview: View {
             }
         }
         .padding(14)
-        .background(Color.white, in: .rect(cornerRadius: 26, style: .continuous))
+        .background(Color.surface, in: .rect(cornerRadius: 26, style: .continuous))
         .shadow(color: Color.ink.opacity(0.12), radius: 16, y: 8)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Example notification: Good morning. Your day is ready.")

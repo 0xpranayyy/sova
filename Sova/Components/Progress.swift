@@ -20,7 +20,7 @@ struct ProgressLine: View {
                 ForEach(Array(milestones.enumerated()), id: \.offset) { index, done in
                     let x = geo.size.width * Double(index + 1) / Double(milestones.count + 1)
                     Circle()
-                        .fill(Color.white)
+                        .fill(Color.surface)
                         .overlay(Circle().strokeBorder(done ? color : Color.night.opacity(0.15), lineWidth: 3))
                         .frame(width: height + 2, height: height + 2)
                         .position(x: x, y: height / 2)

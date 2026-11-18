@@ -17,7 +17,7 @@ struct Checkbox: View {
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         ZStack {
             shape
-                .fill(Color.white.opacity(0.55))
+                .fill(color.opacity(0.06))
                 .opacity(isOn ? 0 : 1)
             shape
                 .strokeBorder(color.opacity(emphasized ? 1 : 0.3), lineWidth: 2.5)
@@ -69,6 +69,7 @@ struct CheckButton: View {
         .sensoryFeedback(trigger: isOn) { _, newValue in
             newValue ? .success : .impact(weight: .light)
         }
+        .onChange(of: isOn) { _, newValue in Sounds.play(newValue ? .check : .uncheck) }
         .accessibilityLabel(label)
         .accessibilityValue(isOn ? "Done" : "Not done")
     }

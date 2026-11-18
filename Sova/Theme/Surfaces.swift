@@ -12,7 +12,7 @@ extension View {
         return self
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(tint ?? Color.white, in: shape)
+            .background(tint ?? Color.surface, in: shape)
             .overlay(shape.strokeBorder(Color.hairline, lineWidth: tint == nil ? 1.5 : 0))
     }
 
@@ -70,7 +70,7 @@ struct QuietButtonStyle: ButtonStyle {
             .foregroundStyle(Color.ink)
             .padding(.horizontal, 20)
             .frame(minHeight: height)
-            .background(Color.white, in: .capsule)
+            .background(Color.surface, in: .capsule)
             .overlay(Capsule().strokeBorder(Color.hairline, lineWidth: 1.5))
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(.spring(response: 0.22, dampingFraction: 0.6), value: configuration.isPressed)

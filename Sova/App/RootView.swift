@@ -1,8 +1,10 @@
 import SwiftUI
 import SwiftData
+import Combine
 
 struct RootView: View {
     @AppStorage("hasOnboarded") private var hasOnboarded = false
+    @AppStorage("appearance") private var appearanceRaw = Appearance.system.rawValue
 
     var body: some View {
         ZStack {
@@ -19,12 +21,14 @@ struct RootView: View {
         }
         .animation(.smooth(duration: 0.6), value: hasOnboarded)
         .font(.allo(.body))
-        .preferredColorScheme(.light)
+        .preferredColorScheme((Appearance(rawValue: appearanceRaw) ?? .system).scheme)
     }
 }
 
 struct MainTabView: View {
     @State private var router = AppRouter()
+    /// Bumps at midnight so day-based screens don't keep showing yesterday.
+    @State private var today = Date.now.startOfDay
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
 
     private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
@@ -32,22 +36,25 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $router.tab) {
             Tab("Today", systemImage: "sun.max", value: AppTab.today) {
-                TodayView()
+                TodayView().id(today)
             }
             Tab("Goals", systemImage: "flag", value: AppTab.goals) {
                 GoalsView()
             }
             Tab("Rituals", systemImage: "repeat", value: AppTab.routines) {
-                RoutinesView()
+                RoutinesView().id(today)
             }
             Tab("Insights", systemImage: "chart.bar", value: AppTab.insights) {
-                InsightsView()
+                InsightsView().id(today)
             }
             Tab("New", systemImage: "plus", value: AppTab.create, role: .search) {
                 Color.canvas
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
+            today = Date.now.startOfDay
+        }
         .sensoryFeedback(.selection, trigger: router.tab)
         .onChange(of: router.tab) { previous, current in
             guard current == .create else { return }
@@ -100,7 +107,7 @@ struct ToastBar: View {
                         } label: {
                             Text("Undo")
                                 .font(.allo(.subheadline, .semibold))
-                                .foregroundStyle(Color.accentColor)
+                                .foregroundStyle(Color.ink)
                                 .frame(minWidth: 44, minHeight: 44)
                         }
                         .buttonStyle(.plain)
@@ -121,12 +128,10 @@ struct ToastBar: View {
 
 #Preview("App") {
     MainTabView()
-        .preferredColorScheme(.light)
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }
 
 #Preview("Onboarding") {
     OnboardingView()
-        .preferredColorScheme(.light)
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }

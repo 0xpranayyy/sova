@@ -59,7 +59,7 @@ struct QuickCaptureView: View {
         VStack(alignment: .leading, spacing: 0) {
             MonoCaps(added == 0 ? String(localized: "New task")
                      : String(localized: "\(added) added · keep going"),
-                     color: added == 0 ? .inkSecondary : StickerTone.mint.deep)
+                     color: added == 0 ? .inkSecondary : .positive)
                 .contentTransition(.numericText())
 
             ZStack(alignment: .topLeading) {
@@ -74,7 +74,7 @@ struct QuickCaptureView: View {
                     .font(fieldFont)
                     .tracking(-0.4)
                     .foregroundStyle(Color.clear)
-                    .tint(StickerTone.indigo.fill)
+                    .tint(Color.ink)
                     .lineLimit(1...4)
                     .focused($focused)
                     .submitLabel(.done)
@@ -190,7 +190,7 @@ private struct Token: View {
         .foregroundStyle(selected ? Color.ink : Color.inkSecondary)
         .padding(.horizontal, 12)
         .frame(height: 34)
-        .background(selected ? Color.white : Color.clear, in: .capsule)
+        .background(selected ? Color.surface : Color.clear, in: .capsule)
         .overlay(Capsule().strokeBorder(Color.night.opacity(selected ? 0 : 0.1)))
     }
 }

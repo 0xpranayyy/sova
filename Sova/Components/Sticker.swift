@@ -14,7 +14,7 @@ enum StickerTone: String, CaseIterable {
         case .orange: Color(hex: 0xFFA03A)
         case .cyan: Color(hex: 0x3DCBFF)
         case .lime: Color(hex: 0xC2F53A)
-        case .indigo: Color(hex: 0x2B1677)
+        case .indigo: Color(light: 0x2B1677, dark: 0x3B26A6)
         }
     }
 
@@ -32,7 +32,7 @@ enum StickerTone: String, CaseIterable {
         }
     }
 
-    var border: Color { self == .indigo ? Color(hex: 0x1A0B4F) : deep }
+    var border: Color { self == .indigo ? Color(light: 0x1A0B4F, dark: 0x5A45C8) : deep }
 
     /// A stable tone for an item's stored accent.
     init(_ accent: Accent) {
