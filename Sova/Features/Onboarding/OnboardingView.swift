@@ -16,7 +16,7 @@ enum OnboardingStep: Int, CaseIterable, Comparable {
 struct OnboardingView: View {
     @Environment(\.modelContext) private var context
     @AppStorage("hasOnboarded") private var hasOnboarded = false
-    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
     @AppStorage("userName") private var userName = ""
     @AppStorage("morningReminderOn") private var savedMorningOn = false
     @AppStorage("morningReminderMinutes") private var savedMorningMinutes = 8 * 60
@@ -35,7 +35,7 @@ struct OnboardingView: View {
     @State private var isRequesting = false
     @State private var look = CGSize(width: 0, height: 0.4)
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ink }
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedGoal: String { goalTitle.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var chosenRituals: [RitualOption] { RitualOption.all.filter { rituals.contains($0.id) } }
@@ -81,7 +81,7 @@ struct OnboardingView: View {
                     }
             )
         }
-        .tint(theme.accent.color)
+        .tint(Color.ember)
         .sensoryFeedback(.selection, trigger: step)
     }
 
@@ -105,26 +105,24 @@ struct OnboardingView: View {
 
     private var topBar: some View {
         let indicated = OnboardingStep.indicated
-        let position = (indicated.firstIndex(of: step) ?? 0) + 1
+        let position = indicated.firstIndex(of: step) ?? 0
         return ZStack {
             if indicated.contains(step) {
-                MonoCaps(String(format: String(localized: "Step %02d of %02d"), position, indicated.count))
-                    .contentTransition(.numericText())
-                    .transition(.opacity)
+                HStack(spacing: 4) {
+                    ForEach(0..<indicated.count, id: \.self) { i in
+                        Capsule()
+                            .fill(i <= position ? Color.night : Color.night.opacity(0.15))
+                            .frame(width: i == position ? 20 : 6, height: 6)
+                    }
+                }
+                .accessibilityElement()
+                .accessibilityLabel("Step \(position + 1) of \(indicated.count)")
+                .transition(.opacity)
             }
             HStack {
                 if step > .hello && step < .finish {
-                    Button(action: back) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundStyle(Color.ink)
-                            .frame(width: 44, height: 44)
-                            .background(Color.white, in: .circle)
-                            .overlay(Circle().strokeBorder(Color.hairline))
-                    }
-                    .buttonStyle(.pressable)
-                    .accessibilityLabel("Back")
-                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                    CircleAction(symbol: "chevron.left", label: String(localized: "Back"), action: back)
+                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
                 }
                 Spacer()
             }
@@ -156,7 +154,7 @@ struct OnboardingView: View {
                     if isRequesting { ProgressView().tint(Color.inkInverse) }
                 }
             }
-            .buttonStyle(.ink)
+            .buttonStyle(InkButtonStyle(ember: step == .finish))
             .disabled(isRequesting)
 
             if step == .rhythm && (morningOn || eveningOn) {
@@ -225,24 +223,15 @@ struct OnboardingView: View {
     }
 }
 
-/// Paper, with the sunlight hero behind the welcome screen.
+/// Warm paper behind every step.
 struct OnboardingBackdrop: View {
     var step: OnboardingStep
     var theme: SovaTheme
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .top) {
-                Color.canvas
-                if step == .hello {
-                    SunHero(height: geo.size.height * 0.68, arcDepth: 70) { EmptyView() }
-                        .transition(.opacity)
-                }
-            }
-        }
-        .ignoresSafeArea()
-        .animation(.smooth(duration: 0.6), value: step)
-        .accessibilityHidden(true)
+        Color.canvas
+            .ignoresSafeArea()
+            .accessibilityHidden(true)
     }
 }
 

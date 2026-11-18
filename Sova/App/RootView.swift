@@ -25,9 +25,9 @@ struct RootView: View {
 
 struct MainTabView: View {
     @State private var router = AppRouter()
-    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
 
-    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ink).accent.color }
+    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
 
     var body: some View {
         TabView(selection: $router.tab) {

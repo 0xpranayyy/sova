@@ -8,16 +8,15 @@ struct RoutineRow: View {
     var body: some View {
         let done = routine.isDone(on: .now)
         HStack(spacing: 14) {
-            IconTile(symbol: routine.symbol, size: 36, active: done)
+            StickerIcon(symbol: routine.symbol, tone: StickerTone(routine.accent), size: 36)
 
             VStack(alignment: .leading, spacing: 7) {
                 Text(routine.title)
-                    .font(.allo(.body, .medium))
+                    .font(.allo(.body, .bold))
                     .foregroundStyle(Color.ink)
                 HStack(spacing: 10) {
                     WeekTrack(routine: routine)
-                    Text(routine.streak > 1 ? String(localized: "\(routine.streak)-day streak")
-                                            : Weekdays.summary(for: routine.weekdays))
+                    Text(Weekdays.summary(for: routine.weekdays))
                         .font(.allo(.footnote))
                         .foregroundStyle(Color.inkTertiary)
                         .contentTransition(.numericText())
@@ -26,8 +25,11 @@ struct RoutineRow: View {
 
             Spacer(minLength: 0)
 
+            if routine.streak > 1 {
+                StickerChip(text: "\(routine.streak)d", tone: .mint)
+            }
             if routine.isScheduled(on: .now) {
-                CheckButton(isOn: done, round: true, size: 26, label: routine.title) {
+                CheckButton(isOn: done, color: .ember, round: true, size: 28, label: routine.title) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) { routine.toggle(on: .now) }
                 }
             } else {
@@ -48,7 +50,7 @@ struct WeekTrack: View {
     let routine: Routine
 
     var body: some View {
-        let accent = Color.black
+        let accent = Color.ember
         HStack(spacing: 3) {
             ForEach(-6...0, id: \.self) { offset in
                 let day = Date.now.adding(days: offset)

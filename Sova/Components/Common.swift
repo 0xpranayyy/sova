@@ -14,7 +14,7 @@ struct IconTile: View {
             .font(.system(size: size * 0.5, weight: .regular))
             .foregroundStyle(filled ? Color.inkInverse : Color.ink)
             .frame(width: size, height: size)
-            .background(filled ? Color.black : Color.clear,
+            .background(filled ? Color.night : Color.clear,
                         in: .rect(cornerRadius: size * 0.29, style: .continuous))
             .opacity(active || filled ? 1 : 0.85)
             .accessibilityHidden(true)
@@ -92,7 +92,7 @@ struct EmptyState: View {
 struct ThemeSwatches: View {
     @Binding var themeRaw: String
 
-    private var selected: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ink }
+    private var selected: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
 
     var body: some View {
         HStack(spacing: 0) {

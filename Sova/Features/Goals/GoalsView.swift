@@ -19,19 +19,13 @@ struct GoalsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Goals")
-                            .font(.hero(40, weight: .medium))
-                            .tracking(-1.8)
-                            .foregroundStyle(Color.ink)
-                        Text(active.isEmpty ? String(localized: "Nothing in progress yet.")
-                             : String(localized: "\(active.count) in progress, \(averageText) on average."))
-                            .font(.allo(.subheadline))
-                            .foregroundStyle(Color.inkSecondary)
+                    ScreenTitle(title: String(localized: "Goals"),
+                                subtitle: active.isEmpty ? String(localized: "Nothing in progress yet")
+                                    : String(localized: "\(active.count) in progress · \(averageText) on average")) {
+                        CircleAction(symbol: "plus", label: String(localized: "New goal")) { router.sheet = .newGoal }
                     }
-                    .padding(.horizontal, 4)
-                    .padding(.top, 12)
-                    .padding(.bottom, 12)
+                    .padding(.top, 4)
+                    .padding(.bottom, 8)
 
                     if active.isEmpty {
                         EmptyState(title: String(localized: "No goals yet"),
@@ -78,16 +72,6 @@ struct GoalsView: View {
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .safeAreaInset(edge: .top, spacing: 0) {
-                SovaNavPill {
-                    Button { router.sheet = .newGoal } label: {
-                        Image(systemName: "plus").font(.system(size: 18)).frame(width: 36, height: 36)
-                    }
-                    .buttonStyle(.pressable)
-                    .accessibilityLabel("New goal")
-                }
-                .padding(.top, 4)
-            }
             .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: Goal.self) { goal in
                 GoalDetailView(goal: goal)

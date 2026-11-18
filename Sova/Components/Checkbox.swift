@@ -6,7 +6,7 @@ struct Checkbox: View {
     var isOn: Bool
     var color: Color = SovaTheme.current.accent.color
     var round = false
-    var size: CGFloat = 22
+    var size: CGFloat = 26
     var emphasized = false
 
     var body: some View {
@@ -16,7 +16,7 @@ struct Checkbox: View {
             shape
                 .fill(Color.white)
             shape
-                .strokeBorder(emphasized ? color : Color.black.opacity(0.25), lineWidth: 1.5)
+                .strokeBorder(emphasized ? color : Color.night.opacity(0.18), lineWidth: 2)
                 .opacity(isOn ? 0 : 1)
             shape
                 .fill(color)
@@ -47,7 +47,7 @@ struct CheckButton: View {
     var isOn: Bool
     var color: Color = SovaTheme.current.accent.color
     var round = false
-    var size: CGFloat = 22
+    var size: CGFloat = 26
     var emphasized = false
     var label: String = ""
     var action: () -> Void

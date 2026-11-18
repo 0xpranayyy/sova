@@ -10,12 +10,11 @@ private struct StepHeadline: View {
 
     var body: some View {
         Text(text)
-            .font(.hero(size, weight: .medium))
+            .font(.hero(size, weight: .heavy))
             .tracking(-1.4)
             .foregroundStyle(Color.ink)
-            .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .reveal(index)
     }
 }
@@ -26,11 +25,10 @@ private struct StepBody: View {
 
     var body: some View {
         Text(text)
-            .font(.allo(.body))
+            .font(.allo(.body, .medium))
             .foregroundStyle(Color.inkSecondary)
-            .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .reveal(index)
     }
 }
@@ -41,31 +39,47 @@ private var accent: Color { SovaTheme.current.accent.color }
 
 struct HelloStep: View {
     var look: CGSize
-    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 104
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 92
 
     var body: some View {
-        VStack(spacing: 0) {
-            OwlMark(size: 40, look: look, bodyColor: .white, eyeColor: Color.sun)
-                .padding(.top, 12)
-                .reveal(0)
-            Spacer().frame(height: 96)
-            Text("A calmer way to plan your day.")
-                .font(.allo(size: 23, weight: .medium, relativeTo: .title2))
-                .tracking(-0.8)
-                .multilineTextAlignment(.center)
-                .reveal(1)
-            Text("Sova")
-                .font(.hero(titleSize, weight: .bold))
-                .tracking(-5.5)
+        VStack(alignment: .leading, spacing: 0) {
+            // A loose pile of what a Sova day is made of.
+            ZStack(alignment: .topLeading) {
+                Sticker(text: "Morning pages", tone: .lilac, caption: "Ritual · 7:00", size: 19, tilt: -6)
+                    .offset(x: 126, y: 0)
+                Sticker(text: "Call Mom", tone: .yellow, size: 19, tilt: 5)
+                    .offset(x: 0, y: 80)
+                Starburst(value: "12", caption: "Day streak", tone: .mint, size: 100, tilt: -10)
+                    .offset(x: 214, y: 76)
+                Sticker(text: "Read 12 books", tone: .pink, caption: "Goal · 71%", size: 23, tilt: -4)
+                    .offset(x: 16, y: 164)
+                Sticker(text: "!!", tone: .orange, size: 28, tilt: 8)
+                    .offset(x: 214, y: 192)
+                Sticker(text: "Drink water", tone: .cyan, size: 17, tilt: 3)
+                    .offset(x: 126, y: 258)
+                OwlMark(size: 60, look: look)
+                    .rotationEffect(.degrees(-8))
+                    .offset(x: 2, y: 272)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.top, 8)
+            .reveal(0)
+
+            Text("Sova.")
+                .font(.hero(titleSize, weight: .heavy))
+                .tracking(-5)
+                .foregroundStyle(Color.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-                .padding(.top, 8)
+                .reveal(1)
+            Text("Tasks, rituals and goals.\nOne good day at a time.")
+                .font(.allo(size: 20, weight: .semibold, relativeTo: .title3))
+                .tracking(-0.4)
+                .foregroundStyle(Color.inkSecondary)
+                .padding(.top, 10)
+                .padding(.bottom, 26)
                 .reveal(2)
-            Spacer()
         }
-        .foregroundStyle(.white)
-        .shadow(color: .black.opacity(0.08), radius: 10, y: 2)
-        .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
     }
 }
@@ -271,33 +285,22 @@ struct RitualsStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "Pick a few rituals"))
-                StepBody(text: String(localized: "Things you want to do regularly. You can change these later."))
+                StepHeadline(text: String(localized: "Pick a few rituals."))
+                StepBody(text: String(localized: "Small things you want to do regularly."))
                     .padding(.top, 10)
 
-                ForEach(Array([DayPeriod.morning, .afternoon, .anytime, .evening].enumerated()), id: \.element) { index, period in
-                    let items = RitualOption.all.filter { $0.period == period }
-                    if !items.isEmpty {
-                        MonoCaps(period.name)
-                            .padding(.top, 22)
-                            .padding(.bottom, 8)
-                            .padding(.leading, 4)
-                            .reveal(2 + index)
-                        VStack(spacing: 0) {
-                            ForEach(Array(items.enumerated()), id: \.element.id) { i, ritual in
-                                if i > 0 { Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, 66) }
-                                RitualRow(ritual: ritual, selected: selection.contains(ritual.id)) {
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                                        if selection.contains(ritual.id) { selection.remove(ritual.id) }
-                                        else { selection.insert(ritual.id) }
-                                    }
-                                }
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                    ForEach(Array(RitualOption.all.enumerated()), id: \.element.id) { index, ritual in
+                        RitualTile(ritual: ritual, selected: selection.contains(ritual.id)) {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                                if selection.contains(ritual.id) { selection.remove(ritual.id) }
+                                else { selection.insert(ritual.id) }
                             }
                         }
-                        .surface(cornerRadius: 20, padding: 0)
-                        .reveal(2 + index)
+                        .reveal(2 + index / 2)
                     }
                 }
+                .padding(.top, 22)
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)
@@ -309,39 +312,66 @@ struct RitualsStep: View {
     }
 }
 
-private struct RitualRow: View {
+/// A ritual as a tile that becomes a sticker when chosen.
+private struct RitualTile: View {
     let ritual: RitualOption
     let selected: Bool
     let action: () -> Void
 
+    private var tone: StickerTone { StickerTone(ritual.accent) }
+
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 14) {
-                IconTile(symbol: ritual.symbol, size: 36, active: selected)
-                Text(ritual.title)
-                    .font(.allo(.body, .medium))
-                    .foregroundStyle(Color.ink)
-                Spacer()
-                Text(Weekdays.summary(for: ritual.weekdays))
-                    .font(.allo(.footnote))
-                    .foregroundStyle(Color.inkTertiary)
-                ZStack {
-                    Circle().strokeBorder(Color.white.opacity(0.22), lineWidth: 1.5).opacity(selected ? 0 : 1)
-                    Circle().fill(accent).scaleEffect(selected ? 1 : 0.3).opacity(selected ? 1 : 0)
-                    CheckmarkShape()
-                        .trim(from: 0, to: selected ? 1 : 0)
-                        .stroke(Color.inkInverse, style: StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round))
-                        .padding(6.5)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top) {
+                    Image(systemName: ritual.symbol)
+                        .font(.system(size: 21, weight: .semibold))
+                    Spacer()
+                    ZStack {
+                        Circle()
+                            .strokeBorder(Color.night.opacity(0.15), lineWidth: 2)
+                            .opacity(selected ? 0 : 1)
+                        Circle()
+                            .fill(tone.deep)
+                            .scaleEffect(selected ? 1 : 0.3)
+                            .opacity(selected ? 1 : 0)
+                        CheckmarkShape()
+                            .trim(from: 0, to: selected ? 1 : 0)
+                            .stroke(tone.fill, style: StrokeStyle(lineWidth: 2.6, lineCap: .round, lineJoin: .round))
+                            .padding(6.5)
+                    }
+                    .frame(width: 24, height: 24)
                 }
-                .frame(width: 24, height: 24)
+                Spacer(minLength: 18)
+                Text(ritual.title)
+                    .font(.allo(size: 16.5, weight: .heavy, relativeTo: .headline))
+                    .tracking(-0.4)
+                    .multilineTextAlignment(.leading)
+                Text(Weekdays.summary(for: ritual.weekdays) == String(localized: "Every day")
+                     ? ritual.period.name : Weekdays.summary(for: ritual.weekdays))
+                    .font(.allo(size: 10.5, weight: .bold, relativeTo: .caption2))
+                    .tracking(1)
+                    .textCase(.uppercase)
+                    .opacity(0.6)
+                    .padding(.top, 2)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .contentShape(.rect)
+            .foregroundStyle(selected ? tone.deep : Color.ink)
+            .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 112, alignment: .topLeading)
+            .background(selected ? tone.fill : Color.white, in: .rect(cornerRadius: 22, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .strokeBorder(selected ? tone.border : Color.night.opacity(0.08), lineWidth: 2.5)
+            }
+            .background {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(tone.border.opacity(selected ? 0.2 : 0))
+                    .offset(x: 3, y: 4)
+            }
         }
         .buttonStyle(.pressable)
-        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: selected)
         .accessibilityLabel(ritual.title)
+        .accessibilityValue(ritual.period.name)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
@@ -387,8 +417,7 @@ struct GoalStep: View {
                             .foregroundStyle(selected ? Color.inkInverse : Color.ink)
                             .padding(.horizontal, 14)
                             .frame(height: 40)
-                            .background(selected ? accent : Color.surface, in: .capsule)
-                            .overlay(Capsule().strokeBorder(Color.white.opacity(selected ? 0 : 0.07)))
+                            .background(selected ? Color.night : Color.white, in: .capsule)
                         }
                         .buttonStyle(.pressable)
                         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -556,7 +585,7 @@ struct ThemeStep: View {
     var rituals: [RitualOption]
     var goalTitle: String
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ink }
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
 
     var body: some View {
         ScrollView {
@@ -651,62 +680,51 @@ struct FinishStep: View {
     var remindersOn: Bool
     var theme: SovaTheme
     @State private var hop = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 36
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 44
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack {
-                OwlMark(size: 112, happy: true, blinks: false)
-                    .keyframeAnimator(initialValue: 0.0, trigger: hop) { view, y in
-                        view.offset(y: y)
-                    } keyframes: { _ in
-                        KeyframeTrack {
-                            CubicKeyframe(-22, duration: 0.22)
-                            SpringKeyframe(0, duration: 0.5, spring: .bouncy)
-                        }
+            SkyCard(progress: hop > 0 ? 1 : 0.15, sky: .skyEvening, owlHappy: hop > 0) {
+                ZStack(alignment: .topLeading) {
+                    if ritualCount > 0 {
+                        Sticker(text: ritualCount == 1 ? String(localized: "1 ritual") : String(localized: "\(ritualCount) rituals"),
+                                tone: .mint, caption: String(localized: "Set up"), size: 21, tilt: -6)
+                            .offset(x: 24, y: 40)
                     }
+                    if !goalTitle.isEmpty {
+                        Sticker(text: goalTitle, tone: .pink, caption: String(localized: "Goal"), size: 17, tilt: 5)
+                            .frame(maxWidth: 190, alignment: .leading)
+                            .offset(x: 150, y: 24)
+                    }
+                    if remindersOn {
+                        Sticker(text: String(localized: "On"), tone: .yellow, caption: String(localized: "Reminders"), size: 17, tilt: -3)
+                            .offset(x: 140, y: 120)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.top, 16)
             .reveal(0)
 
-            Text(name.isEmpty ? String(localized: "You're all set.") : String(localized: "You're all set, \(name)."))
-                .font(.hero(size, weight: .medium))
-                .tracking(-1.6)
+            Text(name.isEmpty ? String(localized: "You're all set.") : String(localized: "You're all set,\n\(name)."))
+                .font(.hero(size, weight: .heavy))
+                .tracking(-2)
                 .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 30)
                 .reveal(1)
-
-            VStack(alignment: .leading, spacing: 0) {
-                summaryRow(String(localized: "Rituals"), ritualCount == 0 ? String(localized: "None yet") : "\(ritualCount)")
-                summaryRow(String(localized: "Goal"), goalTitle.isEmpty ? String(localized: "None yet") : goalTitle)
-                summaryRow(String(localized: "Reminders"), remindersOn ? String(localized: "On") : String(localized: "Off"))
-                summaryRow(String(localized: "Accent"), theme.name, swatch: theme.accent.color, last: true)
-            }
-            .padding(.top, 22)
-            .padding(.bottom, 20)
-            .reveal(2)
+            Text("Your first day starts now.")
+                .font(.allo(.body, .medium))
+                .foregroundStyle(Color.inkSecondary)
+                .padding(.top, 10)
+                .reveal(2)
+            Spacer()
         }
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 16)
         .sensoryFeedback(.success, trigger: hop)
         .task {
-            try? await Task.sleep(for: .milliseconds(450))
+            try? await Task.sleep(for: .milliseconds(500))
             hop += 1
-        }
-    }
-
-    private func summaryRow(_ label: String, _ value: String, swatch: Color? = nil, last: Bool = false) -> some View {
-        VStack(spacing: 0) {
-            HStack {
-                MonoCaps(label, size: 10.5)
-                Spacer()
-                if let swatch { Circle().fill(swatch).frame(width: 8, height: 8) }
-                Text(value)
-                    .font(.allo(.subheadline, .medium))
-                    .foregroundStyle(Color.ink)
-                    .lineLimit(1)
-            }
-            .padding(.vertical, 11)
-            if !last { Rectangle().fill(Color.hairline).frame(height: 1) }
         }
     }
 }

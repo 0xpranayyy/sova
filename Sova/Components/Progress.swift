@@ -12,17 +12,17 @@ struct ProgressLine: View {
         GeometryReader { geo in
             let value = min(max(progress, 0), 1)
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.well)
+                Capsule().fill(Color.canvas)
                 Capsule()
                     .fill(color)
                     .frame(width: value == 0 ? 0 : max(height, geo.size.width * value))
                 ForEach(Array(milestones.enumerated()), id: \.offset) { index, done in
-                    let x = geo.size.width * Double(index + 1) / Double(milestones.count)
+                    let x = geo.size.width * Double(index + 1) / Double(milestones.count + 1)
                     Circle()
-                        .fill(done ? color : Color.canvas)
-                        .overlay(Circle().strokeBorder(done ? color : Color.white.opacity(0.22), lineWidth: 1.5))
-                        .frame(width: 10, height: 10)
-                        .position(x: min(max(x, 5), geo.size.width - 5), y: height / 2)
+                        .fill(Color.white)
+                        .overlay(Circle().strokeBorder(done ? color : Color.night.opacity(0.15), lineWidth: 3))
+                        .frame(width: height + 2, height: height + 2)
+                        .position(x: x, y: height / 2)
                 }
             }
         }

@@ -7,7 +7,7 @@ import TipKit
 struct QuickCaptureView: View {
     @Environment(\.modelContext) private var context
     @Environment(AppRouter.self) private var router
-    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
 
     @State private var text = ""
     @State private var day: DayChoice = .today
@@ -34,22 +34,22 @@ struct QuickCaptureView: View {
         }
     }
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ink }
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
     private var accent: Color { theme.accent.color }
     private var parsed: ParsedTask { QuickParse.parse(text) }
     private var canSave: Bool { !parsed.title.isEmpty }
-    private let fieldFont = Font.allo(size: 25, weight: .medium, relativeTo: .title2)
+    private let fieldFont = Font.allo(size: 26, weight: .bold, relativeTo: .title2)
 
     /// The typed text with what the parser understood highlighted.
     private var highlighted: AttributedString {
         var attributed = AttributedString(text)
         attributed.foregroundColor = Color.ink
         if let range = parsed.dateRange, let r = Range(range, in: attributed) {
-            attributed[r].backgroundColor = Color.sunSoft
+            attributed[r].backgroundColor = Color.skyMorning
         }
         if let range = parsed.priorityRange, let r = Range(range, in: attributed) {
-            attributed[r].foregroundColor = Color.danger
-            attributed[r].backgroundColor = Color(hex: 0xF9D6D1)
+            attributed[r].foregroundColor = Color.white
+            attributed[r].backgroundColor = Color.ember
         }
         return attributed
     }
@@ -58,7 +58,7 @@ struct QuickCaptureView: View {
         VStack(alignment: .leading, spacing: 0) {
             MonoCaps(added == 0 ? String(localized: "New task")
                      : String(localized: "\(added) added · keep going"),
-                     color: added == 0 ? .black.opacity(0.45) : .ink)
+                     color: added == 0 ? .inkSecondary : .ember)
                 .contentTransition(.numericText())
 
             ZStack(alignment: .topLeading) {
@@ -73,7 +73,7 @@ struct QuickCaptureView: View {
                     .font(fieldFont)
                     .tracking(-0.4)
                     .foregroundStyle(Color.clear)
-                    .tint(.black)
+                    .tint(Color.ember)
                     .lineLimit(1...4)
                     .focused($focused)
                     .submitLabel(.done)
@@ -117,9 +117,9 @@ struct QuickCaptureView: View {
                 Button(action: save) {
                     Image(systemName: "arrow.up")
                         .font(.allo(.body, .bold))
-                        .foregroundStyle(Color.inkInverse)
+                        .foregroundStyle(Color.white)
                         .frame(width: 40, height: 40)
-                        .background(Color.black, in: .circle)
+                        .background(Color.ember, in: .circle)
                 }
                 .buttonStyle(.pressable)
                 .disabled(!canSave)
@@ -182,12 +182,12 @@ private struct Token: View {
     var body: some View {
         HStack(spacing: 6) {
             if let symbol { Image(systemName: symbol).font(.allo(.caption2, .semibold)) }
-            Text(text).font(.allo(.subheadline, .medium))
+            Text(text).font(.allo(.subheadline, .bold))
         }
         .foregroundStyle(selected ? Color.ink : Color.inkSecondary)
         .padding(.horizontal, 12)
-        .frame(height: 32)
+        .frame(height: 34)
         .background(selected ? Color.white : Color.clear, in: .capsule)
-        .overlay(Capsule().strokeBorder(Color.black.opacity(selected ? 0.12 : 0.06)))
+        .overlay(Capsule().strokeBorder(Color.night.opacity(selected ? 0 : 0.1)))
     }
 }

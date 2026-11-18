@@ -63,12 +63,12 @@ struct GoalDetailView: View {
     private var hero: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
-                IconTile(symbol: goal.symbol, size: 30, active: true)
+                StickerIcon(symbol: goal.symbol, tone: StickerTone(goal.accent), size: 34, tilt: -4)
                 MonoCaps(goal.deadlineText ?? String(localized: "No deadline"),
                          color: (goal.daysLeft ?? 1) < 0 ? Color.danger : .inkTertiary)
             }
             Text(goal.title)
-                .font(.hero(32, weight: .medium))
+                .font(.hero(32, weight: .heavy))
                 .tracking(-1.2)
                 .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
@@ -86,8 +86,8 @@ struct GoalDetailView: View {
             .foregroundStyle(Color.ink)
             .padding(.top, 18)
 
-            ProgressLine(progress: goal.progress, color: .black, height: 4,
-                         milestones: goal.sortedMilestones.map(\.isDone))
+            ProgressLine(progress: goal.progress, color: .ember, height: 12,
+                         milestones: Array(goal.sortedMilestones.map(\.isDone).dropLast()))
                 .padding(.top, 14)
         }
         .padding(.top, 8)

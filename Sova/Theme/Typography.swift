@@ -81,35 +81,32 @@ extension Font {
     }
 }
 
-/// A tiny uppercase monospaced label, used sparingly on cards
-/// ("UP NEXT · 14:00", "01 · 21 DAYS LEFT").
+/// A small secondary label (name kept for existing call sites).
 struct MonoCaps: View {
     let text: String
-    var color: Color = .black.opacity(0.45)
-    var size: CGFloat = 10.5
+    var color: Color = .inkSecondary
+    var size: CGFloat = 13
 
-    init(_ text: String, color: Color = .black.opacity(0.45), size: CGFloat = 10.5) {
+    init(_ text: String, color: Color = .inkSecondary, size: CGFloat = 13) {
         self.text = text
         self.color = color
-        self.size = size
+        self.size = max(size, 12)
     }
 
     var body: some View {
         Text(text)
-            .font(.system(size: size, weight: .regular, design: .monospaced))
-            .tracking(0.8)
-            .textCase(.uppercase)
+            .font(.allo(size: size, weight: .semibold, relativeTo: .footnote))
             .foregroundStyle(color)
     }
 }
 
-/// A section heading: quiet, sentence case.
+/// A section heading: bold, night.
 struct SectionLabel: View {
     let title: String
     var trailing: String? = nil
-    var color: Color = .inkSecondary
+    var color: Color = .ink
 
-    init(_ title: String, trailing: String? = nil, color: Color = .inkSecondary) {
+    init(_ title: String, trailing: String? = nil, color: Color = .ink) {
         self.title = title
         self.trailing = trailing
         self.color = color
@@ -118,18 +115,65 @@ struct SectionLabel: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
-                .font(.allo(.subheadline, .medium))
+                .font(.allo(.subheadline, .bold))
                 .foregroundStyle(color)
             Spacer()
             if let trailing {
                 Text(trailing)
-                    .font(.mono(13, weight: .regular))
-                    .foregroundStyle(Color.inkTertiary)
+                    .font(.allo(.footnote, .semibold).monospacedDigit())
+                    .foregroundStyle(Color.inkSecondary)
                     .contentTransition(.numericText())
             }
         }
         .textCase(nil)
         .padding(.horizontal, 4)
         .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// A big, tight, heavy screen title.
+struct ScreenTitle<Trailing: View>: View {
+    let title: String
+    var subtitle: String? = nil
+    @ViewBuilder var trailing: Trailing
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .center) {
+                Text(title)
+                    .font(.hero(34, weight: .heavy))
+                    .tracking(-1.4)
+                    .foregroundStyle(Color.ink)
+                Spacer()
+                trailing
+            }
+            if let subtitle {
+                Text(subtitle)
+                    .font(.allo(.subheadline, .semibold))
+                    .foregroundStyle(Color.inkSecondary)
+            }
+        }
+        .padding(.horizontal, 4)
+    }
+}
+
+/// A round white button for the top-right action of a screen.
+struct CircleAction: View {
+    let symbol: String
+    let label: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(Color.ink)
+                .frame(width: 42, height: 42)
+                .background(Color.white, in: .circle)
+                .shadow(color: Color.night.opacity(0.06), radius: 6, y: 2)
+                .frame(width: 44, height: 44)
+        }
+        .buttonStyle(.pressable)
+        .accessibilityLabel(label)
     }
 }

@@ -8,53 +8,49 @@ struct GoalCard: View {
         goal.sortedMilestones.first(where: { !$0.isDone })?.title
     }
 
-    private var label: String {
-        var parts: [String] = []
-        if let number { parts.append(String(format: "%02d", number)) }
-        if let deadline = goal.deadlineText { parts.append(deadline) }
-        return parts.joined(separator: " · ")
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                MonoCaps(label, color: (goal.daysLeft ?? 1) < 0 ? .danger : .black.opacity(0.45))
-                Spacer()
-                MonoCaps(goal.milestones.isEmpty ? String(localized: "No steps")
-                         : String(localized: "\(goal.completedMilestones)/\(goal.milestones.count) steps"))
-            }
-
-            HStack(alignment: .bottom, spacing: 12) {
-                VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 12) {
+                StickerIcon(symbol: goal.symbol, tone: StickerTone(goal.accent), size: 46, tilt: -4)
+                VStack(alignment: .leading, spacing: 1) {
                     Text(goal.title)
-                        .font(.allo(size: 20, weight: .medium, relativeTo: .title3))
-                        .tracking(-0.6)
+                        .font(.allo(size: 17.5, weight: .heavy, relativeTo: .headline))
+                        .tracking(-0.4)
                         .foregroundStyle(Color.ink)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                     Text(nextStep.map { String(localized: "Next: \($0)") }
                          ?? (goal.milestones.isEmpty ? String(localized: "Progress set by hand") : String(localized: "Every step done")))
-                        .font(.allo(.subheadline))
+                        .font(.allo(.footnote, .medium))
                         .foregroundStyle(Color.inkSecondary)
                         .lineLimit(1)
                 }
                 Spacer(minLength: 8)
                 HStack(alignment: .firstTextBaseline, spacing: 1) {
                     Text(Int((goal.progress * 100).rounded()), format: .number)
-                        .font(.hero(40, weight: .medium))
-                        .tracking(-2)
+                        .font(.hero(34, weight: .heavy))
+                        .tracking(-1.6)
                         .contentTransition(.numericText(value: goal.progress))
-                    Text("%").font(.allo(.title3)).foregroundStyle(Color.inkTertiary)
+                    Text("%").font(.allo(.callout, .bold)).foregroundStyle(Color.inkTertiary)
                 }
                 .foregroundStyle(Color.ink)
             }
-            .padding(.top, 12)
 
-            ProgressLine(progress: goal.progress, color: .black, height: 3,
-                         milestones: goal.sortedMilestones.map(\.isDone))
-                .padding(.top, 18)
+            ProgressLine(progress: goal.progress, color: .ember, height: 12,
+                         milestones: Array(goal.sortedMilestones.map(\.isDone).dropLast()))
+                .padding(.top, 16)
+
+            HStack {
+                Text(goal.milestones.isEmpty ? String(localized: "Set by hand")
+                     : String(localized: "\(goal.completedMilestones) of \(goal.milestones.count) steps"))
+                Spacer()
+                if let deadline = goal.deadlineText { Text(deadline) }
+            }
+            .font(.allo(.caption, .bold))
+            .foregroundStyle((goal.daysLeft ?? 1) < 0 ? Color.ember : Color.inkSecondary)
+            .padding(.top, 10)
         }
-        .surface(cornerRadius: 16, padding: 18)
+        .surface(cornerRadius: 22, padding: 18)
         .accessibilityElement(children: .combine)
     }
 }

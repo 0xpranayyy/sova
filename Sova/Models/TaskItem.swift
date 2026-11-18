@@ -71,7 +71,7 @@ final class TaskItem {
     }
 
     var accent: Accent {
-        get { Accent(rawValue: accentRaw) ?? .ink }
+        get { Accent(rawValue: accentRaw) ?? .ember }
         set { accentRaw = newValue.rawValue }
     }
 

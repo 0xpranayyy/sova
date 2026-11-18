@@ -1,0 +1,169 @@
+import SwiftUI
+
+/// Tonal sticker colors: a saturated fill, with text and outline in a deep
+/// shade of the same hue. Borrowed in spirit from the Allo type specimen.
+enum StickerTone: String, CaseIterable {
+    case yellow, mint, lilac, pink, orange, cyan, lime, indigo
+
+    var fill: Color {
+        switch self {
+        case .yellow: Color(hex: 0xFFE94D)
+        case .mint: Color(hex: 0x4DF2B0)
+        case .lilac: Color(hex: 0xD9CEFF)
+        case .pink: Color(hex: 0xFF5C93)
+        case .orange: Color(hex: 0xFFA03A)
+        case .cyan: Color(hex: 0x3DCBFF)
+        case .lime: Color(hex: 0xC2F53A)
+        case .indigo: Color(hex: 0x2B1677)
+        }
+    }
+
+    /// Text and glyphs on the fill.
+    var deep: Color {
+        switch self {
+        case .yellow: Color(hex: 0x5E4A00)
+        case .mint: Color(hex: 0x0B5A3C)
+        case .lilac: Color(hex: 0x4423B8)
+        case .pink: Color(hex: 0x5E0A26)
+        case .orange: Color(hex: 0x6B3400)
+        case .cyan: Color(hex: 0x063F73)
+        case .lime: Color(hex: 0x2F5A00)
+        case .indigo: Color(hex: 0xFFE94D)
+        }
+    }
+
+    var border: Color { self == .indigo ? Color(hex: 0x1A0B4F) : deep }
+
+    /// A stable tone for an item's stored accent.
+    init(_ accent: Accent) {
+        switch accent {
+        case .plum: self = .lilac
+        case .lagoon: self = .mint
+        case .ember, .clay: self = .orange
+        case .tide: self = .cyan
+        case .graphite, .ink: self = .indigo
+        case .marigold: self = .yellow
+        case .rose: self = .pink
+        case .moss, .lime: self = .lime
+        }
+    }
+}
+
+/// A tilted label sticker with an optional small caption above.
+struct Sticker: View {
+    let text: String
+    var tone: StickerTone
+    var caption: String? = nil
+    var size: CGFloat = 18
+    var tilt: Double = 0
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if let caption {
+                Text(caption)
+                    .font(.allo(size: 10, weight: .bold, relativeTo: .caption2))
+                    .tracking(1.2)
+                    .textCase(.uppercase)
+                    .opacity(0.8)
+            }
+            Text(text)
+                .font(.allo(size: size, weight: .heavy, relativeTo: .headline))
+                .tracking(-0.4)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .foregroundStyle(tone.deep)
+        .padding(.horizontal, size * 0.75)
+        .padding(.vertical, size * 0.45)
+        .background(tone.fill, in: .rect(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(tone.border, lineWidth: 2.5))
+        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(tone.border.opacity(0.14)).offset(x: 3, y: 4))
+        .rotationEffect(.degrees(tilt))
+    }
+}
+
+/// A small icon on its tone, used for rituals and goals.
+struct StickerIcon: View {
+    let symbol: String
+    var tone: StickerTone
+    var size: CGFloat = 36
+    var tilt: Double = 0
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: size * 0.48, weight: .semibold))
+            .foregroundStyle(tone.deep)
+            .frame(width: size, height: size)
+            .background(tone.fill, in: .rect(cornerRadius: size * 0.33, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: size * 0.33, style: .continuous).strokeBorder(tone.border, lineWidth: 2))
+            .rotationEffect(.degrees(tilt))
+            .accessibilityHidden(true)
+    }
+}
+
+/// A starburst badge, for streaks.
+struct Starburst: View {
+    let value: String
+    var caption: String
+    var tone: StickerTone = .mint
+    var size: CGFloat = 100
+    var tilt: Double = 0
+
+    var body: some View {
+        ZStack {
+            StarburstShape(points: 16)
+                .fill(tone.fill)
+            StarburstShape(points: 16)
+                .stroke(tone.border, style: StrokeStyle(lineWidth: 2.5, lineJoin: .round))
+            VStack(spacing: 0) {
+                Text(value)
+                    .font(.allo(size: size * 0.3, weight: .heavy, relativeTo: .title))
+                    .tracking(-1)
+                Text(caption)
+                    .font(.allo(size: size * 0.095, weight: .bold, relativeTo: .caption2))
+                    .tracking(1)
+                    .textCase(.uppercase)
+            }
+            .foregroundStyle(tone.deep)
+        }
+        .frame(width: size, height: size)
+        .rotationEffect(.degrees(tilt))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct StarburstShape: Shape {
+    var points: Int
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let outer = min(rect.width, rect.height) / 2
+        let inner = outer * 0.86
+        var path = Path()
+        for i in 0..<(points * 2) {
+            let r = i.isMultiple(of: 2) ? outer : inner
+            let a = Double(i) * .pi / Double(points)
+            let p = CGPoint(x: center.x + r * cos(a), y: center.y + r * sin(a))
+            if i == 0 { path.move(to: p) } else { path.addLine(to: p) }
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// A tiny tonal pill, e.g. a streak count on a row.
+struct StickerChip: View {
+    let text: String
+    var tone: StickerTone
+
+    var body: some View {
+        Text(text)
+            .font(.allo(size: 12, weight: .heavy, relativeTo: .caption))
+            .foregroundStyle(tone.deep)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(tone.fill, in: .rect(cornerRadius: 8, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(tone.border, lineWidth: 1.5))
+            .rotationEffect(.degrees(-4))
+    }
+}

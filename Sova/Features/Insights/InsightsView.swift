@@ -5,10 +5,10 @@ struct InsightsView: View {
     @Query private var tasks: [TaskItem]
     @Query(sort: \Routine.order) private var routines: [Routine]
     @Query(filter: #Predicate<Goal> { !$0.isArchived }) private var goals: [Goal]
-    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
 
     private static let weeks = 17
-    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ink).accent.color }
+    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
 
     // MARK: Data
 
@@ -68,75 +68,64 @@ struct InsightsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(hasHistory ? String(localized: "Last 30 days") : String(localized: "Insights"))
-                        .font(.allo(.subheadline, .medium))
-                        .foregroundStyle(Color.inkSecondary)
+                    ScreenTitle(title: String(localized: "Insights")) { EmptyView() }
+                        .padding(.top, 4)
+                        .padding(.bottom, 14)
 
-                    if hasHistory {
-                        HStack(alignment: .bottom, spacing: 12) {
+                    // The headline number, on indigo.
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(hasHistory ? String(localized: "Rituals kept · 30 days") : String(localized: "No history yet"))
+                            .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
+                            .tracking(1.2)
+                            .textCase(.uppercase)
+                            .opacity(0.7)
+                        HStack(alignment: .bottom, spacing: 10) {
                             HStack(alignment: .firstTextBaseline, spacing: 2) {
                                 Text(Int((current * 100).rounded()), format: .number)
-                                    .font(.hero(96, weight: .bold))
-                                    .tracking(-5)
+                                    .font(.hero(84, weight: .heavy))
+                                    .tracking(-4.5)
                                     .contentTransition(.numericText(value: current))
-                                Text("%").font(.hero(40, weight: .medium)).foregroundStyle(Color.inkTertiary)
+                                Text("%").font(.hero(36, weight: .heavy)).opacity(0.6)
                             }
-                            .foregroundStyle(Color.ink)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("of rituals kept").font(.allo(.body, .medium)).foregroundStyle(Color.ink)
-                                if routines.contains(where: { $0.createdAt < Date.now.adding(days: -30) }) {
-                                    Text(delta >= 0 ? String(localized: "up \(delta)% from last month")
-                                                    : String(localized: "down \(-delta)% from last month"))
-                                        .font(.allo(.subheadline))
-                                        .foregroundStyle(Color.inkSecondary)
-                                }
+                            .foregroundStyle(StickerTone.yellow.fill)
+                            if hasHistory, routines.contains(where: { $0.createdAt < Date.now.adding(days: -30) }) {
+                                Sticker(text: delta >= 0 ? "↑ \(delta)%" : "↓ \(-delta)%",
+                                        tone: delta >= 0 ? .mint : .pink, size: 14, tilt: -4)
+                                    .padding(.bottom, 14)
                             }
-                            .padding(.bottom, 14)
                         }
-                    } else {
-                        Text("No history yet.")
-                            .font(.hero(34, weight: .medium))
-                            .tracking(-1.2)
-                            .foregroundStyle(Color.ink)
-                            .padding(.top, 6)
-                        Text("Finish tasks and check off rituals, and your activity shows up here.")
-                            .font(.allo(.subheadline))
-                            .foregroundStyle(Color.inkSecondary)
-                            .padding(.top, 6)
+                        WeekBars(values: weekCounts)
+                            .padding(.top, 12)
                     }
+                    .foregroundStyle(Color.canvas)
+                    .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 28, style: .continuous))
 
-                    WeekBars(values: weekCounts)
-                        .surface(cornerRadius: 16, padding: 18)
-                        .padding(.top, 22)
+                    HStack(alignment: .center, spacing: 12) {
+                        Sticker(text: "\(tasksDone)", tone: .pink, caption: String(localized: "Tasks done"), size: 40, tilt: -2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Starburst(value: "\(bestStreak)", caption: String(localized: "Day streak"), tone: .mint, size: 112, tilt: 8)
+                    }
+                    .padding(.top, 14)
+                    .padding(.horizontal, 2)
 
                     heatmap
-                        .surface(cornerRadius: 16, padding: 16)
-                        .padding(.top, 10)
+                        .surface(cornerRadius: 22, padding: 16)
+                        .padding(.top, 14)
 
-                    Grid(horizontalSpacing: 10, verticalSpacing: 10) {
-                        GridRow {
-                            StatTile(value: "\(tasksDone)", label: String(localized: "Tasks done"))
-                            StatTile(value: String(localized: "\(bestStreak) days"), label: String(localized: "Best streak"))
-                        }
-                        GridRow {
-                            StatTile(value: perDay.formatted(.number.precision(.fractionLength(1))),
-                                     label: String(localized: "Per day"))
-                            StatTile(value: goalAverage.formatted(.percent.precision(.fractionLength(0))),
-                                     label: String(localized: "Goal progress"))
-                        }
+                    HStack(spacing: 10) {
+                        StatTile(value: perDay.formatted(.number.precision(.fractionLength(1))), label: String(localized: "Done per day"))
+                        StatTile(value: goalAverage.formatted(.percent.precision(.fractionLength(0))), label: String(localized: "Goal progress"))
                     }
                     .padding(.top, 10)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 14)
-                .padding(.bottom, 40)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 90)
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .safeAreaInset(edge: .top, spacing: 0) {
-                SovaNavPill { EmptyView() }
-                    .padding(.top, 4)
-            }
             .toolbarVisibility(.hidden, for: .navigationBar)
         }
     }
@@ -203,13 +192,13 @@ struct InsightsView: View {
         if let day {
             let count = activity(on: day)
             let level = count == 0 ? 0 : Double(count) / Double(peak)
-            RoundedRectangle(cornerRadius: 3.5, style: .continuous)
-                .fill(count == 0 ? Color.well : Self.sunScale(level))
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .fill(count == 0 ? Color.well : Color.ember.opacity(0.22 + 0.78 * level))
                 .frame(width: 15, height: 15)
                 .overlay {
                     if day.isSameDay(as: .now) {
-                        RoundedRectangle(cornerRadius: 3.5, style: .continuous)
-                            .strokeBorder(Color.black, lineWidth: 1.2)
+                        RoundedRectangle(cornerRadius: 5, style: .continuous)
+                            .strokeBorder(Color.night, lineWidth: 1.5)
                     }
                 }
         } else {
@@ -223,50 +212,45 @@ private struct StatTile: View {
     let label: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            MonoCaps(label)
+        VStack(alignment: .leading, spacing: 2) {
             Text(value)
-                .font(.hero(30, weight: .medium))
+                .font(.hero(28, weight: .heavy))
                 .tracking(-1.2)
                 .foregroundStyle(Color.ink)
                 .contentTransition(.numericText())
+            Text(label)
+                .font(.allo(.footnote, .semibold))
+                .foregroundStyle(Color.inkSecondary)
         }
-        .surface(cornerRadius: 16, padding: 16)
+        .surface(cornerRadius: 22, padding: 16)
         .accessibilityElement(children: .combine)
     }
 }
 
-/// Seven fat capsules, one per day. Today is drawn in sunlight.
+/// Seven fat capsules, one per day, on the indigo card. Today is yellow.
 private struct WeekBars: View {
     let values: [(Date, Int)]
 
     var body: some View {
         let peak = max(values.map(\.1).max() ?? 1, 1)
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                MonoCaps(String(localized: "This week"))
-                Spacer()
-                MonoCaps(String(localized: "\(values.map(\.1).reduce(0, +)) done"))
-            }
-            HStack(alignment: .bottom, spacing: 8) {
-                ForEach(Array(values.enumerated()), id: \.offset) { _, item in
-                    let day = item.0
-                    let count = item.1
-                    let isToday = day.isSameDay(as: .now)
-                    VStack(spacing: 8) {
-                        Capsule()
-                            .fill(isToday ? Color.sun : (count == 0 ? Color.well : Color.black))
-                            .frame(height: max(14, 120 * Double(count) / Double(peak)))
-                            .frame(maxWidth: .infinity)
-                        Text(Weekdays.letter(day.weekday))
-                            .font(.allo(.caption, isToday ? .bold : .medium))
-                            .foregroundStyle(isToday ? Color.ink : Color.inkTertiary)
-                    }
+        HStack(alignment: .bottom, spacing: 8) {
+            ForEach(Array(values.enumerated()), id: \.offset) { _, item in
+                let day = item.0
+                let count = item.1
+                let isToday = day.isSameDay(as: .now)
+                VStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(isToday ? StickerTone.yellow.fill : Color.canvas.opacity(count == 0 ? 0.18 : 0.88))
+                        .frame(height: max(14, 92 * Double(count) / Double(peak)))
+                        .frame(maxWidth: .infinity)
+                    Text(Weekdays.letter(day.weekday))
+                        .font(.allo(.caption, .heavy))
+                        .opacity(isToday ? 1 : 0.55)
                 }
             }
-            .frame(height: 146, alignment: .bottom)
-            .animation(.spring(response: 0.6, dampingFraction: 0.8), value: values.map(\.1))
         }
+        .frame(height: 116, alignment: .bottom)
+        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: values.map(\.1))
         .accessibilityElement()
         .accessibilityLabel("This week")
         .accessibilityValue(values.map { "\($0.1)" }.joined(separator: ", "))

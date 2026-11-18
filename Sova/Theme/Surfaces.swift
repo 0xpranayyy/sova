@@ -9,12 +9,13 @@ extension View {
     /// the one thing on screen that deserves attention.
     func surface(cornerRadius: CGFloat = 22, padding: CGFloat = 16, tint: Color? = nil,
                  interactive: Bool = false) -> some View {
-        let shape = RoundedRectangle(cornerRadius: min(cornerRadius, 16), style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: max(cornerRadius, 20), style: .continuous)
         return self
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(tint.map { $0.opacity(0.06) } ?? Color.surface, in: shape)
-            .overlay(shape.strokeBorder(tint.map { $0.opacity(0.3) } ?? Color.hairline, lineWidth: 1))
+            .background(tint ?? Color.surface, in: shape)
+            .shadow(color: Color.night.opacity(0.05), radius: 0, y: 1)
+            .shadow(color: Color.night.opacity(0.05), radius: 9, y: 6)
     }
 }
 
@@ -29,18 +30,20 @@ extension Glass {
 
 // MARK: - Buttons
 
-/// The primary action: a solid black pill.
+/// The primary action: a solid night pill, or ember for the moments that
+/// start something.
 struct InkButtonStyle: ButtonStyle {
     var compact = false
+    var ember = false
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(compact ? .allo(.subheadline, .medium) : .allo(.body, .medium))
-            .foregroundStyle(Color.inkInverse)
+            .font(compact ? .allo(.subheadline, .bold) : .allo(.body, .bold))
+            .foregroundStyle(ember ? Color.white : Color.inkInverse)
             .padding(.horizontal, compact ? 18 : 24)
-            .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? 44 : 52)
-            .background(Color.black, in: .capsule)
+            .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? 44 : 54)
+            .background(ember ? Color.ember : Color.night, in: .capsule)
             .opacity(isEnabled ? 1 : 0.35)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
@@ -51,12 +54,12 @@ struct InkButtonStyle: ButtonStyle {
 struct QuietButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.allo(.subheadline, .medium))
+            .font(.allo(.subheadline, .bold))
             .foregroundStyle(Color.ink)
             .padding(.horizontal, 18)
             .frame(minHeight: 44)
             .background(Color.white, in: .capsule)
-            .overlay(Capsule().strokeBorder(Color.black.opacity(0.12)))
+            .shadow(color: Color.night.opacity(0.06), radius: 6, y: 2)
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .animation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
     }
@@ -77,6 +80,8 @@ struct PressableStyle: ButtonStyle {
 extension ButtonStyle where Self == InkButtonStyle {
     static var ink: InkButtonStyle { InkButtonStyle() }
     static var inkCompact: InkButtonStyle { InkButtonStyle(compact: true) }
+    static var ember: InkButtonStyle { InkButtonStyle(ember: true) }
+    static var emberCompact: InkButtonStyle { InkButtonStyle(compact: true, ember: true) }
 }
 
 extension ButtonStyle where Self == QuietButtonStyle {

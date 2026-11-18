@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Warm paper.
+/// Warm cream paper.
 struct CanvasBackground: View {
     var glow: Double = 0
 
@@ -11,68 +11,80 @@ struct CanvasBackground: View {
     }
 }
 
-/// The signature moment: sunlight falling through leaves, ending in a
-/// wide soft arc into the paper below.
-struct SunHero<Content: View>: View {
-    var height: CGFloat
-    /// How far the arc rises from the bottom edge.
-    var arcDepth: CGFloat = 64
+/// Sova's signature: the day as a sky. A sun crosses a dotted arc as you
+/// finish things, over a horizon where the owl sits. The sky's color
+/// follows the actual time of day.
+struct SkyCard<Content: View>: View {
+    var progress: Double
+    var sky: Color = .sky()
+    var owlHappy = false
+    var height: CGFloat = 250
     @ViewBuilder var content: Content
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
-        ZStack(alignment: .top) {
-            Image("Sunlight")
-                .resizable()
-                .scaledToFill()
-                .frame(height: height)
-                .frame(maxWidth: .infinity)
-                .clipped()
-                .accessibilityHidden(true)
-            content
+        GeometryReader { geo in
+            let w = geo.size.width
+            let horizon = height - 54
+            let radius = min(w * 0.37, horizon - 46)
+            let center = CGPoint(x: w / 2, y: horizon)
+            let p = min(max(progress, 0), 1)
+            let angle = Double.pi * (1 - p)
+            let sun = CGPoint(x: center.x + radius * cos(angle), y: center.y - radius * sin(angle))
+
+            ZStack(alignment: .topLeading) {
+                sky
+
+                // Ground below the horizon.
+                Rectangle()
+                    .fill(Color.night.opacity(0.07))
+                    .frame(height: height - horizon)
+                    .offset(y: horizon)
+                Rectangle()
+                    .fill(Color.night.opacity(0.25))
+                    .frame(height: 1.5)
+                    .offset(y: horizon)
+
+                // The full path of the day, then the part already travelled.
+                SkyArc(center: center, radius: radius, progress: 1)
+                    .stroke(Color.night.opacity(0.18), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [0.1, 8]))
+                SkyArc(center: center, radius: radius, progress: p)
+                    .stroke(Color.night, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+
+                Circle()
+                    .fill(Color.ember)
+                    .frame(width: 34, height: 34)
+                    .position(sun)
+
+                OwlMark(size: 46, happy: owlHappy)
+                    .position(x: p > 0.6 ? 20 + 23 : w - 20 - 23, y: horizon - 21)
+
+                content
+                    .frame(width: w, height: height, alignment: .top)
+            }
+            .animation(reduceMotion ? nil : .spring(response: 0.9, dampingFraction: 0.8), value: p)
         }
         .frame(height: height)
-        .clipShape(ArcBottom(depth: arcDepth))
+        .clipShape(.rect(cornerRadius: 30, style: .continuous))
     }
 }
 
-/// A rectangle whose bottom edge is a gentle upward arc.
-struct ArcBottom: Shape {
-    var depth: CGFloat
+/// The upper half of a circle, drawn from the left up to `progress`.
+struct SkyArc: Shape {
+    var center: CGPoint
+    var radius: CGFloat
+    var progress: Double
+
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
 
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.addQuadCurve(to: CGPoint(x: rect.minX, y: rect.maxY),
-                          control: CGPoint(x: rect.midX, y: rect.maxY - depth * 2))
-        path.closeSubpath()
+        path.addArc(center: center, radius: radius,
+                    startAngle: .degrees(180), endAngle: .degrees(180 + 180 * progress), clockwise: false)
         return path
-    }
-}
-
-/// The floating pill at the top of each tab: the owl, the name, and one
-/// action on the right.
-struct SovaNavPill<Trailing: View>: View {
-    @ViewBuilder var trailing: Trailing
-
-    var body: some View {
-        HStack(spacing: 7) {
-            OwlMark(size: 22, blinks: true)
-            Text("Sova")
-                .font(.allo(size: 18, weight: .medium, relativeTo: .headline))
-                .tracking(-0.4)
-                .foregroundStyle(Color.ink)
-            Spacer()
-            trailing
-                .foregroundStyle(Color.ink)
-        }
-        .padding(.leading, 16)
-        .padding(.trailing, 6)
-        .frame(height: 48)
-        .background(Color(hex: 0xF8F8F8).opacity(0.94), in: .capsule)
-        .shadow(color: .black.opacity(0.04), radius: 0, y: 1)
-        .shadow(color: .black.opacity(0.08), radius: 12, y: 6)
-        .padding(.horizontal, 16)
     }
 }

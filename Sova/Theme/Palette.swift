@@ -22,24 +22,46 @@ extension Color {
 
 // MARK: - Semantic tokens
 //
-// Warm paper, soft-black ink, white hairline cards. Color comes from one
-// sunlit moment per screen, never from the chrome.
+// Sova's own palette: warm cream paper, deep night-indigo ink, and ember,
+// the color of the owl's eye, as the single accent. The sky colors follow
+// the time of day.
 
 extension Color {
-    static let canvas = Color(hex: 0xFBFAF6)
-    static let ink = Color.black.opacity(0.86)
-    static let inkSecondary = Color.black.opacity(0.52)
-    static let inkTertiary = Color.black.opacity(0.32)
-    /// Text on black buttons and filled checks.
-    static let inkInverse = Color(hex: 0xF8F8F8)
-    static let well = Color.black.opacity(0.06)
+    static let night = Color(hex: 0x17153B)
+    static let ember = Color(hex: 0xFF5B24)
+
+    static let canvas = Color(hex: 0xF5F0E6)
+    static let ink = Color.night
+    static let inkSecondary = Color.night.opacity(0.56)
+    static let inkTertiary = Color.night.opacity(0.32)
+    /// Text on night and ember fills.
+    static let inkInverse = Color(hex: 0xF5F0E6)
+    static let well = Color.night.opacity(0.06)
     static let surface = Color.white
     static let surfaceRaised = Color.white
-    static let hairline = Color.black.opacity(0.08)
-    static let danger = Color(hex: 0xD9483B)
-    /// The sunlight: used for highlights, never for chrome.
-    static let sun = Color(hex: 0xE9B10F)
-    static let sunSoft = Color(hex: 0xFCE7A4)
+    static let hairline = Color.night.opacity(0.07)
+    static let danger = Color.ember
+
+    static let skyMorning = Color(hex: 0xFFD9B8)
+    static let skyAfternoon = Color(hex: 0xFFE7A1)
+    static let skyEvening = Color(hex: 0xD9CCFF)
+
+    /// The sky for a given time of day.
+    static func sky(for date: Date = .now) -> Color {
+        switch Calendar.current.component(.hour, from: date) {
+        case 5..<12: .skyMorning
+        case 12..<17: .skyAfternoon
+        default: .skyEvening
+        }
+    }
+
+    static func sky(for period: DayPeriod) -> Color {
+        switch period {
+        case .morning: .skyMorning
+        case .afternoon, .anytime: .skyAfternoon
+        case .evening: .skyEvening
+        }
+    }
 }
 
 // MARK: - Accents
@@ -52,9 +74,9 @@ enum Accent: String, CaseIterable, Identifiable {
 
     var name: String {
         switch self {
-        case .ink: "Ink"
+        case .ink: "Night"
         case .lime: "Lime"
-        case .ember: "Clay"
+        case .ember: "Ember"
         case .marigold: "Sun"
         case .moss: "Fern"
         case .lagoon: "Teal"
@@ -68,40 +90,40 @@ enum Accent: String, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
-        case .ink: Color.black
-        case .lime: Color(hex: 0x7A9A1F)
-        case .ember: Color(hex: 0xC4532F)
-        case .marigold: Color(hex: 0xC9940A)
-        case .moss: Color(hex: 0x3F7D4E)
-        case .lagoon: Color(hex: 0x1F7A80)
-        case .tide: Color(hex: 0x2F5FA8)
-        case .plum: Color(hex: 0x6E4A9E)
-        case .rose: Color(hex: 0xB8466B)
-        case .clay: Color(hex: 0xA77B52)
+        case .ink: Color.night
+        case .lime: Color(hex: 0x6E9A1F)
+        case .ember: Color.ember
+        case .marigold: Color(hex: 0xE0A100)
+        case .moss: Color(hex: 0x2E9E6B)
+        case .lagoon: Color(hex: 0x14919A)
+        case .tide: Color(hex: 0x3E6FE0)
+        case .plum: Color(hex: 0x7B57D6)
+        case .rose: Color(hex: 0xE0457B)
+        case .clay: Color(hex: 0xB9825A)
         case .graphite: Color(hex: 0x4A4E55)
         }
     }
 
     var gradient: Color { color }
-    var soft: Color { color.opacity(0.1) }
+    var soft: Color { color.opacity(0.12) }
 }
 
 // MARK: - Themes
 
-/// The accent used for checks, progress and the create button.
+/// The accent for checks, progress and the create button.
 enum SovaTheme: String, CaseIterable, Identifiable {
-    case ink, ember, tide, plum, moss
+    case ember, plum, tide, moss, ink
 
     var id: String { rawValue }
     var name: String { accent.name }
 
     var accent: Accent {
         switch self {
-        case .ink: .ink
         case .ember: .ember
-        case .tide: .tide
         case .plum: .plum
+        case .tide: .tide
         case .moss: .moss
+        case .ink: .ink
         }
     }
 
@@ -109,6 +131,6 @@ enum SovaTheme: String, CaseIterable, Identifiable {
     var swatch: Color { accent.color }
 
     static var current: SovaTheme {
-        SovaTheme(rawValue: UserDefaults.standard.string(forKey: "theme") ?? "") ?? .ink
+        SovaTheme(rawValue: UserDefaults.standard.string(forKey: "theme") ?? "") ?? .ember
     }
 }

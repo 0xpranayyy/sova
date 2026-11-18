@@ -4,30 +4,24 @@ import SwiftData
 struct RoutinesView: View {
     @Environment(AppRouter.self) private var router
     @Query(sort: \Routine.order) private var routines: [Routine]
-    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Rituals")
-                            .font(.hero(40, weight: .medium))
-                            .tracking(-1.8)
-                            .foregroundStyle(Color.ink)
-                        Text(String(localized: "\(routines.filter { $0.isDone(on: .now) }.count) of \(routines.filter { $0.isScheduled(on: .now) }.count) done today."))
-                            .font(.allo(.subheadline))
-                            .foregroundStyle(Color.inkSecondary)
+                    ScreenTitle(title: String(localized: "Rituals"),
+                                subtitle: String(localized: "\(routines.filter { $0.isDone(on: .now) }.count) of \(routines.filter { $0.isScheduled(on: .now) }.count) done today")) {
+                        CircleAction(symbol: "plus", label: String(localized: "New ritual")) { router.sheet = .newRoutine }
                     }
-                    .padding(.horizontal, 4)
-                    .padding(.top, 12)
+                    .padding(.top, 4)
 
                     if routines.isEmpty {
                         EmptyState(title: String(localized: "No rituals yet"),
                                    message: String(localized: "Rituals are things you do on a schedule, like reading or a morning walk."),
                                    actionTitle: String(localized: "Add a routine")) { router.sheet = .newRoutine }
                     } else {
-                        WeekStrip(routines: routines, color: .black)
+                        WeekStrip(routines: routines, color: .ember)
                             .padding(.bottom, 4)
                         ForEach(DayPeriod.allCases) { period in
                             let items = routines.filter { $0.period == period }
@@ -51,16 +45,6 @@ struct RoutinesView: View {
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .safeAreaInset(edge: .top, spacing: 0) {
-                SovaNavPill {
-                    Button { router.sheet = .newRoutine } label: {
-                        Image(systemName: "plus").font(.system(size: 18)).frame(width: 36, height: 36)
-                    }
-                    .buttonStyle(.pressable)
-                    .accessibilityLabel("New ritual")
-                }
-                .padding(.top, 4)
-            }
             .toolbarVisibility(.hidden, for: .navigationBar)
         }
     }
