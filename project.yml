@@ -4,6 +4,10 @@ options:
   bundleIdPrefix: app.sova
   deploymentTarget:
     iOS: "26.0"
+packages:
+  Libraries.dev:
+    url: https://github.com/Jakubantalik/Libraries.dev
+    revision: 580ac1f0c9858edd579812fdea40d876217b27cb
 targets:
   Sova:
     type: application
@@ -26,6 +30,8 @@ targets:
         INFOPLIST_FILE: Config/Sova-Info.plist
     dependencies:
       - target: SovaWidgetsExtension
+      - package: Libraries.dev
+        product: DistortionWavesKit
   SovaWidgetsExtension:
     type: app-extension
     platform: iOS

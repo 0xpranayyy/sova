@@ -16,6 +16,7 @@ enum SovaSettings {
         static let isPlus = "isPlusCached"
         static let lastReviewPrompt = "lastReviewPrompt"
         static let activeDays = "activeDays"
+        static let dayCompleteShown = "dayCompleteShown"
     }
 
     /// Defaults the widget and intents can read too.

@@ -41,6 +41,9 @@ struct OnboardingView: View {
     @State private var remindersGranted = false
     @State private var isRequesting = false
     @State private var look = CGSize(width: 0, height: 0.4)
+    /// Where the main button sits on screen: the welcome wave rises from it.
+    @State private var launchFrame: CGRect = .zero
+    @Environment(WaveDirector.self) private var waves
 
     private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -166,6 +169,7 @@ struct OnboardingView: View {
             }
             .buttonStyle(.big)
             .disabled(isRequesting)
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { launchFrame = $0 }
 
             if step == .rhythm && (morningOn || eveningOn) {
                 Button("Not now") {
@@ -223,7 +227,16 @@ struct OnboardingView: View {
     private func finish() {
         userName = trimmedName
         StarterContent.install(rituals: chosenRituals, goalTitle: trimmedGoal, theme: theme, in: context)
-        withAnimation(.smooth(duration: 0.7)) { hasOnboarded = true }
+        // A wave in Sova's colors rises from the button and lands on Today;
+        // the real Today takes over underneath once it has landed.
+        let started = waves.play(.welcome, from: launchFrame) {
+            hasOnboarded = true
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(300))
+                waves.dismiss()
+            }
+        }
+        if !started { withAnimation(.smooth(duration: 0.7)) { hasOnboarded = true } }
     }
 }
 
@@ -264,5 +277,6 @@ extension View {
 
 #Preview {
     OnboardingView()
+        .environment(WaveDirector())
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }

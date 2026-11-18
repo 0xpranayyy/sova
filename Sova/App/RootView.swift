@@ -5,21 +5,23 @@ import Combine
 struct RootView: View {
     @AppStorage("hasOnboarded") private var hasOnboarded = false
     @AppStorage("appearance") private var appearanceRaw = Appearance.system.rawValue
+    @State private var waves = WaveDirector()
 
     var body: some View {
         ZStack {
             if hasOnboarded {
                 MainTabView()
-                    .transition(.asymmetric(
-                        insertion: .opacity.combined(with: .scale(scale: 1.03)),
-                        removal: .opacity
-                    ))
+                    .transition(.opacity)
             } else {
                 OnboardingView()
                     .transition(.opacity)
             }
+
+            // Sova's two big moments: the welcome and a whole day done.
+            WaveOverlay()
         }
-        .animation(.smooth(duration: 0.6), value: hasOnboarded)
+        .animation(.smooth(duration: 0.45), value: hasOnboarded)
+        .environment(waves)
         .font(.allo(.body))
         .preferredColorScheme((Appearance(rawValue: appearanceRaw) ?? .system).scheme)
     }
@@ -143,10 +145,12 @@ struct ToastBar: View {
 
 #Preview("App") {
     MainTabView()
+        .environment(WaveDirector())
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }
 
 #Preview("Onboarding") {
     OnboardingView()
+        .environment(WaveDirector())
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }

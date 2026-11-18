@@ -8,20 +8,50 @@ struct TodayView: View {
     @Query(sort: \TaskItem.createdAt, order: .reverse) private var tasks: [TaskItem]
     @Query(sort: \Routine.order) private var routines: [Routine]
     @AppStorage("userName") private var userName = ""
+    @Environment(WaveDirector.self) private var waves
+    @Environment(\.requestReview) private var requestReview
     @State private var showSettings = false
     @State private var showDone = false
 
     private let captureTip = QuickCaptureTip()
     private let swipeTip = SwipeTip()
 
-    private var greeting: String {
+    private var greeting: String { Self.greeting(for: userName) }
+
+    static func greeting(for name: String) -> String {
         let base: String = switch Calendar.current.component(.hour, from: .now) {
         case 5..<12: String(localized: "Good morning")
         case 12..<17: String(localized: "Good afternoon")
         case 17..<22: String(localized: "Good evening")
         default: String(localized: "Still up")
         }
-        return userName.isEmpty ? base : base + ", " + userName
+        return name.isEmpty ? base : base + ", " + name
+    }
+
+    /// The whole day is done: once a day, a ring wave from the owl carries
+    /// Today into the day's summary. The rating prompt waits until it closes.
+    private func dayComplete(from owl: CGRect, summary: DaySummary) {
+        let defaults = UserDefaults.standard
+        let today = Date.now.startOfDay
+        let shown = (defaults.object(forKey: SovaSettings.Key.dayCompleteShown) as? Date).map { $0 >= today } ?? false
+        guard !shown, !waves.isActive else { return askForReviewIfDue() }
+        defaults.set(today, forKey: SovaSettings.Key.dayCompleteShown)
+        Task { @MainActor in
+            // Let the ring close and the owl hop first.
+            try? await Task.sleep(for: .milliseconds(700))
+            let started = waves.play(.dayDone(summary), from: owl, afterDismiss: {
+                askForReviewIfDue(after: .milliseconds(600))
+            })
+            if !started { askForReviewIfDue() }
+        }
+    }
+
+    private func askForReviewIfDue(after delay: Duration = .seconds(2.5)) {
+        guard ReviewPrompt.shouldAskAfterCelebration() else { return }
+        Task {
+            try? await Task.sleep(for: delay)
+            requestReview()
+        }
     }
 
     private func next(in entries: [TimelineEntry]) -> TimelineEntry? {
@@ -54,8 +84,11 @@ struct TodayView: View {
                 }
                 .cardRow(top: 4, bottom: 14)
 
-                DayStage(greeting: greeting, done: done.count, total: entries.count, streak: streak)
-                    .cardRow(bottom: 10)
+                DayStage(greeting: greeting, done: done.count, total: entries.count, streak: streak) { owl in
+                    dayComplete(from: owl, summary: DaySummary(tasks: doneTasks.count, rituals: ritualsDone,
+                                                               streak: streak))
+                }
+                .cardRow(bottom: 10)
 
                 TipView(captureTip).cardRow(bottom: 8)
                 if !entries.isEmpty { TipView(swipeTip).cardRow(bottom: 8) }
@@ -178,10 +211,14 @@ struct DayStage: View {
     let done: Int
     let total: Int
     let streak: Int
+    /// Called with the owl's place on screen when the last thing of the day
+    /// is ticked. Without it, the stage asks for a rating itself.
+    var onDayComplete: ((CGRect) -> Void)? = nil
 
     @Environment(\.requestReview) private var requestReview
 
     @State private var cheers = 0
+    @State private var owlFrame: CGRect = .zero
 
     private var progress: Double { total == 0 ? 0 : Double(done) / Double(total) }
 
@@ -212,6 +249,7 @@ struct DayStage: View {
                         bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
                         pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
                         celebrate: cheers)
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { owlFrame = $0 }
                     .position(x: w / 2, y: h * 0.57)
 
                 MonoCaps(greeting, color: StickerTone.indigo.deep)
@@ -241,7 +279,9 @@ struct DayStage: View {
             if total > 0, new == total, old < total {
                 cheers += 1
                 Haptics.celebrate()
-                if ReviewPrompt.shouldAskAfterCelebration() {
+                if let onDayComplete {
+                    onDayComplete(owlFrame)
+                } else if ReviewPrompt.shouldAskAfterCelebration() {
                     Task {
                         try? await Task.sleep(for: .seconds(2.5))
                         requestReview()
@@ -498,5 +538,6 @@ struct DayRow: View {
 #Preview {
     TodayView()
         .environment(AppRouter())
+        .environment(WaveDirector())
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }

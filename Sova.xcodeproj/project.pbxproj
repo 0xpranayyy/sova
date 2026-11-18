@@ -13,6 +13,7 @@
 
 /* Begin PBXBuildFile section */
 		5A000000000000000000001C /* SovaWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A0000000000000000000011 /* SovaWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5A0000000000000000000022 /* DistortionWavesKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0000000000000000000021 /* DistortionWavesKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5A0000000000000000000022 /* DistortionWavesKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,6 +132,7 @@
 			);
 			name = Sova;
 			packageProductDependencies = (
+				5A0000000000000000000021 /* DistortionWavesKit */,
 			);
 			productName = Sova;
 			productReference = 5A0000000000000000000001 /* Sova.app */;
@@ -185,6 +188,9 @@
 			);
 			mainGroup = 5A0000000000000000000004;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5A0000000000000000000020 /* XCRemoteSwiftPackageReference "Libraries.dev" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5A0000000000000000000005 /* Products */;
 			projectDirPath = "";
@@ -449,6 +455,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5A0000000000000000000020 /* XCRemoteSwiftPackageReference "Libraries.dev" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Jakubantalik/Libraries.dev";
+			requirement = {
+				kind = revision;
+				revision = 580ac1f0c9858edd579812fdea40d876217b27cb;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5A0000000000000000000021 /* DistortionWavesKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5A0000000000000000000020 /* XCRemoteSwiftPackageReference "Libraries.dev" */;
+			productName = DistortionWavesKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5A0000000000000000000009 /* Project object */;
 }

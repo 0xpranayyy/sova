@@ -23,6 +23,7 @@ Small, physical details everywhere:
 
 - **The owl is alive.** It breathes, glances around on its own, leans toward where it's looking, double-blinks now and then, and flaps its wings when happy. Tap it and it squishes, hops with spring physics and squints happily. Its cheeks glow when it's pleased.
 - **Celebrations.** Finishing your whole day or a whole goal bursts sparkles outward with spring physics while the owl hops and flaps, timed to a rolling haptic flourish.
+- **Two waves, used sparingly.** Tapping "Open Sova" at the end of onboarding sends a wave in Sova's sticker colors up from the button, carrying the welcome screen into Today. Finishing the whole day (once a day) sends a ring out from the owl into a "Day done!" summary with the day's tasks, rituals and streak. Both use Distortion Waves and become a simple crossfade with Reduce Motion.
 - **Haptics with intent.**
   - A soft press on every big button.
   - A tick when switching tabs.
@@ -118,3 +119,5 @@ marketing/      launch film, App Store screenshots, banner and listing copy
 ## Credits
 
 Typeface: [Allo](https://github.com/joshpuckett/allo) by Josh Puckett, used under the SIL Open Font License 1.1. The license ships in `Shared/Fonts/Allo-OFL.txt`.
+
+Transitions: [Distortion Waves](https://github.com/Jakubantalik/Libraries.dev) (`DistortionWavesKit`) by Jakub Antalik, from libraries.dev, used under the MIT License through Swift Package Manager, pinned to a fixed revision.
