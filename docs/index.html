@@ -403,6 +403,7 @@ html{overflow-x:clip}
 @keyframes peek{0%,100%{transform:translateY(16px) rotate(6deg)}50%{transform:translateY(0) rotate(-4deg)}}
 
 /* ===================== v3: polish + mobile ===================== */
+.panel::after{content:none!important}
 html{-webkit-tap-highlight-color:transparent}
 .panel::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:6;opacity:.09;mix-blend-mode:multiply;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
@@ -532,6 +533,21 @@ main>section:nth-of-type(n+4){content-visibility:auto;contain-intrinsic-size:aut
 @keyframes reveal{to{clip-path:circle(var(--vr,150vmax) at var(--vx,50%) var(--vy,0))}}
 html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:background-color .35s ease,color .35s ease,border-color .35s ease!important}
 
+/* ===================== v4: calmer sections ===================== */
+.hero-meta{font-weight:700;font-size:15px;color:#5a4a9a;padding-bottom:clamp(40px,6vw,88px)}
+.also{margin-top:clamp(80px,10vw,130px);display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(24px,4vw,56px);align-items:start}
+.also-widget{background:#2B1677;color:#fff;border-radius:var(--r-xl);padding:clamp(28px,4vw,44px)}
+.also-widget h2{margin:6px 0 10px}
+.also-widget p{color:rgba(255,255,255,.75);font-weight:600;font-size:17px;max-width:460px}
+.also-list{display:grid;grid-template-columns:1fr 1fr;gap:0 32px}
+.also-list div{padding:20px 0;border-top:1.5px solid var(--hair)}
+.also-list dt{font-weight:900;font-size:19px;letter-spacing:-.02em;margin-bottom:6px}
+.also-list dd{color:var(--ink2);font-weight:600;font-size:16px;line-height:1.45}
+.w-pill .ic{flex:none}
+.section-head{margin-top:clamp(80px,10vw,130px)}
+@media (max-width:900px){.also{grid-template-columns:1fr}}
+@media (max-width:600px){.also-list{grid-template-columns:1fr}.also-widget .widgets{flex-direction:column}.w-medium{min-width:0}}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
@@ -563,23 +579,15 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
   <section class="wrap">
     <div class="panel hero">
       <div class="hero-rays" aria-hidden="true"><svg viewBox="0 0 2000 2000"><path d="M2000.00 1000.00 L1593.89 1085.39 L1959.49 1281.73 L1545.78 1249.25 L1841.25 1540.64 L1453.45 1392.92 L1654.86 1755.75 L1324.38 1504.75 L1415.42 1909.63 L1169.04 1575.70 L1142.31 1989.82 L1000.00 1600.00 L857.69 1989.82 L830.96 1575.70 L584.58 1909.63 L675.62 1504.75 L345.14 1755.75 L546.55 1392.92 L158.75 1540.64 L454.22 1249.25 L40.51 1281.73 L406.11 1085.39 L0.00 1000.00 L406.11 914.61 L40.51 718.27 L454.22 750.75 L158.75 459.36 L546.55 607.08 L345.14 244.25 L675.62 495.25 L584.58 90.37 L830.96 424.30 L857.69 10.18 L1000.00 400.00 L1142.31 10.18 L1169.04 424.30 L1415.42 90.37 L1324.38 495.25 L1654.86 244.25 L1453.45 607.08 L1841.25 459.36 L1545.78 750.75 L1959.49 718.27 L1593.89 914.61Z" fill="#FFF2A0"/></svg></div>
-      <svg class="spark" style="top:70px;right:46%" width="40" height="40" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FF5C93"/></svg>
-      <svg class="spark" style="top:40%;right:4%" width="30" height="30" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FFFFFF"/></svg>
-      <svg class="spark" style="bottom:34%;left:46%" width="18" height="18" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#2B1677"/></svg>
       <div class="hero-grid">
         <div>
-          <span class="label"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg>New · for iPhone</span>
           <h1 class="h-xl" aria-label="Your day, beautifully done."><span class="word" style="animation-delay:.05s">Your</span> <span class="word" style="animation-delay:.14s">day,</span> <span class="word" style="animation-delay:.23s">beautifully</span> <span class="word" style="animation-delay:.32s">done.</span></h1>
-          <p class="lead">Tasks, daily habits and big goals in one happy app, with a little owl cheering you on every step of the way.</p>
+          <p class="lead">Tasks, habits and goals in one app for iPhone. Type a task the way you would say it, tick it off, and see your day come together.</p>
           <div class="hero-cta">
             <a class="btn btn-big js-store" href="#get"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>Download on the App Store</a>
             <a class="btn btn-ghost" href="#film"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3" /></svg>Watch the film</a>
           </div>
-          <div class="hero-meta">
-            <span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>Free to start</span>
-            <span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>No account</span>
-            <span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>Private by design</span>
-          </div>
+          <p class="hero-meta">Free on iPhone. No account needed.</p>
         </div>
         <div class="fan" id="fan">
           <div class="phone p-left"><img decoding="async" src="assets/screens/rituals.webp" alt="Rituals screen" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
@@ -595,37 +603,22 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
 <g class="eyes"><circle cx="30" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="31.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="34.5" cy="45.5" r="2.8" fill="#FFE94D"/></g><circle cx="70" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="71.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="74.5" cy="45.5" r="2.8" fill="#FFE94D"/></g></g>
 <circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
 <path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg></div>
-          <div class="bubble">Morning, Alex! ☀️</div>
-          <span class="stk mint" style="top:190px;right:6%;rotate:8deg">🔥 12-day streak</span>
+          <div class="bubble">Morning, Alex!</div>
+          <span class="stk mint" style="top:190px;right:6%;rotate:8deg">12-day streak</span>
           <span class="stk pink" style="bottom:200px;left:-10px;rotate:-7deg;animation-delay:-2s">3 of 4 done</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- MARQUEE -->
-  <div class="marquee" aria-hidden="true">
-    <div class="track">
-      <span class="stk yellow">✅ To-dos</span><span class="stk mint">🔁 Habits</span><span class="stk pink">🎯 Goals</span>
-      <span class="stk lilac">⏰ Reminders</span><span class="stk cyan">📱 Widgets</span><span class="stk lime">🎙️ Siri</span>
-      <span class="stk yellow">🌙 Dark mode</span><span class="stk pink">☁️ iCloud sync</span><span class="stk mint">🔥 Streaks</span>
-      <span class="stk yellow">✅ To-dos</span><span class="stk mint">🔁 Habits</span><span class="stk pink">🎯 Goals</span>
-      <span class="stk lilac">⏰ Reminders</span><span class="stk cyan">📱 Widgets</span><span class="stk lime">🎙️ Siri</span>
-      <span class="stk yellow">🌙 Dark mode</span><span class="stk pink">☁️ iCloud sync</span><span class="stk mint">🔥 Streaks</span>
-    </div>
-  </div>
-
   <!-- STORY -->
   <section class="wrap" id="features">
     <div class="panel story" id="story" data-theme="mint">
-      <svg class="spark" style="top:60px;right:6%" width="30" height="30" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FFFFFF"/></svg>
       <div class="story-grid">
         <div class="story-steps">
           <article class="step" data-screen="capture" data-theme="mint">
-            <div class="num">01</div>
-            <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg>Quick capture</span>
             <h2 class="h-lg">Just type it. Sova gets it.</h2>
-            <p class="lead">Write the way you talk. Sova picks out the day, the time, repeats and priority, and sets everything up for you.</p>
+            <p class="lead">Write “Call Mom tomorrow 6pm !!” and Sova fills in the date, the time and the priority. “Every Monday” makes it repeat.</p>
             <div class="capture" aria-label="Example: Call Mom tomorrow 6pm, high priority">
               <small>NEW TASK</small>
               <div class="line"><span id="typed"></span><span class="caret"></span></div>
@@ -634,10 +627,8 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
             <div class="phone inline-phone"><img decoding="async" src="assets/screens/capture.webp" alt="Quick capture highlighting tomorrow 6pm" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="today" data-theme="yellow">
-            <div class="num">02</div>
-            <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg>Today</span>
-            <h2 class="h-lg">Your whole day, in one ring.</h2>
-            <p class="lead">Only what matters today. Up Next tells you the one thing to do now, and the ring fills as you go.</p>
+            <h2 class="h-lg">One screen for today.</h2>
+            <p class="lead">Today shows what is due, the rituals you planned and anything overdue. Up Next picks the one thing to do now. Swipe anything else to tomorrow.</p>
             <div class="ring-demo" aria-hidden="true">
               <div class="ring">
                 <svg class="r" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" stroke="rgba(43,22,119,.14)" stroke-width="12" fill="none"/><circle class="r-fill" cx="50" cy="50" r="42" stroke="#2B1677" stroke-width="12" fill="none" stroke-linecap="round"/></svg>
@@ -657,22 +648,13 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
             <div class="phone inline-phone"><img decoding="async" src="assets/screens/today.webp" alt="Today screen" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="rituals" data-theme="lilac">
-            <div class="num">03</div>
-            <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>Rituals</span>
-            <h2 class="h-lg">Rituals that actually stick.</h2>
-            <p class="lead">Morning walks, reading, water. Pick the days, tick them off, and watch your week fill up with sunshine.</p>
-            <ul class="points">
-              <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg></span>Streaks that make you want to keep going</li>
-              <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg></span>Grouped by morning, afternoon and evening</li>
-              <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>A happy little wiggle every time you tick</li>
-            </ul>
+            <h2 class="h-lg">Habits, on a schedule.</h2>
+            <p class="lead">Set which days a ritual happens and when: morning, afternoon or evening. Tick it off and the streak counts up. Rest days don’t break it.</p>
             <div class="phone inline-phone"><img decoding="async" src="assets/screens/rituals.webp" alt="Rituals with a 12 day streak" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="goals" data-theme="pink">
-            <div class="num">04</div>
-            <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>Goals</span>
             <h2 class="h-lg">Big goals, small steps.</h2>
-            <p class="lead">Break a big dream into steps you can tick off. Every step fills the bar, and the owl is proud of you.</p>
+            <p class="lead">Give a goal a deadline and break it into steps. Each step you tick moves the percentage, and tasks can link to the goal they serve.</p>
             <div class="bars">
               <div class="bar"><div><span>Run a half marathon</span><span>80%</span></div><i><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></i></div>
               <div class="bar"><div><span>Launch my side project</span><span>40%</span></div><i><span class="on"></span><span class="on"></span><span></span><span></span><span></span></i></div>
@@ -709,23 +691,17 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
       <div class="feature-grid">
         <div class="stage"><div class="phone "><img decoding="async" src="assets/screens/dark.webp" alt="Sova in dark mode with a yellow night owl" loading="lazy" width="760" height="1670"><span class="glare"></span></div></div>
         <div class="feature-copy">
-          <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>Dark mode</span>
-          <h2 class="h-lg">Gorgeous, day and night.</h2>
-          <p class="lead">After dark, Sova turns into a cozy indigo night and the owl starts to glow. It follows your iPhone, or pick light or dark yourself.</p>
+          <h2 class="h-lg">Light by day. Indigo by night.</h2>
+          <p class="lead">Dark mode follows your iPhone, or you can set it yourself. The owl turns yellow so it still stands out at night.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- BENTO -->
+  <!-- ALSO -->
   <section class="wrap" id="widgets">
-    <div class="section-head reveal">
-      <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>The little things</span>
-      <h2 class="h-lg">Made to feel good.</h2>
-      <p class="lead">Small details that make planning your day feel like a treat.</p>
-    </div>
-    <div class="bento">
-      <div class="card span2 c-indigo reveal">
+    <div class="also reveal">
+      <div class="also-widget">
         <div class="widgets" aria-hidden="true">
           <div class="w-small">
             <svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,.15)" stroke-width="10" fill="none"/><circle cx="50" cy="50" r="44" stroke="#FFE94D" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="207 277" transform="rotate(-90 50 50)"/></svg>
@@ -742,57 +718,33 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
             <span class="tag">3 of 4 done</span>
           </div>
           <div class="w-medium">
-            <div class="w-pill done" style="background:#4DF2B0;color:#0B5A3C"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>Walk<span class="ck"></span></div>
-            <div class="w-pill" style="background:#FFE94D;color:#5E4A00">📖 Read<span class="ck"></span></div>
-            <div class="w-pill done" style="background:#3DCBFF;color:#063F73">💧 Water<span class="ck"></span></div>
-            <div class="w-pill" style="background:#D9CEFF;color:#4423B8">🧘 Breathe<span class="ck"></span></div>
+            <div class="w-pill done" style="background:#4DF2B0;color:#0B5A3C"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z" /><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z" /><path d="M16 17h4" /><path d="M4 13h4" /></svg>Walk<span class="ck"></span></div>
+            <div class="w-pill" style="background:#FFE94D;color:#5E4A00"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14" /><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" /></svg>Read<span class="ck"></span></div>
+            <div class="w-pill done" style="background:#3DCBFF;color:#063F73"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" /></svg>Water<span class="ck"></span></div>
+            <div class="w-pill" style="background:#D9CEFF;color:#4423B8"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>Wind down<span class="ck"></span></div>
           </div>
         </div>
-        <h3>Widgets you can tick</h3>
-        <p>Your progress ring and the owl on your Home Screen. Tick off rituals right from the widget, and see what's next on your Lock Screen.</p>
+        <h2 class="h-md">Widgets you can tick.</h2>
+        <p>The Today widget shows your progress ring. The Rituals widget lets you tick habits off from the Home Screen, and the Lock Screen shows what's next.</p>
       </div>
-      <div class="card c-cyan reveal">
-        <div class="siri" aria-hidden="true"><span class="me">Hey Siri, add a task in Sova</span><span style="background:rgba(255,255,255,.55)">Added “Buy milk” for Tomorrow ✓</span></div>
-        <h3>Siri & Shortcuts</h3>
-        <p>Add tasks and tick rituals with your voice.</p>
-      </div>
-      <div class="card c-yellow reveal">
-        <div class="notif" aria-hidden="true"><img src="assets/icon.png" alt=""><div><b>Call Mom</b><small>It's 6:00 PM. Time for this one!</small></div></div>
-        <h3>Alerts & repeats</h3>
-        <p>A nudge right on time. Repeat daily, weekly or monthly.</p>
-      </div>
-      <div class="card c-orange reveal">
-        <div class="wave-bars" aria-hidden="true"><i></i><i style="animation-delay:-.2s"></i><i style="animation-delay:-.5s"></i><i style="animation-delay:-.1s"></i><i style="animation-delay:-.7s"></i><i style="animation-delay:-.3s"></i><i style="animation-delay:-.9s"></i></div>
-        <h3>Sounds & haptics</h3>
-        <p>Soft dings and taps when you check things off. Silent switch respected.</p>
-      </div>
-      <div class="card c-lime reveal">
-        <div class="toast" aria-hidden="true">Done: Gym, leg day <u>Undo</u></div>
-        <h3>Undo, everywhere</h3>
-        <p>Ticked or deleted by mistake? One tap brings it back.</p>
-      </div>
-      <div class="card span3 private reveal">
-        <div class="big-ic" style="background:var(--lilac);color:var(--lD)"><svg class="ic" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg></div>
-        <div>
-          <h3>Private by design</h3>
-          <p>No account, no tracking, no ads. Your data stays on your iPhone, or privately in your own iCloud with Sova Plus.</p>
-        </div>
-        <div class="private-tags"><span>No sign-up</span><span>No tracking</span><span>No ads</span><span>On-device</span></div>
-      </div>
+      <dl class="also-list">
+        <div><dt>Siri and Shortcuts</dt><dd>“Add a task in Sova” works by voice, and every action is available in Shortcuts.</dd></div>
+        <div><dt>Alerts and repeats</dt><dd>A notification at the task's time, or a few minutes before. Repeat daily, on weekdays, weekly, monthly or yearly.</dd></div>
+        <div><dt>Undo</dt><dd>Ticked, moved or deleted something by mistake? The bar at the bottom brings it back.</dd></div>
+        <div><dt>Sounds and haptics</dt><dd>Short tones and taps when you check things off. Both can be turned off, and sounds follow the silent switch.</dd></div>
+        <div><dt>Insights</dt><dd>Your week at a glance, a 17-week activity calendar and which rituals you keep most often.</dd></div>
+        <div><dt>Private</dt><dd>No account, no tracking, no ads. Data stays on your iPhone, or in your own iCloud with Plus.</dd></div>
+      </dl>
     </div>
-    <div class="dots" id="dots" aria-hidden="true"></div>
   </section>
 
   <!-- FILM -->
   <section class="wrap" id="film">
     <div class="panel film reveal">
-      <svg class="spark" style="top:50px;left:44%" width="36" height="36" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FF5C93"/></svg>
-      <svg class="spark" style="bottom:70px;left:8%" width="26" height="26" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#4DF2B0"/></svg>
       <div class="film-grid">
         <div>
-          <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3" /></svg>The film</span>
           <h2 class="h-lg">Meet Sova in 30 seconds.</h2>
-          <p class="lead">Type a task, tick off your day, keep your streak and reach your goals, with a happy owl by your side.</p>
+          <p class="lead">A short film showing quick capture, Today, rituals, goals and dark mode.</p>
         </div>
         <div class="video" id="video">
           <video id="filmVideo" src="assets/sova-film.mp4" poster="assets/film-poster.jpg" playsinline preload="none"></video>
@@ -805,9 +757,8 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
   <!-- PRICING -->
   <section class="wrap" id="plus">
     <div class="section-head reveal">
-      <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg>Pricing</span>
-      <h2 class="h-lg">Free to start. Plus when you're ready.</h2>
-      <p class="lead">Everything you need every day is free. Sova Plus unlocks the rest.</p>
+      <h2 class="h-lg">Free, with Plus if you want more.</h2>
+      <p class="lead">Tasks, widgets, Siri and dark mode are free. Plus adds unlimited rituals and goals, iCloud sync and app icons.</p>
     </div>
     <div class="toggle-wrap reveal"><div class="toggle" role="group" aria-label="Billing period">
       <button type="button" data-plan="monthly">Monthly</button>
@@ -846,7 +797,7 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
           <li><span class="ck"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>Unlimited rituals and goals</li>
           <li><span class="ck"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>iCloud sync on all your devices</li>
           <li><span class="ck"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>Extra app icons</li>
-          <li><span class="ck"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>Support a tiny indie app 💛</li>
+          <li><span class="ck"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>Supports independent development</li>
         </ul>
         <div class="options"><span>Monthly</span><span>Yearly · 7-day trial</span><span>Lifetime $49.99</span></div>
       </div>
@@ -867,7 +818,7 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
 <g class="eyes"><circle cx="30" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="31.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="34.5" cy="45.5" r="2.8" fill="#FFE94D"/></g><circle cx="70" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="71.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="74.5" cy="45.5" r="2.8" fill="#FFE94D"/></g></g>
 <circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
 <path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg></div>
-      <h2 class="h-lg" style="margin-top:10px">Questions? Hoo&#8209;hoo.</h2>
+      <h2 class="h-lg" style="margin-top:10px">Questions</h2>
     </div>
     <div class="faq">
       <details class="reveal"><summary>Is Sova free?<span class="pm"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="M12 5v14" /></svg></span></summary><p>Yes. Unlimited tasks, 3 rituals, 1 goal, widgets, Siri and dark mode are free forever. Sova Plus unlocks unlimited rituals and goals, iCloud sync and extra app icons.</p></details>
@@ -886,8 +837,6 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
         <span style="top:12%;left:10%"></span><span style="top:22%;left:84%;animation-delay:-1s"></span><span style="top:70%;left:6%;animation-delay:-2s"></span>
         <span style="top:80%;left:90%;animation-delay:-.6s"></span><span style="top:40%;left:94%;animation-delay:-1.6s"></span><span style="top:56%;left:16%;animation-delay:-2.2s"></span>
       </div>
-      <svg class="spark" style="top:18%;left:28%" width="34" height="34" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FF5C93"/></svg>
-      <svg class="spark" style="top:26%;right:26%" width="26" height="26" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#4DF2B0"/></svg>
       <svg class="owl wave" viewBox="-14 -6 128 136" width="150" height="159" aria-hidden="true">
 <ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
 <path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#FFE94D" stroke="#C9AE00" stroke-width="5" stroke-linejoin="round"/>
@@ -898,8 +847,8 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
 <g class="eyes"><circle cx="30" cy="47" r="17" fill="#2B1677"/><path d="M21 51 Q30 39 39 51" stroke="#FFE94D" stroke-width="5.5" fill="none" stroke-linecap="round"/><circle cx="70" cy="47" r="17" fill="#2B1677"/><path d="M61 51 Q70 39 79 51" stroke="#FFE94D" stroke-width="5.5" fill="none" stroke-linecap="round"/></g>
 <circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
 <path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg>
-      <h2 class="h-lg">Make today a good day.</h2>
-      <p class="lead">Download Sova and let the owl help you finish your day with a smile.</p>
+      <h2 class="h-lg">Start with today.</h2>
+      <p class="lead">Sova is free on iPhone. Plus is optional.</p>
       <a class="btn btn-big js-store" href="#get"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>Download on the App Store</a>
     </div>
   </section>
@@ -910,16 +859,6 @@ html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:
   <div><b>Sova</b><span>Tasks, habits &amp; goals</span></div>
   <a class="btn js-store" href="#get">Get</a>
 </div>
-<div class="giant" aria-hidden="true"><svg class="owl track" viewBox="-14 -6 128 136" width="150" height="159" aria-hidden="true">
-<ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
-<path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
-<path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
-<path d="M10 0 Q30 21.6 50 18.36 Q70 21.6 90 0 C110 45.36 104 116 50 116 C-4 116 -10 45.36 10 0Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
-<ellipse cx="50" cy="90" rx="25" ry="22" fill="#4A34A8"/>
-<path d="M40 84 q5 4 10 0 q5 4 10 0 M43 95 q4 3.5 7 0 q3.5 3.5 7 0" stroke="#2B1677" stroke-opacity=".35" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-<g class="eyes"><circle cx="30" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="31.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="34.5" cy="45.5" r="2.8" fill="#FFE94D"/></g><circle cx="70" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="71.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="74.5" cy="45.5" r="2.8" fill="#FFE94D"/></g></g>
-<circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
-<path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg><h2>Sova.</h2></div>
 <footer>
   <div class="wrap">
     <a class="brand" href="#top"><img src="assets/icon.png" alt="" width="30" height="30" style="width:30px;height:30px;border-radius:8px">Sova</a>
@@ -958,9 +897,9 @@ function render(n) {
   }
   typed.innerHTML = s;
   let c = "";
-  if (n >= DATE[1]) c += '<span class="chip y">📅 Thu, 6:00 PM</span>';
-  if (n >= PRI[1]) c += '<span class="chip p">⚑ High</span>';
-  if (n >= TEXT.length) c += '<span class="chip m">✓ Added</span>';
+  if (n >= DATE[1]) c += '<span class="chip y">Thu, 6:00 PM</span>';
+  if (n >= PRI[1]) c += '<span class="chip p">High priority</span>';
+  if (n >= TEXT.length) c += '<span class="chip m">Added</span>';
   if (chips.innerHTML !== c) chips.innerHTML = c;
 }
 if (reduce) { render(TEXT.length); }
@@ -1030,6 +969,7 @@ new IntersectionObserver(([e]) => { atFinal = e.isIntersecting; setBar(); }, { t
 
 // Carousel dots for the little things
 const bento = document.querySelector(".bento"), dots = document.getElementById("dots");
+if (bento && dots) {
 const cards = [...bento.children];
 dots.innerHTML = cards.map(() => "<i></i>").join("");
 const dotEls = [...dots.children];
@@ -1041,6 +981,7 @@ const markDot = () => {
 };
 bento.addEventListener("scroll", () => requestAnimationFrame(markDot), { passive: true });
 markDot();
+}
 
 // Light / dark toggle: follows the system until the user picks, then remembers.
 (() => {
