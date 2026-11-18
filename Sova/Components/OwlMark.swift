@@ -15,7 +15,13 @@ struct OwlMark: View {
     var body: some View {
         let w = size, h = size * 1.08
         ZStack {
-            OwlBody().fill(Color.ink)
+            OwlBody().fill(LinearGradient(colors: [Color.white, Color(hex: 0xD9D9DE)],
+                                          startPoint: .top, endPoint: .bottom))
+            // Two faint feather marks on the chest.
+            FeatherMarks()
+                .stroke(Color.black.opacity(0.08), style: StrokeStyle(lineWidth: w * 0.022, lineCap: .round))
+                .frame(width: w * 0.3, height: w * 0.12)
+                .offset(y: h * 0.86 - h / 2)
 
             HStack(spacing: w * 0.04) {
                 eye(w)
@@ -24,7 +30,7 @@ struct OwlMark: View {
             .offset(y: h * 0.44 - h / 2)
 
             Beak()
-                .fill(Accent.marigold.color)
+                .fill(SovaTheme.current.accent.color)
                 .frame(width: w * 0.11, height: w * 0.10)
                 .offset(y: h * 0.62 - h / 2 + w * 0.05)
         }
@@ -37,19 +43,21 @@ struct OwlMark: View {
 
     private func eye(_ w: CGFloat) -> some View {
         ZStack {
-            Circle().fill(Color.canvas)
+            Circle().fill(Color(hex: 0x0B0B0D))
             if happy {
                 HappyEye()
-                    .stroke(Color.ink, style: StrokeStyle(lineWidth: w * 0.045, lineCap: .round))
+                    .stroke(Color.white, style: StrokeStyle(lineWidth: w * 0.045, lineCap: .round))
                     .frame(width: w * 0.16, height: w * 0.07)
                     .offset(y: w * 0.01)
                     .transition(.scale(0.6).combined(with: .opacity))
             } else {
-                Circle()
-                    .fill(Color.ink)
-                    .frame(width: w * 0.15, height: w * 0.15)
-                    .offset(x: look.width * w * 0.06, y: look.height * w * 0.06 + w * 0.01)
-                    .transition(.scale(0.6).combined(with: .opacity))
+                ZStack(alignment: .topTrailing) {
+                    Circle().fill(Color.white)
+                    Circle().fill(Color.canvas).frame(width: w * 0.045, height: w * 0.045).offset(x: -w * 0.02, y: w * 0.02)
+                }
+                .frame(width: w * 0.15, height: w * 0.15)
+                .offset(x: look.width * w * 0.06, y: look.height * w * 0.06 + w * 0.01)
+                .transition(.scale(0.6).combined(with: .opacity))
             }
         }
         .frame(width: w * 0.34, height: w * 0.34)
@@ -90,6 +98,18 @@ struct Beak: Shape {
         path.addLine(to: CGPoint(x: r.maxX, y: r.minY))
         path.addLine(to: CGPoint(x: r.midX, y: r.maxY))
         path.closeSubpath()
+        return path
+    }
+}
+
+struct FeatherMarks: Shape {
+    func path(in r: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: r.minX, y: r.minY))
+        path.addQuadCurve(to: CGPoint(x: r.maxX, y: r.minY), control: CGPoint(x: r.midX, y: r.minY + r.height * 0.6))
+        path.move(to: CGPoint(x: r.minX + r.width * 0.15, y: r.maxY - r.height * 0.2))
+        path.addQuadCurve(to: CGPoint(x: r.maxX - r.width * 0.15, y: r.maxY - r.height * 0.2),
+                          control: CGPoint(x: r.midX, y: r.maxY + r.height * 0.2))
         return path
     }
 }

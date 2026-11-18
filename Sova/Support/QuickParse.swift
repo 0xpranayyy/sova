@@ -6,6 +6,10 @@ struct ParsedTask: Equatable {
     var dueDate: Date?
     var hasTime: Bool
     var priority: Priority
+    /// Where the date phrase and priority marks sit in the original text,
+    /// so the field can highlight what it understood.
+    var dateRange: Range<String.Index>?
+    var priorityRange: Range<String.Index>?
 }
 
 enum QuickParse {
@@ -20,32 +24,40 @@ enum QuickParse {
     private static let danglingWords = ["on", "at", "by", "due", "for", "before"]
 
     static func parse(_ input: String) -> ParsedTask {
-        var text = input
         var priority: Priority = .low
-        if let range = text.range(of: "!!!") {
+        var priorityRange: Range<String.Index>?
+        if let range = input.range(of: "!!!") {
             priority = .high
-            text.removeSubrange(range)
-        } else if let range = text.range(of: "!!") {
+            priorityRange = range
+        } else if let range = input.range(of: "!!") {
             priority = .medium
-            text.removeSubrange(range)
+            priorityRange = range
         }
 
         var dueDate: Date?
         var hasTime = false
-        let ns = text as NSString
-        if let match = detector?.firstMatch(in: text, range: NSRange(location: 0, length: ns.length)),
-           let date = match.date {
-            let phrase = ns.substring(with: match.range)
+        var dateRange: Range<String.Index>?
+        let ns = input as NSString
+        if let match = detector?.firstMatch(in: input, range: NSRange(location: 0, length: ns.length)),
+           let date = match.date,
+           let range = Range(match.range, in: input) {
+            let phrase = String(input[range])
             let phraseRange = NSRange(location: 0, length: (phrase as NSString).length)
             hasTime = timePattern?.firstMatch(in: phrase, range: phraseRange) != nil
             dueDate = hasTime ? date : date.startOfDay
-            text = ns.replacingCharacters(in: match.range, with: " ")
+            dateRange = range
         }
 
-        var words = text.split(whereSeparator: \.isWhitespace).map(String.init)
+        var title = input
+        let removals = [dateRange, priorityRange].compactMap { $0 }.sorted { $0.lowerBound > $1.lowerBound }
+        for range in removals where range.upperBound <= title.endIndex {
+            title.replaceSubrange(range, with: " ")
+        }
+        var words = title.split(whereSeparator: \.isWhitespace).map(String.init)
         while let last = words.last, danglingWords.contains(last.lowercased()) { words.removeLast() }
-        let title = words.joined(separator: " ").trimmingCharacters(in: CharacterSet(charactersIn: " ,;-"))
+        let cleaned = words.joined(separator: " ").trimmingCharacters(in: CharacterSet(charactersIn: " ,;-"))
 
-        return ParsedTask(title: title, dueDate: dueDate, hasTime: hasTime, priority: priority)
+        return ParsedTask(title: cleaned, dueDate: dueDate, hasTime: hasTime, priority: priority,
+                          dateRange: dateRange, priorityRange: priorityRange)
     }
 }

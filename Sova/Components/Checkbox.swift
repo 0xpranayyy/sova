@@ -1,31 +1,33 @@
 import SwiftUI
 
-/// The tick that draws itself. Square for tasks, round for routines and
-/// milestones.
+/// The completion mark. Square for tasks, round for rituals. Done reads as
+/// a soft accent tile with a check that draws itself.
 struct Checkbox: View {
     var isOn: Bool
-    var color: Color
+    var color: Color = SovaTheme.current.accent.color
     var round = false
     var size: CGFloat = 22
+    var emphasized = false
 
     var body: some View {
-        let radius = round ? size / 2 : size * 0.3
+        let radius = round ? size / 2 : size * 0.32
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         ZStack {
             shape
-                .strokeBorder(Color.inkTertiary, lineWidth: 1.5)
+                .fill(Color.canvas)
+            shape
+                .strokeBorder(emphasized ? color : Color.white.opacity(0.28), lineWidth: 1.6)
                 .opacity(isOn ? 0 : 1)
             shape
-                .fill(color)
-                .scaleEffect(isOn ? 1 : 0.4)
+                .fill(color.opacity(0.16))
                 .opacity(isOn ? 1 : 0)
             CheckmarkShape()
                 .trim(from: 0, to: isOn ? 1 : 0)
-                .stroke(Color.white, style: StrokeStyle(lineWidth: size * 0.1, lineCap: .round, lineJoin: .round))
-                .padding(size * 0.27)
+                .stroke(color, style: StrokeStyle(lineWidth: size * 0.11, lineCap: .round, lineJoin: .round))
+                .padding(size * 0.28)
         }
         .frame(width: size, height: size)
-        .animation(.spring(response: 0.32, dampingFraction: 0.68), value: isOn)
+        .animation(.spring(response: 0.32, dampingFraction: 0.7), value: isOn)
     }
 }
 
@@ -42,15 +44,16 @@ struct CheckmarkShape: Shape {
 /// A checkbox wrapped in a 44pt button with haptics.
 struct CheckButton: View {
     var isOn: Bool
-    var color: Color
+    var color: Color = SovaTheme.current.accent.color
     var round = false
     var size: CGFloat = 22
+    var emphasized = false
     var label: String = ""
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Checkbox(isOn: isOn, color: color, round: round, size: size)
+            Checkbox(isOn: isOn, color: color, round: round, size: size, emphasized: emphasized)
                 .frame(width: 44, height: 44)
                 .contentShape(.rect)
         }
@@ -61,13 +64,4 @@ struct CheckButton: View {
         .accessibilityLabel(label)
         .accessibilityValue(isOn ? "Done" : "Not done")
     }
-}
-
-#Preview {
-    @Previewable @State var on = false
-    HStack(spacing: 24) {
-        CheckButton(isOn: on, color: Accent.ember.color) { on.toggle() }
-        CheckButton(isOn: on, color: Accent.moss.color, round: true, size: 28) { on.toggle() }
-    }
-    .padding()
 }

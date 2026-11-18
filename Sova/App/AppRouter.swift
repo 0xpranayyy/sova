@@ -3,6 +3,9 @@ import Observation
 
 enum AppTab: Hashable {
     case today, goals, routines, insights
+    /// The separated "+" button in the tab bar. Selecting it opens the
+    /// right creator for the tab you were on, then snaps back.
+    case create
 }
 
 /// Which sheet is presented. Lives at the root so any screen, and the
@@ -49,6 +52,14 @@ final class AppRouter {
     var tab: AppTab = .today
     var sheet: EditorSheet?
     private(set) var toast: Toast?
+
+    func createAction(from tab: AppTab) -> EditorSheet {
+        switch tab {
+        case .goals: .newGoal
+        case .routines: .newRoutine
+        default: .quickTask
+        }
+    }
 
     var primaryCreateAction: EditorSheet {
         switch tab {

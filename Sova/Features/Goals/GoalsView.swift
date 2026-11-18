@@ -10,10 +10,26 @@ struct GoalsView: View {
     private var active: [Goal] { allGoals.filter { !$0.isArchived } }
     private var archived: [Goal] { allGoals.filter(\.isArchived) }
 
+    private var averageText: String {
+        let avg = active.isEmpty ? 0 : active.map(\.progress).reduce(0, +) / Double(active.count)
+        return avg.formatted(.percent.precision(.fractionLength(0)))
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 18) {
+                        MonoCaps(active.isEmpty ? String(localized: "No active goals")
+                                 : String(localized: "\(active.count) active · \(averageText) average"))
+                        Text("Goals")
+                            .font(.hero(44, weight: .bold))
+                            .tracking(-1.8)
+                            .foregroundStyle(Color.ink)
+                    }
+                    .padding(.horizontal, 4)
+                    .padding(.bottom, 10)
+
                     if active.isEmpty {
                         EmptyState(title: String(localized: "Somewhere to aim"),
                                    message: String(localized: "Goals turn big ideas into small, finishable steps."),
@@ -30,13 +46,15 @@ struct GoalsView: View {
                         Button {
                             withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { showArchived.toggle() }
                         } label: {
-                            HStack(spacing: 6) {
-                                SectionLabel(String(localized: "Archived"), trailing: "\(archived.count)")
+                            HStack(spacing: 8) {
+                                MonoCaps(String(localized: "Archived · \(archived.count)"))
                                 Image(systemName: "chevron.right")
                                     .font(.caption2.weight(.bold))
-                                    .foregroundStyle(Color.inkSecondary)
+                                    .foregroundStyle(Color.inkTertiary)
                                     .rotationEffect(.degrees(showArchived ? 90 : 0))
+                                Spacer()
                             }
+                            .padding(.horizontal, 4)
                             .contentShape(.rect)
                         }
                         .buttonStyle(.plain)
@@ -44,7 +62,7 @@ struct GoalsView: View {
 
                         if showArchived {
                             ForEach(archived) { goal in
-                                NavigationLink(value: goal) { GoalCard(goal: goal).opacity(0.6) }
+                                NavigationLink(value: goal) { GoalCard(goal: goal).opacity(0.5) }
                                     .buttonStyle(.pressable)
                                     .matchedTransitionSource(id: goal.persistentModelID, in: zoom)
                             }
@@ -57,7 +75,7 @@ struct GoalsView: View {
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .navigationTitle("Goals")
+            .toolbarTitleDisplayMode(.inline)
             .navigationDestination(for: Goal.self) { goal in
                 GoalDetailView(goal: goal)
                     .navigationTransition(.zoom(sourceID: goal.persistentModelID, in: zoom))

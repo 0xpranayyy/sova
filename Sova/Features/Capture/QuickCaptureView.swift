@@ -2,13 +2,12 @@ import SwiftUI
 import SwiftData
 import TipKit
 
-/// A small sheet for capturing tasks as fast as you can type. Dates, times
-/// and priority are read out of the text as you write.
+/// Capture a task as fast as you can type. Dates, times and priority are
+/// read out of the text and highlighted in place as you write.
 struct QuickCaptureView: View {
     @Environment(\.modelContext) private var context
-    @Environment(\.dismiss) private var dismiss
     @Environment(AppRouter.self) private var router
-    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
 
     @State private var text = ""
     @State private var day: DayChoice = .today
@@ -35,85 +34,108 @@ struct QuickCaptureView: View {
         }
     }
 
-    private var accent: Accent { (SovaTheme(rawValue: themeRaw) ?? .ember).accent }
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .lime }
+    private var accent: Color { theme.accent.color }
     private var parsed: ParsedTask { QuickParse.parse(text) }
     private var canSave: Bool { !parsed.title.isEmpty }
+    private let fieldFont = Font.system(size: 24, weight: .semibold)
+
+    /// The typed text with what the parser understood highlighted.
+    private var highlighted: AttributedString {
+        var attributed = AttributedString(text)
+        attributed.foregroundColor = Color.ink
+        if let range = parsed.dateRange, let r = Range(range, in: attributed) {
+            attributed[r].foregroundColor = accent
+            attributed[r].backgroundColor = accent.opacity(0.15)
+        }
+        if let range = parsed.priorityRange, let r = Range(range, in: attributed) {
+            attributed[r].foregroundColor = Color.danger
+            attributed[r].backgroundColor = Color.danger.opacity(0.16)
+        }
+        return attributed
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Checkbox(isOn: false, color: accent.color)
-                TextField("New task", text: $text)
-                    .font(.display(.title3))
-                    .foregroundStyle(Color.ink)
+        VStack(alignment: .leading, spacing: 0) {
+            MonoCaps(added == 0 ? String(localized: "New task")
+                     : String(localized: "\(added) added · keep going"),
+                     color: added == 0 ? .inkTertiary : accent, size: 10.5)
+                .contentTransition(.numericText())
+
+            ZStack(alignment: .topLeading) {
+                Text(highlighted)
+                    .font(fieldFont)
+                    .tracking(-0.4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .allowsHitTesting(false)
+                TextField("", text: $text, prompt: Text("Call Mom tomorrow 6pm !!").foregroundStyle(Color.inkTertiary),
+                          axis: .vertical)
+                    .font(fieldFont)
+                    .tracking(-0.4)
+                    .foregroundStyle(Color.clear)
+                    .tint(accent)
+                    .lineLimit(1...4)
                     .focused($focused)
                     .submitLabel(.done)
-                    .onSubmit(save)
-                Button(action: save) {
-                    Image(systemName: "arrow.up")
-                        .font(.body.weight(.bold))
-                        .foregroundStyle(Color.inkInverse)
-                        .frame(width: 36, height: 36)
-                        .background(Color.ink, in: .circle)
-                        .frame(width: 44, height: 44)
-                        .contentShape(.circle)
-                }
-                .buttonStyle(.pressable)
-                .disabled(!canSave)
-                .opacity(canSave ? 1 : 0.2)
-                .animation(.smooth(duration: 0.2), value: canSave)
-                .accessibilityLabel("Add task")
+                    .onChange(of: text) { _, newValue in
+                        if newValue.contains("\n") {
+                            text = newValue.replacingOccurrences(of: "\n", with: "")
+                            save()
+                        }
+                    }
             }
+            .padding(.top, 12)
 
             HStack(spacing: 8) {
                 if let due = parsed.dueDate {
-                    CaptureChip(text: due.relativeDayText(includingTime: parsed.hasTime),
-                                symbol: parsed.hasTime ? "clock" : "calendar", selected: true, color: accent.color)
-                        .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    Token(symbol: "calendar",
+                          text: parsed.hasTime
+                            ? due.formatted(.dateTime.weekday(.abbreviated).day().hour().minute())
+                            : due.relativeDayText(includingTime: false))
                 } else {
                     ForEach(DayChoice.allCases, id: \.self) { choice in
                         Button {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { day = choice }
                         } label: {
-                            CaptureChip(text: choice.label, symbol: nil, selected: day == choice, color: accent.color)
+                            Token(symbol: nil, text: choice.label, selected: day == choice, accent: accent)
                         }
                         .buttonStyle(.pressable)
                     }
                 }
                 if parsed.priority != .low {
-                    CaptureChip(text: parsed.priority.marks, symbol: nil, selected: true, color: parsed.priority.color)
-                        .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    Token(symbol: "flag", text: parsed.priority == .high ? String(localized: "High") : String(localized: "Medium"))
                 }
-                Spacer(minLength: 0)
+                Spacer(minLength: 4)
                 Button(action: openDetails) {
                     Image(systemName: "slider.horizontal.3")
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(Color.inkSecondary)
-                        .frame(width: 44, height: 34)
+                        .frame(width: 40, height: 40)
                 }
                 .buttonStyle(.pressable)
                 .accessibilityLabel("More options")
-            }
-            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: parsed)
-
-            Group {
-                if added > 0 {
-                    Label(added == 1 ? String(localized: "1 task added") : String(localized: "\(added) tasks added"),
-                          systemImage: "checkmark")
-                        .foregroundStyle(accent.color)
-                        .contentTransition(.numericText())
-                } else {
-                    Text("Try “Pay rent friday !!” or “Call Mom tomorrow 6pm”")
-                        .foregroundStyle(Color.inkTertiary)
+                Button(action: save) {
+                    Image(systemName: "arrow.up")
+                        .font(.body.weight(.bold))
+                        .foregroundStyle(Color.inkInverse)
+                        .frame(width: 40, height: 40)
+                        .background(accent, in: .circle)
                 }
+                .buttonStyle(.pressable)
+                .disabled(!canSave)
+                .opacity(canSave ? 1 : 0.25)
+                .accessibilityLabel("Add task")
             }
-            .font(.footnote)
-            .animation(.smooth, value: added)
+            .padding(.top, 16)
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: parsed.dueDate)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 24)
-        .presentationDetents([.height(196)])
+        .padding(.horizontal, 22)
+        .padding(.top, 26)
+        .padding(.bottom, 12)
+        .presentationDetents([.height(200)])
         .presentationDragIndicator(.visible)
+        .presentationBackground(.regularMaterial)
         .sensoryFeedback(.success, trigger: added)
         .task { focused = true }
     }
@@ -127,7 +149,7 @@ struct QuickCaptureView: View {
             dueDate: p.dueDate ?? day.date,
             hasTime: p.dueDate != nil && p.hasTime,
             priority: p.priority,
-            accent: accent
+            accent: theme.accent
         )
         context.insert(task)
         QuickCaptureTip().invalidate(reason: .actionPerformed)
@@ -151,20 +173,22 @@ struct QuickCaptureView: View {
     }
 }
 
-private struct CaptureChip: View {
-    let text: String
+/// A parsed token or choice, monospaced like a little label.
+private struct Token: View {
     let symbol: String?
-    let selected: Bool
-    let color: Color
+    let text: String
+    var selected = true
+    var accent: Color = .ink
 
     var body: some View {
-        HStack(spacing: 5) {
-            if let symbol { Image(systemName: symbol).font(.caption.weight(.semibold)) }
-            Text(text).font(.footnote.weight(.medium))
+        HStack(spacing: 6) {
+            if let symbol { Image(systemName: symbol).font(.caption2.weight(.semibold)) }
+            Text(text).font(.mono(11.5))
         }
-        .foregroundStyle(selected ? color : Color.inkSecondary)
-        .padding(.horizontal, 12)
-        .frame(height: 32)
-        .background(selected ? color.opacity(0.13) : Color.well, in: .capsule)
+        .foregroundStyle(selected ? Color.inkSecondary : Color.inkTertiary)
+        .padding(.horizontal, 10)
+        .frame(height: 30)
+        .background(selected ? Color.surfaceRaised : Color.clear, in: .rect(cornerRadius: 8, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Color.white.opacity(selected ? 0.1 : 0.06)))
     }
 }

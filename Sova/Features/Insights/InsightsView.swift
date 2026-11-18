@@ -1,160 +1,193 @@
 import SwiftUI
 import SwiftData
-import Charts
-
-private struct DayStat: Identifiable {
-    let day: Date
-    let kind: String
-    let count: Int
-    var id: String { "\(day.timeIntervalSince1970)-\(kind)" }
-}
 
 struct InsightsView: View {
     @Query private var tasks: [TaskItem]
     @Query(sort: \Routine.order) private var routines: [Routine]
     @Query(filter: #Predicate<Goal> { !$0.isArchived }) private var goals: [Goal]
-    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
-    private let tasksLabel = String(localized: "Tasks")
-    private let routinesLabel = String(localized: "Routines")
+    private static let weeks = 17
+    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color }
 
-    private var weekDays: [Date] {
-        let today = Date.now.startOfDay
-        return (0..<7).map { today.adding(days: $0 - 6) }
+    // MARK: Data
+
+    /// Things finished on a given day: tasks plus ritual check-ins.
+    private func activity(on day: Date) -> Int {
+        tasks.filter { $0.completedAt?.isSameDay(as: day) == true }.count
+            + routines.filter { $0.isDone(on: day) }.count
     }
 
-    private var stats: [DayStat] {
-        weekDays.flatMap { day in
-            [
-                DayStat(day: day, kind: tasksLabel,
-                        count: tasks.filter { $0.completedAt?.isSameDay(as: day) == true }.count),
-                DayStat(day: day, kind: routinesLabel,
-                        count: routines.filter { $0.isDone(on: day) }.count),
-            ]
+    /// Columns of seven days (one per week), oldest first, ending this week.
+    private var grid: [[Date?]] {
+        let cal = Calendar.current
+        let today = Date.now.startOfDay
+        let weekStart = cal.dateInterval(of: .weekOfYear, for: today)?.start ?? today
+        return (0..<Self.weeks).map { column in
+            let start = weekStart.adding(days: (column - (Self.weeks - 1)) * 7)
+            return (0..<7).map { row in
+                let day = start.adding(days: row)
+                return day > today ? nil : day
+            }
         }
     }
 
-    private var weekTotal: Int { stats.map(\.count).reduce(0, +) }
-
-    private var tasksThisWeek: Int {
-        let start = weekDays.first ?? .now
-        return tasks.filter { ($0.completedAt ?? .distantPast) >= start }.count
+    private func consistency(days: Int, endingDaysAgo offset: Int = 0) -> Double {
+        let today = Date.now.startOfDay
+        var scheduled = 0, done = 0
+        for routine in routines {
+            for i in offset..<(offset + days) {
+                let day = today.adding(days: -i)
+                guard day >= routine.createdAt.startOfDay, routine.isScheduled(on: day) else { continue }
+                scheduled += 1
+                if routine.isDone(on: day) { done += 1 }
+            }
+        }
+        return scheduled == 0 ? 0 : Double(done) / Double(scheduled)
     }
 
-    private var bestStreak: Routine? { routines.max { $0.streak < $1.streak } }
-
-    private var consistency: Double {
-        guard !routines.isEmpty else { return 0 }
-        return routines.map { $0.consistency(days: 30) }.reduce(0, +) / Double(routines.count)
+    private var tasksDone: Int { tasks.filter(\.isDone).count }
+    private var bestStreak: Int { routines.map(\.streak).max() ?? 0 }
+    private var perDay: Double {
+        let today = Date.now.startOfDay
+        let total = (0..<30).map { activity(on: today.adding(days: -$0)) }.reduce(0, +)
+        return Double(total) / 30
     }
-
     private var goalAverage: Double {
-        guard !goals.isEmpty else { return 0 }
-        return goals.map(\.progress).reduce(0, +) / Double(goals.count)
+        goals.isEmpty ? 0 : goals.map(\.progress).reduce(0, +) / Double(goals.count)
     }
+
+    // MARK: Body
 
     var body: some View {
+        let current = consistency(days: 30)
+        let previous = consistency(days: 30, endingDaysAgo: 30)
+        let delta = Int(((current - previous) * 100).rounded())
+        let hasHistory = !routines.isEmpty || tasksDone > 0
+
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Group {
-                            if weekTotal == 0 {
-                                Text("Your week starts here.")
-                            } else {
-                                Text("\(Text("\(weekTotal)").foregroundStyle(theme.accent.color)) things done this week.")
+                VStack(alignment: .leading, spacing: 0) {
+                    MonoCaps(String(localized: "Last \(Self.weeks) weeks"))
+
+                    if hasHistory {
+                        HStack(alignment: .bottom, spacing: 12) {
+                            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                                Text(Int((current * 100).rounded()), format: .number)
+                                    .font(.hero(96))
+                                    .tracking(-4.5)
+                                    .contentTransition(.numericText(value: current))
+                                Text("%").font(.hero(42)).foregroundStyle(Color.inkTertiary)
                             }
+                            .foregroundStyle(Color.ink)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("consistency").font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+                                if routines.contains(where: { $0.createdAt < Date.now.adding(days: -30) }) {
+                                    Text(delta >= 0 ? "↑ \(delta)% vs last month" : "↓ \(-delta)% vs last month")
+                                        .font(.footnote)
+                                        .foregroundStyle(delta >= 0 ? accent : Color.danger)
+                                } else {
+                                    Text("Rituals, last 30 days").font(.footnote).foregroundStyle(Color.inkTertiary)
+                                }
+                            }
+                            .padding(.bottom, 14)
                         }
-                        .font(.title.weight(.bold))
-                        .foregroundStyle(Color.ink)
-                        Text(weekTotal == 0 ? "Finish a task or check in on a routine, and your progress shows up here."
-                                            : "Tasks and routines, the last seven days.")
+                        .padding(.top, 20)
+                    } else {
+                        Text("Your story starts here.")
+                            .font(.hero(34, weight: .bold))
+                            .tracking(-1.2)
+                            .foregroundStyle(Color.ink)
+                            .padding(.top, 20)
+                        Text("Every task you finish and ritual you keep fills in a square below.")
                             .font(.subheadline)
                             .foregroundStyle(Color.inkSecondary)
+                            .padding(.top, 8)
                     }
-                    .padding(.horizontal, 4)
 
-                    chart
+                    heatmap
+                        .padding(.top, 26)
 
                     Grid(horizontalSpacing: 10, verticalSpacing: 10) {
                         GridRow {
-                            StatTile(value: "\(tasksThisWeek)", label: String(localized: "Tasks finished"))
-                            StatTile(value: "\(bestStreak?.streak ?? 0)",
-                                     label: bestStreak.map { String(localized: "Day streak, \($0.title.lowercased())") }
-                                         ?? String(localized: "Day streak"))
+                            StatTile(value: "\(tasksDone)", label: String(localized: "Tasks done"))
+                            StatTile(value: String(localized: "\(bestStreak)d"), label: String(localized: "Best streak"))
                         }
                         GridRow {
-                            StatTile(value: consistency.formatted(.percent.precision(.fractionLength(0))),
-                                     label: String(localized: "Routine consistency"))
+                            StatTile(value: perDay.formatted(.number.precision(.fractionLength(1))),
+                                     label: String(localized: "Per day"))
                             StatTile(value: goalAverage.formatted(.percent.precision(.fractionLength(0))),
-                                     label: String(localized: "Average goal progress"))
+                                     label: String(localized: "Goal progress"))
                         }
                     }
-
-                    if !routines.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            SectionLabel(String(localized: "Consistency"), trailing: String(localized: "30 days"))
-                            VStack(spacing: 18) {
-                                ForEach(routines.sorted { $0.consistency(days: 30) > $1.consistency(days: 30) }) { routine in
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        HStack {
-                                            Text(routine.title)
-                                                .font(.subheadline)
-                                                .foregroundStyle(Color.ink)
-                                            Spacer()
-                                            Text(routine.consistency(days: 30), format: .percent.precision(.fractionLength(0)))
-                                                .font(.subheadline.monospacedDigit())
-                                                .foregroundStyle(Color.inkSecondary)
-                                        }
-                                        ProgressLine(progress: routine.consistency(days: 30), color: routine.accent.color)
-                                    }
-                                    .accessibilityElement(children: .combine)
-                                }
-                            }
-                            .surface(cornerRadius: 22, padding: 18)
-                        }
-                    }
+                    .padding(.top, 28)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
                 .padding(.top, 8)
                 .padding(.bottom, 40)
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .navigationTitle("Insights")
+            .toolbarTitleDisplayMode(.inline)
         }
     }
 
-    private var chart: some View {
-        Chart(stats) { stat in
-            BarMark(
-                x: .value("Day", stat.day, unit: .day),
-                y: .value("Completed", stat.count),
-                width: .ratio(0.5)
-            )
-            .foregroundStyle(by: .value("Kind", stat.kind))
-            .cornerRadius(3)
-        }
-        .chartForegroundStyleScale([
-            tasksLabel: theme.accent.color,
-            routinesLabel: theme.companion.color,
-        ])
-        .chartXAxis {
-            AxisMarks(values: .stride(by: .day)) { _ in
-                AxisValueLabel(format: .dateTime.weekday(.narrow), centered: true)
-                    .foregroundStyle(Color.inkSecondary)
+    private var heatmap: some View {
+        let columns = grid
+        let counts = columns.flatMap { $0 }.compactMap { $0 }.map(activity(on:))
+        let peak = max(counts.max() ?? 1, 1)
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 4) {
+                ForEach(Array(columns.enumerated()), id: \.offset) { _, week in
+                    VStack(spacing: 4) {
+                        ForEach(0..<7, id: \.self) { row in
+                            cell(for: week[row], peak: peak)
+                        }
+                    }
+                }
+            }
+            HStack(spacing: 4) {
+                ForEach(Array(columns.enumerated()), id: \.offset) { index, week in
+                    let first = week.compactMap { $0 }.first
+                    let showsMonth = first.map { day in
+                        index == 0 || Calendar.current.component(.month, from: day)
+                            != Calendar.current.component(.month, from: day.adding(days: -7))
+                    } ?? false
+                    Color.clear
+                        .frame(width: 15, height: 12)
+                        .overlay(alignment: .leading) {
+                            if showsMonth, let first {
+                                Text(first, format: .dateTime.month(.abbreviated))
+                                    .font(.mono(10))
+                                    .textCase(.uppercase)
+                                    .foregroundStyle(Color.inkTertiary)
+                                    .fixedSize()
+                            }
+                        }
+                }
             }
         }
-        .chartYAxis {
-            AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { _ in
-                AxisGridLine().foregroundStyle(Color.hairline)
-                AxisValueLabel().foregroundStyle(Color.inkTertiary)
-            }
+        .accessibilityElement()
+        .accessibilityLabel("Activity over the last \(Self.weeks) weeks")
+    }
+
+    @ViewBuilder
+    private func cell(for day: Date?, peak: Int) -> some View {
+        if let day {
+            let count = activity(on: day)
+            let level = count == 0 ? 0 : Double(count) / Double(peak)
+            RoundedRectangle(cornerRadius: 3.5, style: .continuous)
+                .fill(count == 0 ? Color.well : accent.opacity(0.25 + 0.75 * level))
+                .frame(width: 15, height: 15)
+                .overlay {
+                    if day.isSameDay(as: .now) {
+                        RoundedRectangle(cornerRadius: 3.5, style: .continuous)
+                            .strokeBorder(Color.ink.opacity(0.7), lineWidth: 1)
+                    }
+                }
+        } else {
+            Color.clear.frame(width: 15, height: 15)
         }
-        .chartLegend(position: .top, alignment: .leading, spacing: 14)
-        .frame(height: 200)
-        .surface(cornerRadius: 22, padding: 18)
     }
 }
 
@@ -163,18 +196,15 @@ private struct StatTile: View {
     let label: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(value)
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                .monospacedDigit()
+                .font(.hero(32))
+                .tracking(-1.2)
                 .foregroundStyle(Color.ink)
                 .contentTransition(.numericText())
-            Text(label)
-                .font(.footnote)
-                .foregroundStyle(Color.inkSecondary)
-                .lineLimit(2, reservesSpace: true)
+            MonoCaps(label, size: 10)
         }
-        .surface(cornerRadius: 22, padding: 16)
+        .surface(cornerRadius: 20, padding: 16)
         .accessibilityElement(children: .combine)
     }
 }

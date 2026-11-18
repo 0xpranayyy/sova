@@ -1,21 +1,22 @@
 import SwiftUI
 
-/// A symbol on a soft square of its accent.
+/// An SF Symbol on a small rounded square. Neutral by default; lights up
+/// with the accent when `active`.
 struct IconTile: View {
     let symbol: String
-    let accent: Accent
-    var size: CGFloat = 40
+    var accent: Accent = .graphite
+    var size: CGFloat = 38
     var filled = false
+    var active = false
 
     var body: some View {
+        let tint = SovaTheme.current.accent.color
         Image(systemName: symbol)
-            .font(.system(size: size * 0.42, weight: .semibold))
-            .foregroundStyle(filled ? Color.white : accent.color)
+            .font(.system(size: size * 0.46, weight: .medium))
+            .foregroundStyle(filled ? Color.inkInverse : (active ? tint : Color.inkSecondary))
             .frame(width: size, height: size)
-            .background {
-                RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
-                    .fill(filled ? AnyShapeStyle(accent.gradient) : AnyShapeStyle(accent.soft))
-            }
+            .background(filled ? tint : (active ? tint.opacity(0.12) : Color.surfaceRaised),
+                        in: .rect(cornerRadius: size * 0.29, style: .continuous))
             .accessibilityHidden(true)
     }
 }
@@ -24,17 +25,15 @@ struct IconTile: View {
 struct MetaLine: View {
     struct Part {
         var text: String
-        var color: Color = .inkSecondary
+        var color: Color = .inkTertiary
     }
 
     var parts: [Part]
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 5) {
             ForEach(Array(parts.enumerated()), id: \.offset) { index, part in
-                if index > 0 {
-                    Text("·").foregroundStyle(Color.inkTertiary)
-                }
+                if index > 0 { Text("·").foregroundStyle(Color.inkTertiary) }
                 Text(part.text).foregroundStyle(part.color)
             }
         }
@@ -43,7 +42,7 @@ struct MetaLine: View {
     }
 }
 
-/// A list of rows on one surface, with hairlines between them.
+/// Rows on one card, with hairlines between them.
 struct GroupedList<Item: Identifiable, Row: View>: View {
     let items: [Item]
     var inset: CGFloat = 60
@@ -54,14 +53,11 @@ struct GroupedList<Item: Identifiable, Row: View>: View {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 row(item)
                 if index < items.count - 1 {
-                    Rectangle()
-                        .fill(Color.hairline)
-                        .frame(height: 1)
-                        .padding(.leading, inset)
+                    Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, inset)
                 }
             }
         }
-        .surface(cornerRadius: 24, padding: 0)
+        .surface(cornerRadius: 20, padding: 0)
     }
 }
 
@@ -72,58 +68,56 @@ struct EmptyState: View {
     var action: (() -> Void)? = nil
 
     var body: some View {
-        VStack(spacing: 14) {
-            OwlMark(size: 56)
-                .padding(.bottom, 4)
+        VStack(alignment: .leading, spacing: 10) {
+            OwlMark(size: 44, blinks: true)
+                .padding(.bottom, 8)
             Text(title)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(Color.ink)
             Text(message)
                 .font(.subheadline)
                 .foregroundStyle(Color.inkSecondary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 280)
+                .fixedSize(horizontal: false, vertical: true)
             if let actionTitle, let action {
                 Button(actionTitle, action: action)
                     .buttonStyle(.inkCompact)
-                    .padding(.top, 6)
+                    .padding(.top, 10)
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 36)
-        .padding(.horizontal, 20)
-        .surface(cornerRadius: 28, padding: 0)
+        .surface(cornerRadius: 24, padding: 22)
     }
 }
 
-/// The five themes as swatches. Used in onboarding and Settings.
+/// The accent choices, as swatches.
 struct ThemeSwatches: View {
     @Binding var themeRaw: String
 
-    private var selected: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
+    private var selected: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .lime }
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(SovaTheme.allCases) { option in
                 Button {
-                    withAnimation(.smooth(duration: 0.6)) { themeRaw = option.rawValue }
+                    withAnimation(.smooth(duration: 0.5)) { themeRaw = option.rawValue }
                 } label: {
-                    VStack(spacing: 10) {
+                    VStack(spacing: 12) {
                         Circle()
-                            .fill(option.swatch)
-                            .frame(width: 40, height: 40)
+                            .fill(option.accent.color)
+                            .frame(width: 36, height: 36)
                             .overlay {
                                 Circle()
-                                    .strokeBorder(Color.ink, lineWidth: 2)
+                                    .strokeBorder(Color.ink, lineWidth: 1.5)
                                     .padding(-6)
                                     .opacity(option == selected ? 1 : 0)
                                     .scaleEffect(option == selected ? 1 : 0.85)
                             }
                         Text(option.name)
-                            .font(.caption.weight(option == selected ? .semibold : .regular))
-                            .foregroundStyle(option == selected ? Color.ink : Color.inkSecondary)
+                            .font(.mono(10.5))
+                            .tracking(1)
+                            .textCase(.uppercase)
+                            .foregroundStyle(option == selected ? Color.ink : Color.inkTertiary)
                     }
-                    .frame(maxWidth: .infinity, minHeight: 72)
+                    .frame(maxWidth: .infinity, minHeight: 76)
                     .contentShape(.rect)
                 }
                 .buttonStyle(.pressable)

@@ -45,10 +45,6 @@ struct GoalEditor: View {
                     SymbolPicker(selection: $symbol, accent: accent, symbols: SymbolPicker.goalSymbols)
                 }
 
-                Section("Color") {
-                    AccentPicker(selection: $accent)
-                }
-
                 Section("Deadline") {
                     Toggle(isOn: $hasDeadline.animation(.snappy)) {
                         Label("Target Date", systemImage: "flag.checkered")
@@ -99,7 +95,7 @@ struct GoalEditor: View {
                 }
             }
         }
-        .tint(accent.color)
+        .tint(SovaTheme.current.accent.color)
     }
 
     private func save() {

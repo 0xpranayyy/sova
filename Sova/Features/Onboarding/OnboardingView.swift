@@ -16,7 +16,7 @@ enum OnboardingStep: Int, CaseIterable, Comparable {
 struct OnboardingView: View {
     @Environment(\.modelContext) private var context
     @AppStorage("hasOnboarded") private var hasOnboarded = false
-    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
     @AppStorage("userName") private var userName = ""
     @AppStorage("morningReminderOn") private var savedMorningOn = false
     @AppStorage("morningReminderMinutes") private var savedMorningMinutes = 8 * 60
@@ -35,7 +35,7 @@ struct OnboardingView: View {
     @State private var isRequesting = false
     @State private var look = CGSize(width: 0, height: 0.4)
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .lime }
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedGoal: String { goalTitle.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var chosenRituals: [RitualOption] { RitualOption.all.filter { rituals.contains($0.id) } }
@@ -104,7 +104,9 @@ struct OnboardingView: View {
     }
 
     private var topBar: some View {
-        HStack {
+        let indicated = OnboardingStep.indicated
+        let position = (indicated.firstIndex(of: step) ?? 0) + 1
+        return HStack(spacing: 16) {
             if step > .hello && step < .finish {
                 Button(action: back) {
                     Image(systemName: "chevron.left")
@@ -119,19 +121,29 @@ struct OnboardingView: View {
                 Color.clear.frame(width: 44, height: 44)
             }
 
-            Spacer()
-
-            if OnboardingStep.indicated.contains(step) {
-                StepIndicator(steps: OnboardingStep.indicated, current: step)
-                    .transition(.opacity)
+            if indicated.contains(step) {
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.well)
+                        Capsule()
+                            .fill(theme.accent.color)
+                            .frame(width: geo.size.width * Double(position) / Double(indicated.count))
+                    }
+                }
+                .frame(height: 3)
+                .transition(.opacity)
+                Text("\(position)/\(indicated.count)")
+                    .font(.mono(12))
+                    .foregroundStyle(Color.inkTertiary)
+                    .contentTransition(.numericText())
+                    .frame(width: 34, alignment: .trailing)
+                    .accessibilityLabel("Step \(position) of \(indicated.count)")
+            } else {
+                Spacer()
             }
-
-            Spacer()
-
-            Color.clear.frame(width: 44, height: 44)
         }
         .foregroundStyle(Color.ink)
-        .animation(.smooth(duration: 0.4), value: step)
+        .animation(.spring(response: 0.5, dampingFraction: 0.85), value: step)
     }
 
     private var primaryTitle: String {
@@ -139,7 +151,7 @@ struct OnboardingView: View {
         case .hello: String(localized: "Get started")
         case .name: trimmedName.isEmpty ? String(localized: "Skip for now") : String(localized: "Continue")
         case .rituals: rituals.isEmpty ? String(localized: "Skip for now")
-                                       : String(localized: "Start with \(rituals.count)")
+                                       : String(localized: "Continue with \(rituals.count)")
         case .goal: trimmedGoal.isEmpty ? String(localized: "Skip for now") : String(localized: "Set this goal")
         case .rhythm: (morningOn || eveningOn) ? String(localized: "Turn on reminders") : String(localized: "Continue")
         case .finish: String(localized: "Open Sova")
@@ -174,13 +186,13 @@ struct OnboardingView: View {
             }
 
             if step == .hello {
-                Text("Takes a minute. Everything stays on your iPhone.")
+                Label("Private by design. Stays on your iPhone.", systemImage: "lock")
                     .font(.footnote)
-                    .foregroundStyle(Color.inkSecondary)
+                    .foregroundStyle(Color.inkTertiary)
                     .transition(.opacity)
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 20)
         .padding(.bottom, 12)
         .animation(.smooth(duration: 0.35), value: step)
     }
@@ -227,37 +239,25 @@ struct OnboardingView: View {
     }
 }
 
-/// Small capsule dots; the current one stretches.
-struct StepIndicator: View {
-    let steps: [OnboardingStep]
-    let current: OnboardingStep
-
-    var body: some View {
-        HStack(spacing: 6) {
-            ForEach(steps, id: \.self) { step in
-                Capsule()
-                    .fill(step == current ? Color.ink : Color.ink.opacity(step < current ? 0.4 : 0.14))
-                    .frame(width: step == current ? 22 : 6, height: 6)
-            }
-        }
-        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: current)
-        .accessibilityElement()
-        .accessibilityLabel("Step \((steps.firstIndex(of: current) ?? 0) + 1) of \(steps.count)")
-    }
-}
-
-/// The onboarding canvas: the brand color, flat.
+/// Near-black with one soft glow of the accent, stronger on the welcome
+/// and finish screens.
 struct OnboardingBackdrop: View {
     var step: OnboardingStep
     var theme: SovaTheme
 
-    /// One canvas for the whole flow, so it reads as a single place.
-    /// It only changes when the user picks a theme.
-    private var mood: SovaTheme { theme }
-
     var body: some View {
-        MeshBackdrop(colors: mood)
-            .animation(.smooth(duration: 1.0), value: mood)
+        let accent = theme.accent.color
+        let hero = step == .hello || step == .finish
+        ZStack {
+            Color.canvas
+            RadialGradient(colors: [accent.opacity(hero ? 0.14 : 0.06), .clear],
+                           center: hero ? UnitPoint(x: 0.5, y: 0.33) : UnitPoint(x: 0.15, y: 0),
+                           startRadius: 0, endRadius: hero ? 230 : 420)
+        }
+        .ignoresSafeArea()
+        .animation(.smooth(duration: 0.8), value: step)
+        .animation(.smooth(duration: 0.6), value: theme)
+        .accessibilityHidden(true)
     }
 }
 

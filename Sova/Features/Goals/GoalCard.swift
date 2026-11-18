@@ -3,45 +3,64 @@ import SwiftUI
 struct GoalCard: View {
     let goal: Goal
 
+    private var accent: Color { SovaTheme.current.accent.color }
+
+    private var nextStep: String? {
+        goal.sortedMilestones.first(where: { !$0.isDone })?.title
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .top, spacing: 14) {
-                IconTile(symbol: goal.symbol, accent: goal.accent, size: 46, filled: true)
-                VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top, spacing: 12) {
+                IconTile(symbol: goal.symbol, size: 38)
+                VStack(alignment: .leading, spacing: 3) {
                     Text(goal.title)
-                        .font(.headline)
+                        .font(.body.weight(.semibold))
                         .foregroundStyle(Color.ink)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
-                    MetaLine(parts: meta)
+                    Group {
+                        if let nextStep {
+                            Text("Next: \(Text(nextStep).foregroundStyle(Color.inkSecondary))")
+                        } else if goal.milestones.isEmpty {
+                            Text("Tracked by feel")
+                        } else {
+                            Text("Every step done")
+                        }
+                    }
+                    .font(.footnote)
+                    .foregroundStyle(Color.inkTertiary)
+                    .lineLimit(1)
                 }
-                Spacer(minLength: 0)
+                Spacer(minLength: 8)
+                HStack(alignment: .firstTextBaseline, spacing: 1) {
+                    Text(Int((goal.progress * 100).rounded()), format: .number)
+                        .font(.hero(34))
+                        .tracking(-1.4)
+                        .contentTransition(.numericText(value: goal.progress))
+                    Text("%").font(.callout.weight(.medium)).foregroundStyle(Color.inkTertiary)
+                }
+                .foregroundStyle(Color.ink)
             }
 
-            HStack(spacing: 12) {
-                ProgressLine(progress: goal.progress, color: goal.accent.color, height: 8)
-                Text(goal.progress, format: .percent.precision(.fractionLength(0)))
-                    .font(.subheadline.weight(.bold).monospacedDigit())
-                    .foregroundStyle(goal.accent.color)
-                    .contentTransition(.numericText(value: goal.progress))
-                    .frame(minWidth: 36, alignment: .trailing)
+            ProgressLine(progress: goal.progress, color: accent, height: 4,
+                         milestones: goal.sortedMilestones.map(\.isDone))
+                .padding(.top, 22)
+
+            HStack {
+                Text(goal.milestones.isEmpty
+                     ? String(localized: "No steps")
+                     : String(localized: "\(goal.completedMilestones)/\(goal.milestones.count) steps"))
+                Spacer()
+                if let text = goal.deadlineText { Text(text) }
             }
+            .font(.mono(10.5))
+            .tracking(0.6)
+            .textCase(.uppercase)
+            .foregroundStyle((goal.daysLeft ?? 1) < 0 ? Color.danger : Color.inkTertiary)
+            .padding(.top, 14)
         }
-        .surface(cornerRadius: 26, padding: 18, interactive: true)
+        .surface(cornerRadius: 24, padding: 20)
         .accessibilityElement(children: .combine)
-    }
-
-    private var meta: [MetaLine.Part] {
-        var parts: [MetaLine.Part] = []
-        if !goal.milestones.isEmpty {
-            parts.append(.init(text: String(localized: "\(goal.completedMilestones) of \(goal.milestones.count) steps")))
-        }
-        if let text = goal.deadlineText {
-            parts.append(.init(text: text, color: (goal.daysLeft ?? 1) < 0 ? Accent.ember.color : .inkSecondary))
-        }
-        if parts.isEmpty {
-            parts.append(.init(text: goal.progress >= 1 ? String(localized: "Achieved") : String(localized: "No deadline")))
-        }
-        return parts
     }
 }

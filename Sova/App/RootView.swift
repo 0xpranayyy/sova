@@ -18,14 +18,15 @@ struct RootView: View {
             }
         }
         .animation(.smooth(duration: 0.6), value: hasOnboarded)
+        .preferredColorScheme(.dark)
     }
 }
 
 struct MainTabView: View {
     @State private var router = AppRouter()
-    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
+    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color }
 
     var body: some View {
         TabView(selection: $router.tab) {
@@ -35,21 +36,31 @@ struct MainTabView: View {
             Tab("Goals", systemImage: "flag", value: AppTab.goals) {
                 GoalsView()
             }
-            Tab("Routines", systemImage: "repeat", value: AppTab.routines) {
+            Tab("Rituals", systemImage: "repeat", value: AppTab.routines) {
                 RoutinesView()
             }
             Tab("Insights", systemImage: "chart.bar", value: AppTab.insights) {
                 InsightsView()
             }
+            Tab("New", systemImage: "plus", value: AppTab.create, role: .search) {
+                Color.canvas
+            }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        .tabViewBottomAccessory {
-            QuickAddAccessory()
+        .onChange(of: router.tab) { previous, current in
+            guard current == .create else { return }
+            router.tab = previous
+            router.sheet = router.createAction(from: previous)
+        }
+        .overlay(alignment: .bottom) {
+            ToastBar()
+                .padding(.horizontal, 16)
+                .padding(.bottom, 96)
         }
         .sheet(item: $router.sheet) { sheet in
             editor(for: sheet)
         }
-        .tint(theme.accent.color)
+        .tint(accent)
         .environment(router)
     }
 
@@ -67,9 +78,8 @@ struct MainTabView: View {
     }
 }
 
-/// Sits on the Liquid Glass bar above the tabs. Normally one tap to create
-/// whatever fits the current tab; briefly an Undo bar after a change.
-struct QuickAddAccessory: View {
+/// A floating Liquid Glass bar with an Undo, shown briefly after a change.
+struct ToastBar: View {
     @Environment(AppRouter.self) private var router
 
     var body: some View {
@@ -82,57 +92,39 @@ struct QuickAddAccessory: View {
                         .lineLimit(1)
                     Spacer(minLength: 8)
                     if let undo = toast.undo {
-                        Button("Undo") {
+                        Button {
                             undo()
                             router.dismissToast()
+                        } label: {
+                            Text("Undo")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Color.accentColor)
+                                .frame(minWidth: 44, minHeight: 44)
                         }
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.accentColor)
                         .buttonStyle(.plain)
-                        .frame(minHeight: 44)
                     }
                 }
-                .padding(.horizontal, 16)
-                .transition(.asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)))
+                .padding(.leading, 18)
+                .padding(.trailing, 10)
+                .frame(height: 52)
+                .glassEffect(.regular, in: .capsule)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
                 .id(toast.id)
-            } else {
-                Button {
-                    router.sheet = router.primaryCreateAction
-                } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "plus")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color.inkInverse)
-                            .frame(width: 26, height: 26)
-                            .background(Color.ink, in: .circle)
-                        Text(router.primaryCreateTitle)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Color.ink)
-                            .contentTransition(.interpolate)
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.horizontal, 12)
-                    .frame(maxHeight: .infinity)
-                    .contentShape(.rect)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(router.primaryCreateTitle)
-                .transition(.asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)))
             }
         }
-        .frame(maxHeight: .infinity)
-        .clipped()
-        .animation(.snappy, value: router.tab)
+        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: router.toast)
         .sensoryFeedback(.impact(weight: .light), trigger: router.toast)
     }
 }
 
 #Preview("App") {
     MainTabView()
+        .preferredColorScheme(.dark)
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }
 
 #Preview("Onboarding") {
     OnboardingView()
+        .preferredColorScheme(.dark)
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }

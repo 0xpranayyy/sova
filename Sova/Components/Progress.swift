@@ -1,10 +1,12 @@
 import SwiftUI
 
-/// A thin, precise progress line.
+/// A thin, precise progress line, optionally with milestone nodes.
 struct ProgressLine: View {
     var progress: Double
     var color: Color
     var height: CGFloat = 4
+    /// Completion state of each milestone, drawn as evenly spaced nodes.
+    var milestones: [Bool] = []
 
     var body: some View {
         GeometryReader { geo in
@@ -14,6 +16,14 @@ struct ProgressLine: View {
                 Capsule()
                     .fill(color)
                     .frame(width: value == 0 ? 0 : max(height, geo.size.width * value))
+                ForEach(Array(milestones.enumerated()), id: \.offset) { index, done in
+                    let x = geo.size.width * Double(index + 1) / Double(milestones.count)
+                    Circle()
+                        .fill(done ? color : Color.canvas)
+                        .overlay(Circle().strokeBorder(done ? color : Color.white.opacity(0.22), lineWidth: 1.5))
+                        .frame(width: 10, height: 10)
+                        .position(x: min(max(x, 5), geo.size.width - 5), y: height / 2)
+                }
             }
         }
         .frame(height: height)
@@ -24,7 +34,7 @@ struct ProgressLine: View {
     }
 }
 
-/// The day as a row of segments, one per task or routine.
+/// The day as a row of ticks, one per task or ritual.
 struct DaySegments: View {
     var done: Int
     var total: Int
@@ -33,18 +43,18 @@ struct DaySegments: View {
     var body: some View {
         Group {
             if total == 0 {
-                Capsule().fill(Color.well).frame(height: 6)
+                Capsule().fill(Color.well).frame(height: 4)
             } else if total <= 24 {
-                HStack(spacing: 3) {
+                HStack(spacing: 4) {
                     ForEach(0..<total, id: \.self) { index in
                         Capsule()
                             .fill(index < done ? color : Color.well)
-                            .frame(height: 6)
+                            .frame(height: 4)
                             .animation(.spring(response: 0.45, dampingFraction: 0.8).delay(Double(index) * 0.02), value: done)
                     }
                 }
             } else {
-                ProgressLine(progress: Double(done) / Double(total), color: color, height: 6)
+                ProgressLine(progress: Double(done) / Double(total), color: color)
             }
         }
         .accessibilityElement()
@@ -71,17 +81,15 @@ struct MiniRing: View {
     }
 }
 
-/// The day's progress as a solid ring, Fitness-style: the track is a
-/// faint version of the same color.
 struct ProgressRing: View {
     var progress: Double
     var lineWidth: CGFloat = 12
     var colors: [Color]
 
     var body: some View {
+        let color = colors.first ?? .accentColor
         ZStack {
-            let color = colors.first ?? .accentColor
-            Circle().stroke(color.opacity(0.18), lineWidth: lineWidth)
+            Circle().stroke(Color.well, lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: max(0.001, min(progress, 1)))
                 .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
@@ -89,6 +97,6 @@ struct ProgressRing: View {
                 .opacity(progress > 0 ? 1 : 0)
         }
         .padding(lineWidth / 2)
-        .animation(.spring(response: 0.8, dampingFraction: 0.75), value: progress)
+        .animation(.spring(response: 0.8, dampingFraction: 0.8), value: progress)
     }
 }

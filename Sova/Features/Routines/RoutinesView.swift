@@ -4,28 +4,38 @@ import SwiftData
 struct RoutinesView: View {
     @Environment(AppRouter.self) private var router
     @Query(sort: \Routine.order) private var routines: [Routine]
-    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 30) {
+                VStack(alignment: .leading, spacing: 26) {
+                    VStack(alignment: .leading, spacing: 18) {
+                        MonoCaps(String(localized: "\(routines.filter { $0.isDone(on: .now) }.count) of \(routines.filter { $0.isScheduled(on: .now) }.count) today"))
+                        Text("Rituals")
+                            .font(.hero(44, weight: .bold))
+                            .tracking(-1.8)
+                            .foregroundStyle(Color.ink)
+                    }
+                    .padding(.horizontal, 4)
+
                     if routines.isEmpty {
                         EmptyState(title: String(localized: "Build a rhythm"),
                                    message: String(localized: "Small things, repeated, become who you are."),
                                    actionTitle: String(localized: "Add a routine")) { router.sheet = .newRoutine }
                     } else {
                         WeekStrip(routines: routines,
-                                  color: (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color)
+                                  color: (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color)
+                            .padding(.bottom, 4)
                         ForEach(DayPeriod.allCases) { period in
                             let items = routines.filter { $0.period == period }
                             if !items.isEmpty {
-                                VStack(alignment: .leading, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 10) {
                                     SectionLabel(
                                         period.name,
                                         trailing: "\(items.filter { $0.isDone(on: .now) }.count) of \(items.filter { $0.isScheduled(on: .now) }.count)"
                                     )
-                                    GroupedList(items: items, inset: 68) { routine in
+                                    GroupedList(items: items, inset: 64) { routine in
                                         RoutineRow(routine: routine) { router.sheet = .routine(routine) }
                                     }
                                 }
@@ -39,7 +49,7 @@ struct RoutinesView: View {
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .navigationTitle("Routines")
+            .toolbarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("New Routine", systemImage: "plus") { router.sheet = .newRoutine }
@@ -73,12 +83,12 @@ struct WeekStrip: View {
                 let isFuture = day > Date.now
                 VStack(spacing: 8) {
                     Text(Weekdays.letter(day.weekday))
-                        .font(.caption2.weight(.semibold))
+                        .font(.mono(10.5))
                         .foregroundStyle(isToday ? Color.ink : Color.inkTertiary)
                     ZStack {
                         MiniRing(progress: isFuture ? 0 : fraction(for: day), color: color, lineWidth: 3)
                         Text(day, format: .dateTime.day())
-                            .font(.footnote.weight(isToday ? .semibold : .regular).monospacedDigit())
+                            .font(.mono(12, weight: isToday ? .semibold : .regular))
                             .foregroundStyle(isFuture ? Color.inkTertiary : Color.ink)
                     }
                     .frame(width: 36, height: 36)
@@ -89,6 +99,6 @@ struct WeekStrip: View {
                 .accessibilityValue(isFuture ? "Upcoming" : fraction(for: day).formatted(.percent.precision(.fractionLength(0))))
             }
         }
-        .surface(cornerRadius: 22, padding: 14)
+        .surface(cornerRadius: 20, padding: 14)
     }
 }

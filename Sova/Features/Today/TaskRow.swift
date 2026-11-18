@@ -13,7 +13,7 @@ struct TaskRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 4) {
-            CheckButton(isOn: task.isDone, color: task.accent.color, label: task.title) {
+            CheckButton(isOn: task.isDone, label: task.title) {
                 TaskActions.toggle(task, router: router)
             }
             .padding(.top, -2)
@@ -23,12 +23,11 @@ struct TaskRow: View {
                     if !task.priority.marks.isEmpty && !task.isDone {
                         Text(task.priority.marks)
                             .font(.body.weight(.bold))
-                            .foregroundStyle(task.priority.color)
+                            .foregroundStyle(Color.danger)
                     }
                     Text(task.title)
                         .font(.body)
-                        .foregroundStyle(task.isDone ? Color.inkSecondary : Color.ink)
-                        .strikethrough(task.isDone, color: Color.inkTertiary)
+                        .foregroundStyle(task.isDone ? Color.inkTertiary : Color.ink)
                         .lineLimit(2)
                 }
                 if !meta.isEmpty {
@@ -72,10 +71,10 @@ struct TaskRow: View {
         var parts: [MetaLine.Part] = []
         if let due = task.dueDate, !(Calendar.current.isDateInToday(due) && !task.hasTime) {
             parts.append(.init(text: due.relativeDayText(includingTime: task.hasTime),
-                               color: task.isOverdue ? Accent.ember.color : .inkSecondary))
+                               color: task.isOverdue ? Color.danger : .inkTertiary))
         }
         if showGoal, let goal = task.goal {
-            parts.append(.init(text: goal.title, color: goal.accent.color))
+            parts.append(.init(text: goal.title))
         }
         if !task.notes.isEmpty && parts.isEmpty {
             parts.append(.init(text: task.notes))
@@ -98,7 +97,7 @@ struct TaskSwipeActions: ViewModifier {
                 } label: {
                     Label(task.isDone ? "Not Done" : "Done", systemImage: task.isDone ? "arrow.uturn.backward" : "checkmark")
                 }
-                .tint(task.accent.color)
+                .tint(SovaTheme.current.accent.color)
             }
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
@@ -112,7 +111,7 @@ struct TaskSwipeActions: ViewModifier {
                     } label: {
                         Label("Tomorrow", systemImage: "arrow.turn.up.right")
                     }
-                    .tint(Accent.marigold.color)
+                    .tint(Color(hex: 0x3A3A40))
                 }
             }
     }
@@ -121,16 +120,7 @@ struct TaskSwipeActions: ViewModifier {
 extension View {
     func taskSwipeActions(_ task: TaskItem) -> some View { modifier(TaskSwipeActions(task: task)) }
 
-    /// A row shown as its own Liquid Glass card in a plain List.
-    func glassListRow(tint: Color? = nil) -> some View {
-        self
-            .surface(cornerRadius: 22, padding: 0, tint: tint, interactive: true)
-            .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-    }
-
-    /// A row with no chrome, for headings, cards and scrollers inside a List.
+    /// A row with no chrome, for timeline rows, headings and cards in a List.
     func bareListRow(top: CGFloat = 0, bottom: CGFloat = 0) -> some View {
         self
             .listRowInsets(EdgeInsets(top: top, leading: 16, bottom: bottom, trailing: 16))

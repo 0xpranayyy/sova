@@ -60,9 +60,9 @@ struct SymbolPicker: View {
                 } label: {
                     Image(systemName: symbol)
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(selected ? Color.white : Color.ink)
+                        .foregroundStyle(selected ? Color.inkInverse : Color.ink)
                         .frame(width: 44, height: 44)
-                        .background(selected ? accent.color : Color.well,
+                        .background(selected ? SovaTheme.current.accent.color : Color.well,
                                     in: .rect(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.pressable)
@@ -91,9 +91,9 @@ struct WeekdayPicker: View {
                     } label: {
                         Text(Weekdays.letter(day))
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(on ? Color.white : Color.ink)
+                            .foregroundStyle(on ? Color.inkInverse : Color.ink)
                             .frame(width: 38, height: 38)
-                            .background(on ? accent.color : Color.well, in: .circle)
+                            .background(on ? SovaTheme.current.accent.color : Color.well, in: .circle)
                             .frame(maxWidth: .infinity, minHeight: 44)
                             .contentShape(.rect)
                     }

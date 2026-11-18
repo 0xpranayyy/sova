@@ -1,26 +1,24 @@
 import SwiftUI
 
-/// The page behind every screen: one calm, flat tint of the theme color.
-/// No blends, no glows. Color comes from solid accents on top of it.
+/// Near-black page with one faint wash of the accent at the top: the
+/// single signature glow per screen.
 struct CanvasBackground: View {
-    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
-    var theme: SovaTheme? = nil
+    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
+    var glow: Double = 0.08
 
     var body: some View {
-        MeshBackdrop(colors: theme ?? SovaTheme(rawValue: themeRaw) ?? .ember)
-    }
-}
-
-/// Kept under its old name so every screen picks up the flat canvas.
-struct MeshBackdrop: View {
-    var colors: SovaTheme
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        Rectangle()
-            .fill(colors.canvas(dark: scheme == .dark))
-            .ignoresSafeArea()
-            .animation(.smooth(duration: 0.6), value: colors)
-            .accessibilityHidden(true)
+        let accent = (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color
+        ZStack(alignment: .top) {
+            Color.canvas
+            GeometryReader { geo in
+                RadialGradient(colors: [accent.opacity(glow), .clear],
+                               center: UnitPoint(x: 0.15, y: 0),
+                               startRadius: 0, endRadius: geo.size.width * 1.1)
+                    .frame(height: geo.size.width * 0.95)
+            }
+        }
+        .ignoresSafeArea()
+        .animation(.smooth(duration: 0.6), value: themeRaw)
+        .accessibilityHidden(true)
     }
 }

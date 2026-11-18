@@ -66,10 +66,6 @@ struct TaskEditor: View {
                     .listRowInsets(EdgeInsets())
                 }
 
-                Section("Color") {
-                    AccentPicker(selection: $accent)
-                }
-
                 if !goals.isEmpty {
                     Section("Goal") {
                         Picker(selection: $goal) {
@@ -110,7 +106,7 @@ struct TaskEditor: View {
             }
             .onAppear { if task == nil { titleFocused = true } }
         }
-        .tint(accent.color)
+        .tint(SovaTheme.current.accent.color)
     }
 
     private func save() {

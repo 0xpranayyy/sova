@@ -6,45 +6,16 @@ struct TodayView: View {
     @Environment(AppRouter.self) private var router
     @Query(sort: \TaskItem.createdAt, order: .reverse) private var tasks: [TaskItem]
     @Query(sort: \Routine.order) private var routines: [Routine]
-    @Query(filter: #Predicate<Goal> { !$0.isArchived }, sort: \Goal.createdAt) private var goals: [Goal]
-    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
     @AppStorage("userName") private var userName = ""
-    @State private var showCompleted = false
     @State private var showSettings = false
 
     private let captureTip = QuickCaptureTip()
     private let swipeTip = SwipeTip()
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
+    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color }
 
-    // MARK: Derived
-
-    private var dueTasks: [TaskItem] {
-        tasks.filter { !$0.isDone && $0.isDueTodayOrEarlier }.sorted(by: TaskItem.ordering)
-    }
-
-    private var upcomingTasks: [TaskItem] {
-        tasks.filter { !$0.isDone && !$0.isDueTodayOrEarlier }
-            .sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }
-    }
-
-    private var completedToday: [TaskItem] {
-        tasks.filter { $0.isDone && ($0.completedAt?.isSameDay(as: .now) ?? false) }
-            .sorted { ($0.completedAt ?? .now) > ($1.completedAt ?? .now) }
-    }
-
-    private var todaysRoutines: [Routine] { routines.filter { $0.isScheduled(on: .now) } }
-    private var routinesDone: Int { todaysRoutines.filter { $0.isDone(on: .now) }.count }
-    private var routinesLeft: Int { todaysRoutines.count - routinesDone }
-
-    private var total: Int { dueTasks.count + completedToday.count + todaysRoutines.count }
-    private var done: Int { completedToday.count + routinesDone }
-    private var progress: Double { total == 0 ? 0 : Double(done) / Double(total) }
-
-    private var focusGoal: Goal? {
-        goals.filter { $0.progress < 1 }
-            .min { ($0.deadline ?? .distantFuture) < ($1.deadline ?? .distantFuture) }
-    }
+    private var entries: [TimelineEntry] { TimelineEntry.build(tasks: tasks, routines: routines) }
 
     private var greeting: String {
         let base: String = switch Calendar.current.component(.hour, from: .now) {
@@ -56,105 +27,79 @@ struct TodayView: View {
         return userName.isEmpty ? base : base + ", " + userName
     }
 
-    // MARK: Body
+    /// The single item that deserves attention right now.
+    private func nextID(in entries: [TimelineEntry]) -> String? {
+        let open = entries.filter { !$0.isDone && $0.section != .overdue }
+        if let timed = open.filter({ ($0.dueTime ?? .distantPast) >= .now })
+            .min(by: { ($0.dueTime ?? .distantFuture) < ($1.dueTime ?? .distantFuture) }) {
+            return timed.id
+        }
+        return open.first(where: { $0.section.rawValue >= DaySection.current.rawValue })?.id ?? open.first?.id
+    }
 
     var body: some View {
+        let entries = self.entries
+        let done = entries.filter(\.isDone).count
+        let total = entries.count
+        let overdue = entries.filter { $0.section == .overdue && !$0.isDone }.count
+        let next = nextID(in: entries)
+        let sections = DaySection.allCases.filter { section in entries.contains { $0.section == section } }
+
         NavigationStack {
             List {
-                hero.bareListRow(top: 4, bottom: 8)
+                header(done: done, total: total, overdue: overdue)
+                    .bareListRow(top: 0, bottom: 10)
 
                 TipView(captureTip)
-                    .bareListRow(bottom: 6)
-                if !dueTasks.isEmpty {
+                    .bareListRow(bottom: 8)
+                if total > 0 {
                     TipView(swipeTip)
-                        .bareListRow(bottom: 6)
+                        .bareListRow(bottom: 8)
                 }
 
-                if !todaysRoutines.isEmpty {
-                    SectionLabel(String(localized: "Routines"), trailing: "\(routinesDone)/\(todaysRoutines.count)")
-                        .bareListRow(top: 18, bottom: 6)
-                    routinesScroller
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
+                if total == 0 {
+                    EmptyState(title: String(localized: "A blank day."),
+                               message: String(localized: "Add what matters. Type it the way you'd say it: “Call Mom at 6pm”."),
+                               actionTitle: String(localized: "New task")) { router.sheet = .quickTask }
+                        .bareListRow(top: 12)
                 }
 
-                SectionLabel(String(localized: "Tasks"), trailing: dueTasks.isEmpty ? nil : "\(dueTasks.count)")
-                    .bareListRow(top: 18, bottom: 6)
-                if dueTasks.isEmpty {
-                    EmptyState(
-                        title: total == 0 ? String(localized: "A fresh start") : String(localized: "All clear"),
-                        message: total == 0
-                            ? String(localized: "Add what matters today. Type it the way you'd say it.")
-                            : String(localized: "Nothing else due today. Enjoy the space."),
-                        actionTitle: String(localized: "New Task")
-                    ) { router.sheet = .quickTask }
-                    .bareListRow(top: 4, bottom: 4)
-                } else {
-                    ForEach(dueTasks) { task in
-                        TaskRow(task: task) { router.sheet = .task(task) }
-                            .glassListRow()
-                            .taskSwipeActions(task)
-                    }
-                }
+                ForEach(sections) { section in
+                    let items = entries.filter { $0.section == section }
+                    TimelineSectionHeader(section: section,
+                                          count: section.range == nil ? "\(items.filter(\.isDone).count)/\(items.count)" : nil)
+                        .background(TimelineRail())
+                        .bareListRow()
 
-                if let goal = focusGoal {
-                    SectionLabel(String(localized: "In Focus"))
-                        .bareListRow(top: 18, bottom: 6)
-                    Button { router.tab = .goals } label: { GoalCard(goal: goal) }
-                        .buttonStyle(.pressable)
-                        .bareListRow(top: 4, bottom: 4)
-                }
-
-                if !upcomingTasks.isEmpty {
-                    SectionLabel(String(localized: "Coming Up"), trailing: "\(upcomingTasks.count)")
-                        .bareListRow(top: 18, bottom: 6)
-                    ForEach(upcomingTasks.prefix(8)) { task in
-                        TaskRow(task: task) { router.sheet = .task(task) }
-                            .glassListRow()
-                            .taskSwipeActions(task)
-                    }
-                }
-
-                if !completedToday.isEmpty {
-                    Button {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { showCompleted.toggle() }
-                    } label: {
-                        HStack(spacing: 8) {
-                            SectionLabel(String(localized: "Done Today"), trailing: "\(completedToday.count)")
-                            Image(systemName: "chevron.right")
-                                .font(.footnote.weight(.bold))
-                                .foregroundStyle(Color.inkSecondary)
-                                .rotationEffect(.degrees(showCompleted ? 90 : 0))
+                    let nowIndex = section == DaySection.current ? (items.firstIndex { !$0.isDone } ?? items.count) : nil
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, entry in
+                        if index == nowIndex {
+                            NowMarker(accent: accent)
+                                .background(TimelineRail())
+                                .bareListRow()
                         }
-                        .contentShape(.rect)
+                        row(entry, isNext: entry.id == next)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(showCompleted ? "Collapse" : "Expand")
-                    .bareListRow(top: 18, bottom: 6)
-
-                    if showCompleted {
-                        ForEach(completedToday) { task in
-                            TaskRow(task: task) { router.sheet = .task(task) }
-                                .glassListRow()
-                                .taskSwipeActions(task)
-                        }
+                    if nowIndex == items.count {
+                        NowMarker(accent: accent)
+                            .background(TimelineRail())
+                            .bareListRow()
                     }
                 }
 
-                Color.clear.frame(height: 24).bareListRow()
+                Color.clear.frame(height: 40).bareListRow()
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
+            .environment(\.defaultMinListRowHeight, 0)
             .background { CanvasBackground() }
-            .navigationTitle("Today")
-            .navigationSubtitle(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Settings", systemImage: "gearshape") { showSettings = true }
                 }
             }
+            .toolbarTitleDisplayMode(.inline)
             .sheet(isPresented: $showSettings) { SettingsView() }
             .task {
                 for await status in captureTip.statusUpdates {
@@ -164,68 +109,85 @@ struct TodayView: View {
         }
     }
 
-    private var hero: some View {
-        HStack(spacing: 18) {
-            ZStack {
-                ProgressRing(progress: progress, lineWidth: 11, colors: [theme.accent.color, theme.companion.color])
-                VStack(spacing: 0) {
-                    Text(progress, format: .percent.precision(.fractionLength(0)))
-                        .font(.title3.weight(.bold).monospacedDigit())
-                        .contentTransition(.numericText(value: progress))
-                    Text("done")
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(Color.inkSecondary)
-                }
-            }
-            .frame(width: 92, height: 92)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Day progress")
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text(greeting)
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(Color.ink)
-                    .lineLimit(2)
-                summary
-                    .font(.subheadline)
-                    .foregroundStyle(Color.inkSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 0)
-        }
-        .surface(cornerRadius: 30, padding: 18, tint: theme.accent.color)
-        .animation(.spring(response: 0.5, dampingFraction: 0.85), value: progress)
-    }
-
-    private var summary: Text {
-        let tasksLeft = dueTasks.count
-        if total == 0 { return Text("Nothing planned yet.") }
-        if tasksLeft == 0 && routinesLeft == 0 { return Text("Everything’s done. Enjoy the rest of your day.") }
-        let taskText = Text(tasksLeft == 1 ? String(localized: "1 task") : String(localized: "\(tasksLeft) tasks"))
-            .foregroundStyle(Color.ink).fontWeight(.semibold)
-        let routineText = Text(routinesLeft == 1 ? String(localized: "1 routine") : String(localized: "\(routinesLeft) routines"))
-            .foregroundStyle(Color.ink).fontWeight(.semibold)
-        if routinesLeft == 0 { return Text("\(taskText) left today.") }
-        if tasksLeft == 0 { return Text("\(routineText) left today.") }
-        return Text("\(taskText) and \(routineText) left today.")
-    }
-
-    private var routinesScroller: some View {
-        ScrollView(.horizontal) {
-            GlassEffectContainer(spacing: 16) {
-                HStack(alignment: .top, spacing: 10) {
-                    ForEach(todaysRoutines) { RoutineDial(routine: $0) }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 6)
+    @ViewBuilder
+    private func row(_ entry: TimelineEntry, isNext: Bool) -> some View {
+        let base = TimelineRow(entry: entry, isNext: isNext, accent: accent) {
+            switch entry.source {
+            case .task(let t): router.sheet = .task(t)
+            case .routine(let r): router.sheet = .routine(r)
             }
         }
-        .scrollIndicators(.hidden)
+        .background(TimelineRail())
+
+        switch entry.source {
+        case .task(let task):
+            base.bareListRow().taskSwipeActions(task)
+        case .routine(let routine):
+            base.bareListRow()
+                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    Button {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { routine.toggle(on: .now) }
+                    } label: {
+                        Label(routine.isDone(on: .now) ? "Not Done" : "Done",
+                              systemImage: routine.isDone(on: .now) ? "arrow.uturn.backward" : "checkmark")
+                    }
+                    .tint(accent)
+                }
+        }
+    }
+
+    private func header(done: Int, total: Int, overdue: Int) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            MonoCaps(Date.now.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
+            Text(greeting)
+                .font(.callout)
+                .foregroundStyle(Color.inkSecondary)
+                .padding(.top, 22)
+            HStack(alignment: .bottom) {
+                HStack(spacing: 0) {
+                    Text("\(done)")
+                        .foregroundStyle(Color.ink)
+                        .contentTransition(.numericText(value: Double(done)))
+                    Text("/\(total)")
+                        .foregroundStyle(Color.ink.opacity(0.2))
+                        .contentTransition(.numericText(value: Double(total)))
+                }
+                .font(.hero(100))
+                .tracking(-5)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+
+                Spacer(minLength: 12)
+
+                VStack(alignment: .trailing, spacing: 3) {
+                    Text(status(done: done, total: total, overdue: overdue))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(overdue > 0 ? Color.danger : Color.ink)
+                    Text(total == done ? String(localized: "Nothing left") : String(localized: "\(total - done) left"))
+                        .font(.footnote)
+                        .foregroundStyle(Color.inkTertiary)
+                }
+                .padding(.bottom, 12)
+            }
+            .animation(.spring(response: 0.45, dampingFraction: 0.85), value: done)
+            DaySegments(done: done, total: total, color: accent)
+                .padding(.top, 16)
+        }
+        .padding(.horizontal, 8)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func status(done: Int, total: Int, overdue: Int) -> String {
+        if total == 0 { return String(localized: "Nothing planned") }
+        if done == total { return String(localized: "All done") }
+        if overdue > 0 { return String(localized: "\(overdue) overdue") }
+        return String(localized: "On track")
     }
 }
 
 #Preview {
     TodayView()
         .environment(AppRouter())
+        .preferredColorScheme(.dark)
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }

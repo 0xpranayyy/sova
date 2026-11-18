@@ -9,7 +9,7 @@ struct GoalDetailView: View {
     @State private var newMilestone = ""
     @State private var confirmDelete = false
     @FocusState private var addFieldFocused: Bool
-    @ScaledMetric(relativeTo: .largeTitle) private var percentSize: CGFloat = 64
+    @ScaledMetric(relativeTo: .largeTitle) private var percentSize: CGFloat = 88
 
     var body: some View {
         ScrollView {
@@ -23,8 +23,8 @@ struct GoalDetailView: View {
                         SectionLabel(String(localized: "Why it matters"))
                         Text(goal.notes)
                             .font(.body)
-                            .foregroundStyle(Color.ink)
-                            .surface(cornerRadius: 22, padding: 18)
+                            .foregroundStyle(Color.inkSecondary)
+                            .surface(cornerRadius: 20, padding: 18)
                     }
                 }
             }
@@ -61,35 +61,37 @@ struct GoalDetailView: View {
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            IconTile(symbol: goal.symbol, accent: goal.accent, size: 52, filled: true)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 10) {
+                IconTile(symbol: goal.symbol, size: 30, active: true)
+                MonoCaps(goal.deadlineText ?? String(localized: "No deadline"),
+                         color: (goal.daysLeft ?? 1) < 0 ? Color.danger : .inkTertiary)
+            }
             Text(goal.title)
-                .font(.largeTitle.weight(.bold))
+                .font(.hero(34, weight: .bold))
+                .tracking(-1.2)
                 .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 16)
 
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(Int((goal.progress * 100).rounded()), format: .number)
-                    .font(.system(size: percentSize, weight: .bold, design: .rounded))
-                    .foregroundStyle(goal.accent.gradient)
-                    .monospacedDigit()
+                    .font(.hero(percentSize))
+                    .tracking(-4)
                     .contentTransition(.numericText(value: goal.progress))
                 Text("%")
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(Color.inkSecondary)
-                Spacer()
-                if let text = goal.deadlineText {
-                    Text(text)
-                        .font(.footnote)
-                        .foregroundStyle((goal.daysLeft ?? 1) < 0 ? Accent.ember.color : Color.inkSecondary)
-                }
+                    .font(.hero(30))
+                    .foregroundStyle(Color.inkTertiary)
             }
             .foregroundStyle(Color.ink)
+            .padding(.top, 18)
 
-            ProgressLine(progress: goal.progress, color: goal.accent.color, height: 10)
+            ProgressLine(progress: goal.progress, color: SovaTheme.current.accent.color, height: 4,
+                         milestones: goal.sortedMilestones.map(\.isDone))
+                .padding(.top, 14)
         }
-        .surface(cornerRadius: 32, padding: 22, tint: goal.accent.color)
         .padding(.top, 8)
+        .padding(.horizontal, 4)
         .accessibilityElement(children: .combine)
     }
 
@@ -100,7 +102,7 @@ struct GoalDetailView: View {
                 Slider(value: $goal.manualProgress, in: 0...1, step: 0.01) {
                     Text("Progress")
                 }
-                .tint(goal.accent.color)
+                .tint(SovaTheme.current.accent.color)
                 Text("No steps yet. Slide to track it by feel, or break it down below.")
                     .font(.footnote)
                     .foregroundStyle(Color.inkSecondary)
@@ -116,12 +118,11 @@ struct GoalDetailView: View {
             VStack(spacing: 0) {
                 ForEach(goal.sortedMilestones) { milestone in
                     HStack(spacing: 4) {
-                        CheckButton(isOn: milestone.isDone, color: goal.accent.color, round: true, label: milestone.title) {
+                        CheckButton(isOn: milestone.isDone, round: true, label: milestone.title) {
                             withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { milestone.isDone.toggle() }
                         }
                         Text(milestone.title)
-                            .foregroundStyle(milestone.isDone ? Color.inkSecondary : Color.ink)
-                            .strikethrough(milestone.isDone, color: Color.inkTertiary)
+                            .foregroundStyle(milestone.isDone ? Color.inkTertiary : Color.ink)
                         Spacer()
                     }
                     .padding(.leading, 8)

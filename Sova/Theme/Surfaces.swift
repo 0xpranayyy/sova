@@ -1,16 +1,20 @@
 import SwiftUI
 
-// MARK: - Glass cards
+// Content sits on quiet, near-transparent cards with hairline edges.
+// Liquid Glass is reserved for what floats: the tab bar, toolbar buttons,
+// sheets and the quick-capture card.
 
 extension View {
-    /// A Liquid Glass card. Optionally tinted with an accent.
-    func surface(cornerRadius: CGFloat = 24, padding: CGFloat = 16, tint: Color? = nil,
+    /// A content card. `tint` gives it a faint accent edge and fill, for
+    /// the one thing on screen that deserves attention.
+    func surface(cornerRadius: CGFloat = 22, padding: CGFloat = 16, tint: Color? = nil,
                  interactive: Bool = false) -> some View {
-        self
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        return self
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassEffect(Glass.card(tint: tint, interactive: interactive),
-                         in: .rect(cornerRadius: cornerRadius, style: .continuous))
+            .background(tint.map { $0.opacity(0.07) } ?? Color.surface, in: shape)
+            .overlay(shape.strokeBorder(tint.map { $0.opacity(0.35) } ?? Color.white.opacity(0.065), lineWidth: 1))
     }
 }
 
@@ -25,25 +29,25 @@ extension Glass {
 
 // MARK: - Buttons
 
-/// The primary action: a full-width, tinted Liquid Glass capsule.
+/// The primary action: a solid warm-white pill with near-black text.
 struct InkButtonStyle: ButtonStyle {
     var compact = false
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(compact ? .subheadline.weight(.semibold) : .headline)
-            .foregroundStyle(.white)
+            .font(compact ? .subheadline.weight(.semibold) : .body.weight(.semibold))
+            .foregroundStyle(Color.inkInverse)
             .padding(.horizontal, compact ? 18 : 24)
-            .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? 42 : 56)
-            .glassEffect(.regular.tint(SovaTheme.current.accent.color).interactive(), in: .capsule)
-            .opacity(isEnabled ? 1 : 0.4)
+            .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? 42 : 58)
+            .background(Color.ink, in: .capsule)
+            .opacity(isEnabled ? 1 : 0.35)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 
-/// A secondary action: clear glass.
+/// A secondary action: a quiet capsule.
 struct QuietButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -51,7 +55,8 @@ struct QuietButtonStyle: ButtonStyle {
             .foregroundStyle(Color.ink)
             .padding(.horizontal, 18)
             .frame(minHeight: 44)
-            .glassEffect(.regular.interactive(), in: .capsule)
+            .background(Color.surfaceRaised, in: .capsule)
+            .overlay(Capsule().strokeBorder(Color.hairline))
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .animation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
     }
@@ -59,11 +64,12 @@ struct QuietButtonStyle: ButtonStyle {
 
 /// Any custom tappable thing: a small, springy press.
 struct PressableStyle: ButtonStyle {
-    var scale: CGFloat = 0.96
+    var scale: CGFloat = 0.97
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? scale : 1)
+            .opacity(configuration.isPressed ? 0.85 : 1)
             .animation(.spring(response: 0.25, dampingFraction: 0.65), value: configuration.isPressed)
     }
 }

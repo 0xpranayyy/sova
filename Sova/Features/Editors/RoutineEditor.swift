@@ -62,10 +62,6 @@ struct RoutineEditor: View {
                     SymbolPicker(selection: $symbol, accent: accent, symbols: SymbolPicker.routineSymbols)
                 }
 
-                Section("Color") {
-                    AccentPicker(selection: $accent)
-                }
-
                 if let routine {
                     Section {
                         LabeledContent("Current streak") {
@@ -102,7 +98,7 @@ struct RoutineEditor: View {
                 }
             }
         }
-        .tint(accent.color)
+        .tint(SovaTheme.current.accent.color)
     }
 
     private func save() {

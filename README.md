@@ -4,33 +4,37 @@ A native iOS app for **daily tasks, goals and routines**, built with SwiftUI and
 
 ## Design
 
-- **Flat, confident color.** Each screen sits on one calm tint of the theme color: no mesh blends, gradients or glows. Color comes from solid accent fills on buttons, icon tiles, routine checks and the progress ring, the way Apple's Fitness, Reminders and Settings use it. There are five themes (Sunset, Ocean, Meadow, Aurora, Midnight).
-- **Liquid Glass throughout.** Cards, task rows, routine buttons, tiles, chips, text fields and buttons all use `glassEffect`, tinted with their accent and interactive where you can tap. The tab bar shrinks as you scroll, and the "New …" accessory floats above it.
-- **Native type.** SF Pro with bold, Apple-style headlines and rounded numerals for stats.
-- **Nine vivid accents**, always used as solid fills.
-- **Crafted details:** a checkbox that draws its own tick, a Fitness-style progress ring for the day, springy pressable tiles, haptics on every meaningful change, and an owl mascot that blinks, follows your finger and smiles when you're done.
+Inspired by Opal, Arc and Linear: dark-first, confident and precise.
+
+- **Near-black canvas, one electric accent.** Lime by default (Coral, Ice, Violet and Mint are the alternatives). The accent marks only what matters: progress, selection, "now" and the create button. One faint glow per screen is the signature moment.
+- **Big, tight type.** SF Pro Display for the hero numbers (the day score, goal percentages, consistency) and SF Mono for small uppercase details, times and counts.
+- **Today as a timeline.** Rituals and tasks merge into one line through Morning, Afternoon and Evening, plus Overdue and Anytime. A live "now" marker shows where you are, and an **Up next** card highlights the one thing that deserves attention. Round markers are rituals; square markers are tasks.
+- **Quiet surfaces, glass where it floats.** Content sits on near-transparent cards with hairline edges. Liquid Glass is used for the tab bar (with a separated "+" create button), toolbar buttons, sheets, notifications and the undo bar.
+- **Details:** a check that draws itself, milestone nodes on goal progress lines, a 17-week activity heatmap, inline highlighting of what quick capture understood, haptics throughout, and an owl mascot that blinks, follows your finger and smiles when you're done.
+
+![Previews](screenshots/3-today.png)
 
 ## Onboarding
 
 Eight short steps. Each has one idea, a staggered blur-in reveal, and drifting washes of color that change mood per step. Swipe right to go back.
 
-1. **Welcome.** The classic Apple layout: the owl in a glass bubble (its eyes follow your touch), "Welcome to Sova" and three feature rows.
+1. **Welcome.** The owl inside slowly turning orbit rings (its eyes follow your touch), with "Own your days." set in large type.
 2. **Three kinds of intention.** Fanned cards explain Today, Always and Someday. The example task is live, so tick it.
 3. **Your name**, with a live preview of your greeting.
 4. **Rituals.** Tactile tiles; each one you pick becomes a real routine.
 5. **One goal for this season.** Write your own or tap a suggestion. It's created with a 90-day horizon.
 6. **Reminders.** A preview of the real notification, then morning and evening times. The system permission prompt only appears after you choose "Turn on reminders".
-7. **Make it yours.** A preview of *your* first day (your rituals, your goal) recolors live as you pick a theme.
+7. **Pick your color.** A preview of *your* first day (your rituals, your goal) recolors live as you choose an accent.
 8. **All set.** A summary of what was created; the owl hops and smiles.
 
 Onboarding creates only what you choose; there is no sample or placeholder data. Inside the app, TipKit carries on teaching: first quick capture, then swiping.
 
 ## Everyday UX
 
-- **Quick capture.** "New Task" opens a small sheet that reads natural language as you type: `Call Mom tomorrow 6pm !!` becomes a high-priority task due tomorrow at 6 PM. Return adds the task and keeps the field open for the next one.
-- **Swipe actions.** On Today, swipe right to finish a task, and swipe left to push it to tomorrow or delete it.
-- **Undo, everywhere.** Completing, moving or deleting a task shows a brief Undo bar in the Liquid Glass accessory above the tab bar.
-- **Settings.** Change your name, theme and reminder times, replay the welcome, or erase all data.
+- **Quick capture.** The "+" in the tab bar opens a small sheet that reads natural language as you type and highlights the date and priority it found: `Call Mom tomorrow 6pm !!` becomes a high-priority task due tomorrow at 6 PM. Return adds the task and keeps the field open for the next one.
+- **Swipe actions.** On Today's timeline, swipe right to finish a task or ritual, and swipe left to push a task to tomorrow or delete it.
+- **Undo, everywhere.** Completing, moving or deleting a task shows a brief Undo bar floating above the tab bar.
+- **Settings.** Change your name, accent and reminder times, replay the welcome, or erase all data.
 
 ## Features
 
