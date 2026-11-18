@@ -55,8 +55,8 @@ enum QuickParse {
             let phrase = input[r].lowercased()
             repeatRange = r
             if phrase.contains("weekday") { repeatRule = .weekdays }
-            else if phrase.contains("day") && !weekdayNames.contains(where: phrase.contains) || phrase == "daily" { repeatRule = .daily }
-            else if let i = weekdayNames.firstIndex(where: phrase.contains) { repeatRule = .weekly; repeatWeekday = i + 1 }
+            else if let i = weekdayNames.firstIndex(where: { phrase.contains($0) }) { repeatRule = .weekly; repeatWeekday = i + 1 }
+            else if phrase.contains("day") || phrase == "daily" { repeatRule = .daily }
             else if phrase.contains("week") { repeatRule = .weekly }
             else if phrase.contains("month") { repeatRule = .monthly }
             else if phrase.contains("year") { repeatRule = .yearly }

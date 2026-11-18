@@ -22,14 +22,16 @@ struct RitualEntity: AppEntity {
 }
 
 struct RitualQuery: EntityQuery {
-    @MainActor
     func entities(for identifiers: [RitualEntity.ID]) async throws -> [RitualEntity] {
-        RitualStore.all().filter { identifiers.contains($0.entityID) }.map(RitualEntity.init)
+        await MainActor.run {
+            RitualStore.all().filter { identifiers.contains($0.entityID) }.map { RitualEntity($0) }
+        }
     }
 
-    @MainActor
     func suggestedEntities() async throws -> [RitualEntity] {
-        RitualStore.all().filter { $0.isScheduled(on: .now) }.map(RitualEntity.init)
+        await MainActor.run {
+            RitualStore.all().filter { $0.isScheduled(on: .now) }.map { RitualEntity($0) }
+        }
     }
 }
 

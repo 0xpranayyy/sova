@@ -22,7 +22,9 @@ struct ToggleRitualIntent: AppIntent {
         try? RitualStore.context.save()
         WidgetCenter.shared.reloadAllTimelines()
         let done = routine.isDone(on: .now)
-        return .result(dialog: done ? "Nice! \(routine.title) is done. 🦉" : "Okay, \(routine.title) is open again.")
+        let message = done ? String(localized: "Nice! \(routine.title) is done. 🦉")
+                           : String(localized: "Okay, \(routine.title) is open again.")
+        return .result(dialog: "\(message)")
     }
 }
 
