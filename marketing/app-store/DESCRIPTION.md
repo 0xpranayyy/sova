@@ -39,12 +39,18 @@ REACH YOUR BIG GOALS
 • Tick each step and watch your progress grow
 • Link tasks to goals so every day moves you forward
 
+WIDGETS AND SIRI
+• Home Screen widgets with the owl and your progress ring
+• Tick off rituals right from the Home Screen
+• Lock Screen widgets for what's next
+• "Hey Siri, add a task in Sova"
+
 SEE HOW YOU'RE DOING
 • Weekly charts and a colorful activity calendar
 • Find out which habits you keep best
 
 GENTLE REMINDERS
-One note in the morning to plan your day, one at night to look back. Nothing more.
+Alerts right when a task is due, plus one note in the morning to plan your day and one at night to look back.
 
 MADE TO FEEL GOOD
 • A cute owl that hops, blinks and celebrates with you
@@ -53,7 +59,18 @@ MADE TO FEEL GOOD
 • Pick your favorite theme color
 
 PRIVATE BY DESIGN
-No account. No sign-up. Everything you add stays on your iPhone.
+No account. No sign-up. No tracking. Everything stays on your iPhone, or in your own iCloud if you turn on sync.
+
+SOVA PLUS
+Sova is free to use with unlimited tasks, 3 rituals and 1 goal. Sova Plus unlocks:
+• Unlimited rituals and goals
+• iCloud sync across your devices
+• Extra app icons
+
+Sova Plus is available as a monthly or yearly auto-renewing subscription (the yearly plan starts with a 7-day free trial), or as a one-time lifetime purchase. Payment is charged to your Apple Account when you confirm. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period, and you can manage or cancel them in your Apple Account settings. Any unused part of a free trial ends when you buy a subscription.
+
+Privacy Policy: https://0xpranayyy.github.io/sova/privacy.html
+Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
 Perfect for students, busy professionals, parents, fitness lovers and anyone who wants to get things done and feel good doing it.
 

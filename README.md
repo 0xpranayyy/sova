@@ -60,44 +60,58 @@ Onboarding creates only what you choose; there is no sample or placeholder data.
 - **Quick capture.** The "+" in the tab bar opens a small sheet that reads natural language as you type and highlights the date and priority it found: `Call Mom tomorrow 6pm !!` becomes a high-priority task due tomorrow at 6 PM. Return adds the task and keeps the field open for the next one.
 - **Swipe actions.** On Today's timeline, swipe right to finish a task or ritual, and swipe left to push a task to tomorrow or delete it.
 - **Undo, everywhere.** Completing, moving or deleting a task shows a brief Undo bar floating above the tab bar.
-- **Settings.** Change your name, accent and reminder times, replay the welcome, or erase all data.
 
 ## Features
 
-| Tab | What it does |
+| Area | What it does |
 | --- | --- |
-| **Today** | A greeting, a progress ring for the day, a row of routine buttons to tick off, tasks due today or earlier (sorted by priority), your focus goal, upcoming tasks and a list of what you finished today |
-| **Goals** | Goal cards with an emoji, gradient progress and a deadline countdown. The detail screen has milestones (progress is calculated from them) or a manual progress slider, plus linked tasks and archiving |
-| **Routines** | Habits grouped by Morning, Afternoon, Evening and Anytime. Each has a weekday schedule, a streak 🔥 and the last 7 days as dots. A week strip at the top shows a completion ring for each day |
-| **Insights** | Swift Charts for the last 7 days, tasks completed this week, your best streak, 30-day routine consistency and average goal progress |
+| **Today** | A greeting, the owl inside a progress ring for the day, an Up Next card, today's rituals as tiles, overdue and open tasks, and what you finished today |
+| **Tasks** | Quick capture reads natural language (`Call Mom tomorrow 6pm !!`, `Water plants every Sunday`). Tasks can repeat (daily, weekdays, weekly, monthly, yearly) and alert at their time or a few minutes before |
+| **Goals** | Goal cards with steps, progress and a deadline; linked tasks; archiving |
+| **Rituals** | Habits grouped by time of day with weekday schedules, streaks 🔥 and a week view on an indigo stage |
+| **Insights** | This week's bars, stats, a 17-week activity calendar and 30-day ritual consistency |
+| **Widgets** | Today (owl and progress ring, Up Next), interactive Rituals (tick right from the Home Screen) and Lock Screen widgets |
+| **Siri & Shortcuts** | "Add a task in Sova", "Tick off a ritual in Sova", "Show my day in Sova" |
+| **Sova Plus** | Unlimited rituals and goals (free: 3 rituals, 1 active goal), iCloud sync, extra app icons. Monthly, yearly (7-day trial) or lifetime, using StoreKit 2 |
+| **Settings** | Appearance, theme, app icon, sounds, haptics, week start, alert timing, overdue badge, reminders, iCloud sync, help and legal links |
 
-Data is stored only on the device, with **SwiftData**.
+Data lives in a SwiftData store in the App Group container, shared with the widgets. With Plus and iCloud sync on, it mirrors to the user's private CloudKit database.
 
 ## Requirements
 
 - Xcode 26 or later
-- iOS / iPadOS 26 or later (Liquid Glass APIs)
+- iOS / iPadOS 26 or later
 
 ## Run
 
 1. Open `Sova.xcodeproj`.
-2. Choose your team under *Signing & Capabilities*.
-3. Run on an iPhone simulator or a device.
+2. Under *Signing & Capabilities*, choose your Team for both **Sova** and **SovaWidgetsExtension**. Xcode then registers the App Group `group.app.sova.Sova`, the iCloud container `iCloud.app.sova.Sova` and Push Notifications.
+3. Run the **Sova** scheme. It uses `Sova.storekit`, so you can test purchases in the simulator without App Store Connect.
 
-The project uses Xcode's synchronized folders, so files you add under `Sova/` are picked up automatically. If you prefer [XcodeGen](https://github.com/yonaskolb/XcodeGen), a `project.yml` is included.
+The project uses Xcode's synchronized folders, so files you add under `Sova/`, `Shared/` or `SovaWidgets/` are picked up automatically. A `project.yml` for [XcodeGen](https://github.com/yonaskolb/XcodeGen) is included too.
+
+## Before submitting to the App Store
+
+1. In App Store Connect, create the in-app purchases:
+   - an auto-renewable subscription group "Sova Plus" with `app.sova.plus.monthly` and `app.sova.plus.yearly` (add a 1-week free trial to yearly)
+   - a non-consumable `app.sova.plus.lifetime`
+2. Turn on GitHub Pages (Settings → Pages → branch `main`, folder `/docs`) so the privacy policy is live at `https://0xpranayyy.github.io/sova/privacy.html`. Use that URL in App Store Connect.
+3. Set your support address in `Sova/Support/Links.swift` (`supportEmail`). The Help & feedback row stays hidden until you do. Add the App Store id there too, once you have it, for the "Rate Sova" link.
+4. For App Privacy, answer **Data Not Collected**.
+5. Listing copy and screenshots are in `marketing/app-store/`.
 
 ## Structure
 
 ```
-Sova/
-  App/          entry point, root TabView, router for sheets and tabs
-  Models/       SwiftData models (TaskItem, Goal, Milestone, Routine), sample data
-  Theme/        color tokens, accents, themes, typography, canvas, surfaces, button styles
-  Components/   owl mark, checkbox, progress, grouped list, empty state, settings menu
-  Support/      natural-language parsing, reminders, task actions with undo, TipKit tips
-  Features/     Onboarding, Capture, Today, Goals, Routines, Insights, Editors, Settings
+Sova/           the app: App, Features, Components, Theme, Support, Intents
+Shared/         used by the app and the widgets: models, store, settings,
+                palette, fonts, quick parse, task alerts, App Intents
+SovaWidgets/    WidgetKit extension: Today, Rituals, Lock Screen
+Config/         entitlements and the app's extra Info.plist keys
+docs/           privacy policy (GitHub Pages)
+marketing/      launch film, App Store screenshots, banner and listing copy
 ```
 
 ## Credits
 
-Typeface: [Allo](https://github.com/joshpuckett/allo) by Josh Puckett, used under the SIL Open Font License 1.1. The license ships in `Sova/Resources/Fonts/Allo-OFL.txt`.
+Typeface: [Allo](https://github.com/joshpuckett/allo) by Josh Puckett, used under the SIL Open Font License 1.1. The license ships in `Shared/Fonts/Allo-OFL.txt`.
