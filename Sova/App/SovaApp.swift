@@ -3,7 +3,7 @@ import SwiftData
 
 @main
 struct SovaApp: App {
-    private let container = SovaStore.makeContainer()
+    private let container = SovaStore.shared
     @State private var store = PlusStore()
 
     init() {

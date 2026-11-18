@@ -7,6 +7,13 @@ import SwiftData
 enum SovaStore {
     static let schema = Schema([TaskItem.self, Goal.self, Milestone.self, Routine.self])
 
+    /// True inside the widget extension, which reads the store but never
+    /// runs iCloud mirroring itself.
+    static let isExtension = Bundle.main.bundlePath.hasSuffix(".appex")
+
+    /// One container per process, shared by the app, Siri and widgets.
+    static let shared: ModelContainer = makeContainer(allowSync: !isExtension)
+
     /// Where the store lives: the shared App Group if it's available,
     /// otherwise the app's own Application Support folder.
     static var storeURL: URL {
