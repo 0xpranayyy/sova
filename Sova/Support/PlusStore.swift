@@ -1,5 +1,6 @@
 import StoreKit
 import Observation
+import UserNotifications
 
 /// Why the paywall opened, so the owl can say something that fits.
 enum PlusReason: String, Hashable {
@@ -47,7 +48,10 @@ final class PlusStore {
     init() {
         updates = Task { [weak self] in
             for await result in Transaction.updates {
-                if case .verified(let transaction) = result { await transaction.finish() }
+                if case .verified(let transaction) = result {
+                    await TrialReminder.scheduleIfNeeded(for: transaction)
+                    await transaction.finish()
+                }
                 await self?.refresh()
             }
         }
@@ -92,5 +96,28 @@ final class PlusStore {
     func restore() async {
         try? await AppStore.sync()
         await refresh()
+    }
+}
+
+/// The paywall promises a heads-up before a free trial turns into a paid
+/// plan. This keeps that promise: one notification, two days before.
+enum TrialReminder {
+    static let id = "sova.trial.reminder"
+
+    static func scheduleIfNeeded(for transaction: Transaction) async {
+        guard transaction.offer?.type == .introductory,
+              let end = transaction.expirationDate else { return }
+        let fire = end.addingTimeInterval(-2 * 86_400)
+        guard fire > .now else { return }
+        await TaskAlerts.requestPermissionIfNeeded()
+
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Your Sova Plus trial ends in 2 days")
+        content.body = String(localized: "Nothing to do if you'd like to keep Plus. You can cancel anytime in Settings.")
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: fire.timeIntervalSinceNow, repeats: false)
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [id])
+        try? await center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
     }
 }
