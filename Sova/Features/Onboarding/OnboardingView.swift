@@ -186,7 +186,7 @@ struct OnboardingView: View {
             }
 
             if step == .hello {
-                Label("Private by design. Stays on your iPhone.", systemImage: "lock")
+                Text("Your data stays on this iPhone.")
                     .font(.footnote)
                     .foregroundStyle(Color.inkTertiary)
                     .transition(.opacity)
@@ -239,25 +239,15 @@ struct OnboardingView: View {
     }
 }
 
-/// Near-black with one soft glow of the accent, stronger on the welcome
-/// and finish screens.
+/// A flat near-black canvas.
 struct OnboardingBackdrop: View {
     var step: OnboardingStep
     var theme: SovaTheme
 
     var body: some View {
-        let accent = theme.accent.color
-        let hero = step == .hello || step == .finish
-        ZStack {
-            Color.canvas
-            RadialGradient(colors: [accent.opacity(hero ? 0.14 : 0.06), .clear],
-                           center: hero ? UnitPoint(x: 0.5, y: 0.33) : UnitPoint(x: 0.15, y: 0),
-                           startRadius: 0, endRadius: hero ? 230 : 420)
-        }
-        .ignoresSafeArea()
-        .animation(.smooth(duration: 0.8), value: step)
-        .animation(.smooth(duration: 0.6), value: theme)
-        .accessibilityHidden(true)
+        Color.canvas
+            .ignoresSafeArea()
+            .accessibilityHidden(true)
     }
 }
 

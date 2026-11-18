@@ -112,9 +112,7 @@ struct ThemeSwatches: View {
                                     .scaleEffect(option == selected ? 1 : 0.85)
                             }
                         Text(option.name)
-                            .font(.mono(10.5))
-                            .tracking(1)
-                            .textCase(.uppercase)
+                            .font(.caption.weight(.medium))
                             .foregroundStyle(option == selected ? Color.ink : Color.inkTertiary)
                     }
                     .frame(maxWidth: .infinity, minHeight: 76)

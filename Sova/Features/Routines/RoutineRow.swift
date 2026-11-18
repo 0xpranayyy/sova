@@ -16,9 +16,9 @@ struct RoutineRow: View {
                     .foregroundStyle(Color.ink)
                 HStack(spacing: 10) {
                     WeekTrack(routine: routine)
-                    Text(routine.streak > 1 ? String(localized: "\(routine.streak)d streak")
+                    Text(routine.streak > 1 ? String(localized: "\(routine.streak)-day streak")
                                             : Weekdays.summary(for: routine.weekdays))
-                        .font(.mono(10.5))
+                        .font(.footnote)
                         .foregroundStyle(Color.inkTertiary)
                         .contentTransition(.numericText())
                 }

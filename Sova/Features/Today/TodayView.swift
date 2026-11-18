@@ -58,8 +58,8 @@ struct TodayView: View {
                 }
 
                 if total == 0 {
-                    EmptyState(title: String(localized: "A blank day."),
-                               message: String(localized: "Add what matters. Type it the way you'd say it: “Call Mom at 6pm”."),
+                    EmptyState(title: String(localized: "Nothing planned"),
+                               message: String(localized: "Nothing here yet. Add a task, or set up a ritual."),
                                actionTitle: String(localized: "New task")) { router.sheet = .quickTask }
                         .bareListRow(top: 12)
                 }

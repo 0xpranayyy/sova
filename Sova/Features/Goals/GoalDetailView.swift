@@ -103,7 +103,7 @@ struct GoalDetailView: View {
                     Text("Progress")
                 }
                 .tint(SovaTheme.current.accent.color)
-                Text("No steps yet. Slide to track it by feel, or break it down below.")
+                Text("No steps yet. Set progress here, or add steps below.")
                     .font(.footnote)
                     .foregroundStyle(Color.inkSecondary)
             }

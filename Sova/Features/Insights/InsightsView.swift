@@ -87,7 +87,7 @@ struct InsightsView: View {
                                         .font(.footnote)
                                         .foregroundStyle(delta >= 0 ? accent : Color.danger)
                                 } else {
-                                    Text("Rituals, last 30 days").font(.footnote).foregroundStyle(Color.inkTertiary)
+                                    Text("of rituals done, last 30 days").font(.footnote).foregroundStyle(Color.inkTertiary)
                                 }
                             }
                             .padding(.bottom, 14)
@@ -99,7 +99,7 @@ struct InsightsView: View {
                             .tracking(-1.2)
                             .foregroundStyle(Color.ink)
                             .padding(.top, 20)
-                        Text("Every task you finish and ritual you keep fills in a square below.")
+                        Text("Finish tasks and check off rituals, and your activity shows up here.")
                             .font(.subheadline)
                             .foregroundStyle(Color.inkSecondary)
                             .padding(.top, 8)
@@ -158,8 +158,7 @@ struct InsightsView: View {
                         .overlay(alignment: .leading) {
                             if showsMonth, let first {
                                 Text(first, format: .dateTime.month(.abbreviated))
-                                    .font(.mono(10))
-                                    .textCase(.uppercase)
+                                    .font(.caption2)
                                     .foregroundStyle(Color.inkTertiary)
                                     .fixedSize()
                             }

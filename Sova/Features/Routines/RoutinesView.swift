@@ -20,8 +20,8 @@ struct RoutinesView: View {
                     .padding(.horizontal, 4)
 
                     if routines.isEmpty {
-                        EmptyState(title: String(localized: "Build a rhythm"),
-                                   message: String(localized: "Small things, repeated, become who you are."),
+                        EmptyState(title: String(localized: "No rituals yet"),
+                                   message: String(localized: "Rituals are things you do on a schedule, like reading or a morning walk."),
                                    actionTitle: String(localized: "Add a routine")) { router.sheet = .newRoutine }
                     } else {
                         WeekStrip(routines: routines,

@@ -31,8 +31,8 @@ struct GoalsView: View {
                     .padding(.bottom, 10)
 
                     if active.isEmpty {
-                        EmptyState(title: String(localized: "Somewhere to aim"),
-                                   message: String(localized: "Goals turn big ideas into small, finishable steps."),
+                        EmptyState(title: String(localized: "No goals yet"),
+                                   message: String(localized: "Add a goal and break it into steps you can check off."),
                                    actionTitle: String(localized: "Set a goal")) { router.sheet = .newGoal }
                     } else {
                         ForEach(active) { goal in

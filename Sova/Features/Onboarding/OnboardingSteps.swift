@@ -6,12 +6,12 @@ import SwiftUI
 private struct StepHeadline: View {
     let text: String
     var index = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 40
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 32
 
     var body: some View {
         Text(text)
             .font(.hero(size, weight: .bold))
-            .tracking(-1.6)
+            .tracking(-0.8)
             .foregroundStyle(Color.ink)
             .fixedSize(horizontal: false, vertical: true)
             .reveal(index)
@@ -37,65 +37,28 @@ private var accent: Color { SovaTheme.current.accent.color }
 
 struct HelloStep: View {
     var look: CGSize
-    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 56
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 44
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack {
-                OrbitRings(accent: accent)
-                    .frame(width: 300, height: 300)
-                OwlMark(size: 128, look: look)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(maxHeight: .infinity)
-            .reveal(0)
+            OwlMark(size: 112, look: look)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .reveal(0)
 
-            Text("Own your\n\(Text("days.").foregroundStyle(Color.ink.opacity(0.42)))")
+            Text("Sova")
                 .font(.hero(titleSize, weight: .bold))
-                .tracking(-2.6)
+                .tracking(-1.6)
                 .foregroundStyle(Color.ink)
                 .reveal(1)
-            Text("Tasks, rituals and goals in one calm system that gets out of your way.")
-                .font(.body)
+            Text("A day planner for your tasks, rituals and goals.")
+                .font(.title3)
                 .foregroundStyle(Color.inkSecondary)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 16)
-                .padding(.bottom, 24)
+                .padding(.top, 8)
+                .padding(.bottom, 28)
                 .reveal(2)
         }
         .padding(.horizontal, 28)
-    }
-}
-
-/// Two thin orbits with a lime moon, slowly turning.
-private struct OrbitRings: View {
-    var accent: Color
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var turn = false
-
-    var body: some View {
-        ZStack {
-            Circle().strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
-            Circle()
-                .strokeBorder(Color.white.opacity(0.16), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [0.1, 15]))
-                .padding(1)
-            Circle().strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
-                .padding(42)
-            Circle()
-                .fill(accent)
-                .frame(width: 10, height: 10)
-                .offset(y: -108)
-                .rotationEffect(.degrees(turn ? 400 : 40))
-            Circle()
-                .fill(Color.white.opacity(0.5))
-                .frame(width: 6, height: 6)
-                .offset(y: -150)
-                .rotationEffect(.degrees(turn ? 110 - 360 : 110))
-        }
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.linear(duration: 60).repeatForever(autoreverses: false)) { turn = true }
-        }
     }
 }
 
@@ -110,12 +73,12 @@ struct PillarsStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "Three kinds of intention."))
-                StepBody(text: String(localized: "Everything in Sova is one of these. Try the first one."))
+                StepHeadline(text: String(localized: "Three kinds of things"))
+                StepBody(text: String(localized: "Tap the first one to check it off."))
                     .padding(.top, 10)
 
                 VStack(spacing: 10) {
-                    PillarCard(label: String(localized: "Today · tasks")) {
+                    PillarCard(label: String(localized: "Tasks")) {
                         HStack(spacing: 4) {
                             CheckButton(isOn: taskDone, label: "Send the proposal") {
                                 withAnimation(.snappy) { taskDone.toggle() }
@@ -130,7 +93,7 @@ struct PillarsStep: View {
                     }
                     .reveal(2)
 
-                    PillarCard(label: String(localized: "Always · rituals")) {
+                    PillarCard(label: String(localized: "Rituals")) {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
                                 Text("Morning pages").font(.body.weight(.medium)).foregroundStyle(Color.ink)
@@ -151,7 +114,7 @@ struct PillarsStep: View {
                     }
                     .reveal(3)
 
-                    PillarCard(label: String(localized: "Someday · goals")) {
+                    PillarCard(label: String(localized: "Goals")) {
                         VStack(alignment: .leading, spacing: 14) {
                             HStack(alignment: .firstTextBaseline) {
                                 Text("Run a half marathon").font(.body.weight(.medium)).foregroundStyle(Color.ink)
@@ -265,7 +228,7 @@ struct NameStep: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             StepHeadline(text: String(localized: "What should we call you?"))
-            StepBody(text: String(localized: "Just for your greeting. It never leaves this device."))
+            StepBody(text: String(localized: "Used for your greeting. Stored only on this iPhone."))
                 .padding(.top, 10)
 
             GlassField(placeholder: String(localized: "Your name"), text: $name,
@@ -300,8 +263,8 @@ struct RitualsStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "Pick your rituals."))
-                StepBody(text: String(localized: "Small things, done often. Change them anytime."))
+                StepHeadline(text: String(localized: "Pick a few rituals"))
+                StepBody(text: String(localized: "Things you want to do regularly. You can change these later."))
                     .padding(.top, 10)
 
                 ForEach(Array([DayPeriod.morning, .afternoon, .anytime, .evening].enumerated()), id: \.element) { index, period in
@@ -352,8 +315,7 @@ private struct RitualRow: View {
                     .foregroundStyle(Color.ink)
                 Spacer()
                 Text(Weekdays.summary(for: ritual.weekdays))
-                    .font(.mono(10.5))
-                    .textCase(.uppercase)
+                    .font(.footnote)
                     .foregroundStyle(Color.inkTertiary)
                 ZStack {
                     Circle().strokeBorder(Color.white.opacity(0.22), lineWidth: 1.5).opacity(selected ? 0 : 1)
@@ -385,8 +347,8 @@ struct GoalStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "One thing for this season."))
-                StepBody(text: String(localized: "Something you'd be proud of in three months."))
+                StepHeadline(text: String(localized: "Set a goal"))
+                StepBody(text: String(localized: "Something to work toward over the next few months. Optional."))
                     .padding(.top, 10)
 
                 GlassField(placeholder: String(localized: "My goal is to…"), text: $title,
@@ -394,7 +356,7 @@ struct GoalStep: View {
                     .padding(.top, 28)
                     .reveal(2)
 
-                MonoCaps(String(localized: "Or start from"))
+                MonoCaps(String(localized: "Suggestions"))
                     .padding(.top, 24)
                     .padding(.bottom, 10)
                     .padding(.leading, 4)
@@ -426,7 +388,7 @@ struct GoalStep: View {
                 }
                 .reveal(3)
 
-                MonoCaps(String(localized: "90 days · change anytime"), size: 10)
+                MonoCaps(String(localized: "Due in 90 days. You can change this later."), size: 10)
                     .padding(.top, 22)
                     .padding(.leading, 4)
                     .reveal(4)
@@ -493,8 +455,8 @@ struct RhythmStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "A gentle nudge, twice a day."))
-                StepBody(text: String(localized: "A note to plan in the morning, one to look back at night. Nothing else, ever."))
+                StepHeadline(text: String(localized: "Want reminders?"))
+                StepBody(text: String(localized: "One in the morning to plan the day, one in the evening to check it off. That's all Sova will ever send."))
                     .padding(.top, 10)
 
                 NotificationPreview()
@@ -591,8 +553,8 @@ struct ThemeStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "Pick your color."))
-                StepBody(text: String(localized: "One accent, used sparingly. Here's your first day."))
+                StepHeadline(text: String(localized: "Choose an accent"))
+                StepBody(text: String(localized: "This is how your first day will look."))
                     .padding(.top, 10)
 
                 YourDayPreview(accent: theme.accent.color, name: name, rituals: rituals, goalTitle: goalTitle)
@@ -681,13 +643,11 @@ struct FinishStep: View {
     var remindersOn: Bool
     var theme: SovaTheme
     @State private var hop = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 48
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 36
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack {
-                OrbitRings(accent: theme.accent.color)
-                    .frame(width: 260, height: 260)
                 OwlMark(size: 112, happy: true, blinks: false)
                     .keyframeAnimator(initialValue: 0.0, trigger: hop) { view, y in
                         view.offset(y: y)
@@ -701,7 +661,7 @@ struct FinishStep: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .reveal(0)
 
-            Text(name.isEmpty ? String(localized: "You're in.") : String(localized: "You're in,\n\(name)."))
+            Text(name.isEmpty ? String(localized: "You're all set.") : String(localized: "You're all set, \(name)."))
                 .font(.hero(size, weight: .bold))
                 .tracking(-2)
                 .foregroundStyle(Color.ink)

@@ -17,7 +17,8 @@ extension Font {
     }
 }
 
-/// Small uppercase monospaced label.
+/// A small secondary label in plain SF Pro, sentence case. (Name kept for
+/// existing call sites; monospaced type is reserved for times and numbers.)
 struct MonoCaps: View {
     let text: String
     var color: Color = .inkTertiary
@@ -31,9 +32,7 @@ struct MonoCaps: View {
 
     var body: some View {
         Text(text)
-            .font(.mono(size))
-            .tracking(1.6)
-            .textCase(.uppercase)
+            .font(.system(size: size + 2, weight: .semibold))
             .foregroundStyle(color)
     }
 }

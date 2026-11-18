@@ -23,7 +23,7 @@ struct GoalCard: View {
                         if let nextStep {
                             Text("Next: \(Text(nextStep).foregroundStyle(Color.inkSecondary))")
                         } else if goal.milestones.isEmpty {
-                            Text("Tracked by feel")
+                            Text("No steps")
                         } else {
                             Text("Every step done")
                         }
@@ -54,9 +54,7 @@ struct GoalCard: View {
                 Spacer()
                 if let text = goal.deadlineText { Text(text) }
             }
-            .font(.mono(10.5))
-            .tracking(0.6)
-            .textCase(.uppercase)
+            .font(.footnote)
             .foregroundStyle((goal.daysLeft ?? 1) < 0 ? Color.danger : Color.inkTertiary)
             .padding(.top, 14)
         }

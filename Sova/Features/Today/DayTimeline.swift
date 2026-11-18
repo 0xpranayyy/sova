@@ -151,7 +151,7 @@ struct TimelineSectionHeader: View {
             MonoCaps(section.title, color: section == .overdue ? Color.danger : .inkTertiary)
             Spacer()
             if let range = section.range {
-                Text(range).font(.mono(10.5)).foregroundStyle(Color.inkTertiary.opacity(0.7))
+                Text(range).font(.mono(11)).foregroundStyle(Color.inkTertiary)
             } else if let count {
                 Text(count).font(.mono(10.5)).foregroundStyle(Color.inkTertiary)
             }
@@ -203,9 +203,7 @@ struct TimelineRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 if isNext {
                     Text(nextLabel)
-                        .font(.mono(10))
-                        .tracking(1.4)
-                        .textCase(.uppercase)
+                        .font(.footnote.weight(.semibold))
                         .foregroundStyle(accent)
                         .padding(.bottom, 2)
                 }

@@ -4,7 +4,7 @@ import SwiftUI
 /// single signature glow per screen.
 struct CanvasBackground: View {
     @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
-    var glow: Double = 0.08
+    var glow: Double = 0
 
     var body: some View {
         let accent = (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color
