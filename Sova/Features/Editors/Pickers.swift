@@ -59,7 +59,7 @@ struct SymbolPicker: View {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) { selection = symbol }
                 } label: {
                     Image(systemName: symbol)
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.allo(size: 18, weight: .medium))
                         .foregroundStyle(selected ? Color.inkInverse : Color.ink)
                         .frame(width: 44, height: 44)
                         .background(selected ? SovaTheme.current.accent.color : Color.well,
@@ -90,7 +90,7 @@ struct WeekdayPicker: View {
                         }
                     } label: {
                         Text(Weekdays.letter(day))
-                            .font(.subheadline.weight(.semibold))
+                            .font(.allo(.subheadline, .semibold))
                             .foregroundStyle(on ? Color.inkInverse : Color.ink)
                             .frame(width: 38, height: 38)
                             .background(on ? SovaTheme.current.accent.color : Color.well, in: .circle)
@@ -117,7 +117,7 @@ struct WeekdayPicker: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { selection = days }
         } label: {
             Text(title)
-                .font(.caption.weight(.semibold))
+                .font(.allo(.caption, .semibold))
                 .foregroundStyle(active ? Color.inkInverse : Color.ink)
                 .padding(.horizontal, 12)
                 .frame(height: 30)

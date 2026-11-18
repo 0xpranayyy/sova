@@ -12,13 +12,13 @@ struct RoutineRow: View {
 
             VStack(alignment: .leading, spacing: 7) {
                 Text(routine.title)
-                    .font(.body.weight(.medium))
+                    .font(.allo(.body, .medium))
                     .foregroundStyle(Color.ink)
                 HStack(spacing: 10) {
                     WeekTrack(routine: routine)
                     Text(routine.streak > 1 ? String(localized: "\(routine.streak)-day streak")
                                             : Weekdays.summary(for: routine.weekdays))
-                        .font(.footnote)
+                        .font(.allo(.footnote))
                         .foregroundStyle(Color.inkTertiary)
                         .contentTransition(.numericText())
                 }

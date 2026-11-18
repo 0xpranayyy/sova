@@ -203,22 +203,22 @@ struct TimelineRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 if isNext {
                     Text(nextLabel)
-                        .font(.footnote.weight(.semibold))
+                        .font(.allo(.footnote, .semibold))
                         .foregroundStyle(accent)
                         .padding(.bottom, 2)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     if let marks, !entry.isDone {
-                        Text(marks).font(.body.weight(.bold)).foregroundStyle(Color.danger)
+                        Text(marks).font(.allo(.body, .bold)).foregroundStyle(Color.danger)
                     }
                     Text(title)
-                        .font(isNext ? .body.weight(.semibold) : .body.weight(.medium))
+                        .font(isNext ? .allo(.body, .semibold) : .allo(.body, .medium))
                         .foregroundStyle(entry.isDone ? Color.inkTertiary : Color.ink)
                         .lineLimit(2)
                 }
                 if !meta.isEmpty {
                     Text(meta)
-                        .font(.footnote)
+                        .font(.allo(.footnote))
                         .foregroundStyle(entry.section == .overdue && !entry.isDone ? Color.danger : Color.inkTertiary)
                         .lineLimit(1)
                 }

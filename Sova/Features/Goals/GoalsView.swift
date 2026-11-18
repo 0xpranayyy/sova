@@ -49,7 +49,7 @@ struct GoalsView: View {
                             HStack(spacing: 8) {
                                 MonoCaps(String(localized: "Archived · \(archived.count)"))
                                 Image(systemName: "chevron.right")
-                                    .font(.caption2.weight(.bold))
+                                    .font(.allo(.caption2, .bold))
                                     .foregroundStyle(Color.inkTertiary)
                                     .rotationEffect(.degrees(showArchived ? 90 : 0))
                                 Spacer()

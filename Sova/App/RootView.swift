@@ -18,6 +18,7 @@ struct RootView: View {
             }
         }
         .animation(.smooth(duration: 0.6), value: hasOnboarded)
+        .font(.allo(.body))
         .preferredColorScheme(.dark)
     }
 }
@@ -87,7 +88,7 @@ struct ToastBar: View {
             if let toast = router.toast {
                 HStack(spacing: 12) {
                     Text(toast.message)
-                        .font(.subheadline)
+                        .font(.allo(.subheadline))
                         .foregroundStyle(Color.ink)
                         .lineLimit(1)
                     Spacer(minLength: 8)
@@ -97,7 +98,7 @@ struct ToastBar: View {
                             router.dismissToast()
                         } label: {
                             Text("Undo")
-                                .font(.subheadline.weight(.semibold))
+                                .font(.allo(.subheadline, .semibold))
                                 .foregroundStyle(Color.accentColor)
                                 .frame(minWidth: 44, minHeight: 44)
                         }

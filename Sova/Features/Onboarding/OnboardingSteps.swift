@@ -24,7 +24,7 @@ private struct StepBody: View {
 
     var body: some View {
         Text(text)
-            .font(.body)
+            .font(.allo(.body))
             .foregroundStyle(Color.inkSecondary)
             .fixedSize(horizontal: false, vertical: true)
             .reveal(index)
@@ -51,7 +51,7 @@ struct HelloStep: View {
                 .foregroundStyle(Color.ink)
                 .reveal(1)
             Text("A day planner for your tasks, rituals and goals.")
-                .font(.title3)
+                .font(.allo(.title3))
                 .foregroundStyle(Color.inkSecondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 8)
@@ -85,7 +85,7 @@ struct PillarsStep: View {
                             }
                             .padding(.leading, -11)
                             Text("Send the proposal")
-                                .font(.body.weight(.medium))
+                                .font(.allo(.body, .medium))
                                 .foregroundStyle(taskDone ? Color.inkTertiary : Color.ink)
                             Spacer()
                             Text("10:00").font(.mono(11.5)).foregroundStyle(Color.inkTertiary)
@@ -96,7 +96,7 @@ struct PillarsStep: View {
                     PillarCard(label: String(localized: "Rituals")) {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
-                                Text("Morning pages").font(.body.weight(.medium)).foregroundStyle(Color.ink)
+                                Text("Morning pages").font(.allo(.body, .medium)).foregroundStyle(Color.ink)
                                 Spacer()
                                 Text("\(streakDays)d streak")
                                     .font(.mono(11.5))
@@ -117,7 +117,7 @@ struct PillarsStep: View {
                     PillarCard(label: String(localized: "Goals")) {
                         VStack(alignment: .leading, spacing: 14) {
                             HStack(alignment: .firstTextBaseline) {
-                                Text("Run a half marathon").font(.body.weight(.medium)).foregroundStyle(Color.ink)
+                                Text("Run a half marathon").font(.allo(.body, .medium)).foregroundStyle(Color.ink)
                                 Spacer()
                                 Text(goalProgress, format: .percent.precision(.fractionLength(0)))
                                     .font(.hero(22))
@@ -239,7 +239,7 @@ struct NameStep: View {
             HStack(spacing: 8) {
                 MonoCaps(String(localized: "Preview"), size: 10)
                 Text(trimmed.isEmpty ? greeting : "\(greeting), \(trimmed)")
-                    .font(.callout)
+                    .font(.allo(.callout))
                     .foregroundStyle(Color.inkSecondary)
                     .contentTransition(.opacity)
             }
@@ -311,11 +311,11 @@ private struct RitualRow: View {
             HStack(spacing: 14) {
                 IconTile(symbol: ritual.symbol, size: 36, active: selected)
                 Text(ritual.title)
-                    .font(.body.weight(.medium))
+                    .font(.allo(.body, .medium))
                     .foregroundStyle(Color.ink)
                 Spacer()
                 Text(Weekdays.summary(for: ritual.weekdays))
-                    .font(.footnote)
+                    .font(.allo(.footnote))
                     .foregroundStyle(Color.inkTertiary)
                 ZStack {
                     Circle().strokeBorder(Color.white.opacity(0.22), lineWidth: 1.5).opacity(selected ? 0 : 1)
@@ -372,9 +372,9 @@ struct GoalStep: View {
                         } label: {
                             HStack(spacing: 7) {
                                 Image(systemName: suggestion.symbol)
-                                    .font(.footnote.weight(.semibold))
+                                    .font(.allo(.footnote, .semibold))
                                 Text(suggestion.title)
-                                    .font(.subheadline.weight(.medium))
+                                    .font(.allo(.subheadline, .medium))
                             }
                             .foregroundStyle(selected ? Color.inkInverse : Color.ink)
                             .padding(.horizontal, 14)
@@ -492,10 +492,10 @@ struct RhythmStep: View {
     private func reminderRow(title: String, symbol: String, isOn: Binding<Bool>, time: Binding<Date>) -> some View {
         HStack(spacing: 10) {
             Image(systemName: symbol)
-                .font(.callout.weight(.medium))
+                .font(.allo(.callout, .medium))
                 .foregroundStyle(isOn.wrappedValue ? accent : Color.inkTertiary)
                 .frame(width: 22)
-            Text(title).font(.callout.weight(.medium)).foregroundStyle(Color.ink)
+            Text(title).font(.allo(.callout, .medium)).foregroundStyle(Color.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
             Spacer(minLength: 0)
@@ -522,13 +522,13 @@ private struct NotificationPreview: View {
                 .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous).strokeBorder(Color.hairline))
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    Text("Sova").font(.footnote.weight(.semibold)).foregroundStyle(Color.inkSecondary)
+                    Text("Sova").font(.allo(.footnote, .semibold)).foregroundStyle(Color.inkSecondary)
                     Spacer()
-                    Text("now").font(.footnote).foregroundStyle(Color.inkTertiary)
+                    Text("now").font(.allo(.footnote)).foregroundStyle(Color.inkTertiary)
                 }
-                Text("Good morning").font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+                Text("Good morning").font(.allo(.subheadline, .semibold)).foregroundStyle(Color.ink)
                 Text("Your day is ready. Take a minute to plan it.")
-                    .font(.subheadline)
+                    .font(.allo(.subheadline))
                     .foregroundStyle(Color.inkSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -594,7 +594,7 @@ private struct YourDayPreview: View {
                 .tracking(-2.4)
                 Spacer()
                 Text(name.isEmpty ? String(localized: "Day one") : String(localized: "Day one, \(name)"))
-                    .font(.footnote)
+                    .font(.allo(.footnote))
                     .foregroundStyle(Color.inkTertiary)
                     .padding(.bottom, 8)
             }
@@ -604,14 +604,14 @@ private struct YourDayPreview: View {
 
             if rituals.isEmpty && goalTitle.isEmpty {
                 Text("Your tasks and rituals will line up here.")
-                    .font(.subheadline)
+                    .font(.allo(.subheadline))
                     .foregroundStyle(Color.inkTertiary)
                     .padding(.top, 16)
             }
             ForEach(Array(rituals.prefix(3).enumerated()), id: \.element.id) { index, ritual in
                 HStack(spacing: 12) {
                     Checkbox(isOn: false, color: accent, round: true, size: 20, emphasized: index == 0)
-                    Text(ritual.title).font(.subheadline.weight(.medium)).foregroundStyle(Color.ink)
+                    Text(ritual.title).font(.allo(.subheadline, .medium)).foregroundStyle(Color.ink)
                     Spacer()
                     MonoCaps(ritual.period.name, size: 9.5)
                 }
@@ -620,7 +620,7 @@ private struct YourDayPreview: View {
             if !goalTitle.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text(goalTitle).font(.subheadline.weight(.medium)).foregroundStyle(Color.ink)
+                        Text(goalTitle).font(.allo(.subheadline, .medium)).foregroundStyle(Color.ink)
                         Spacer()
                         Text("0%").font(.mono(11)).foregroundStyle(Color.inkTertiary)
                     }
@@ -693,7 +693,7 @@ struct FinishStep: View {
                 Spacer()
                 if let swatch { Circle().fill(swatch).frame(width: 8, height: 8) }
                 Text(value)
-                    .font(.subheadline.weight(.medium))
+                    .font(.allo(.subheadline, .medium))
                     .foregroundStyle(Color.ink)
                     .lineLimit(1)
             }

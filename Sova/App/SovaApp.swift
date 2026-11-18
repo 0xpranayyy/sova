@@ -4,6 +4,8 @@ import SwiftData
 @main
 struct SovaApp: App {
     init() {
+        Allo.register()
+        Allo.applyToUIKit()
         SovaTips.configure()
     }
 

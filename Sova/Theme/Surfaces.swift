@@ -36,7 +36,7 @@ struct InkButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(compact ? .subheadline.weight(.semibold) : .body.weight(.semibold))
+            .font(compact ? .allo(.subheadline, .semibold) : .allo(.body, .semibold))
             .foregroundStyle(Color.inkInverse)
             .padding(.horizontal, compact ? 18 : 24)
             .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? 42 : 58)
@@ -51,7 +51,7 @@ struct InkButtonStyle: ButtonStyle {
 struct QuietButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.subheadline.weight(.semibold))
+            .font(.allo(.subheadline, .semibold))
             .foregroundStyle(Color.ink)
             .padding(.horizontal, 18)
             .frame(minHeight: 44)

@@ -81,13 +81,13 @@ struct InsightsView: View {
                             }
                             .foregroundStyle(Color.ink)
                             VStack(alignment: .leading, spacing: 3) {
-                                Text("consistency").font(.subheadline.weight(.semibold)).foregroundStyle(Color.ink)
+                                Text("consistency").font(.allo(.subheadline, .semibold)).foregroundStyle(Color.ink)
                                 if routines.contains(where: { $0.createdAt < Date.now.adding(days: -30) }) {
                                     Text(delta >= 0 ? "↑ \(delta)% vs last month" : "↓ \(-delta)% vs last month")
-                                        .font(.footnote)
+                                        .font(.allo(.footnote))
                                         .foregroundStyle(delta >= 0 ? accent : Color.danger)
                                 } else {
-                                    Text("of rituals done, last 30 days").font(.footnote).foregroundStyle(Color.inkTertiary)
+                                    Text("of rituals done, last 30 days").font(.allo(.footnote)).foregroundStyle(Color.inkTertiary)
                                 }
                             }
                             .padding(.bottom, 14)
@@ -100,7 +100,7 @@ struct InsightsView: View {
                             .foregroundStyle(Color.ink)
                             .padding(.top, 20)
                         Text("Finish tasks and check off rituals, and your activity shows up here.")
-                            .font(.subheadline)
+                            .font(.allo(.subheadline))
                             .foregroundStyle(Color.inkSecondary)
                             .padding(.top, 8)
                     }
@@ -158,7 +158,7 @@ struct InsightsView: View {
                         .overlay(alignment: .leading) {
                             if showsMonth, let first {
                                 Text(first, format: .dateTime.month(.abbreviated))
-                                    .font(.caption2)
+                                    .font(.allo(.caption2))
                                     .foregroundStyle(Color.inkTertiary)
                                     .fixedSize()
                             }

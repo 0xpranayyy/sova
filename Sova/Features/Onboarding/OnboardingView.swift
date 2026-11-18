@@ -110,7 +110,7 @@ struct OnboardingView: View {
             if step > .hello && step < .finish {
                 Button(action: back) {
                     Image(systemName: "chevron.left")
-                        .font(.body.weight(.semibold))
+                        .font(.allo(.body, .semibold))
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.glass)
@@ -179,7 +179,7 @@ struct OnboardingView: View {
                     eveningOn = false
                     advance()
                 }
-                .font(.subheadline.weight(.medium))
+                .font(.allo(.subheadline, .medium))
                 .foregroundStyle(Color.inkSecondary)
                 .frame(minHeight: 32)
                 .transition(.opacity)
@@ -187,7 +187,7 @@ struct OnboardingView: View {
 
             if step == .hello {
                 Text("Your data stays on this iPhone.")
-                    .font(.footnote)
+                    .font(.allo(.footnote))
                     .foregroundStyle(Color.inkTertiary)
                     .transition(.opacity)
             }

@@ -33,7 +33,7 @@ struct SettingsView: View {
                         OwlMark(size: 44)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Sova").font(.display(.title2)).foregroundStyle(Color.ink)
-                            Text("Version \(version)").font(.footnote).foregroundStyle(Color.inkSecondary)
+                            Text("Version \(version)").font(.allo(.footnote)).foregroundStyle(Color.inkSecondary)
                         }
                     }
                     .padding(.vertical, 6)
@@ -64,7 +64,7 @@ struct SettingsView: View {
                             Button("Open iPhone Settings") {
                                 if let url = URL(string: UIApplication.openNotificationSettingsURLString) { openURL(url) }
                             }
-                            .font(.footnote.weight(.semibold))
+                            .font(.allo(.footnote, .semibold))
                         }
                     } else {
                         Text("Two quiet notes a day, at the times you choose. Nothing else.")

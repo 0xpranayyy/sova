@@ -15,7 +15,7 @@ struct GoalCard: View {
                 IconTile(symbol: goal.symbol, size: 38)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(goal.title)
-                        .font(.body.weight(.semibold))
+                        .font(.allo(.body, .semibold))
                         .foregroundStyle(Color.ink)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
@@ -28,7 +28,7 @@ struct GoalCard: View {
                             Text("Every step done")
                         }
                     }
-                    .font(.footnote)
+                    .font(.allo(.footnote))
                     .foregroundStyle(Color.inkTertiary)
                     .lineLimit(1)
                 }
@@ -38,7 +38,7 @@ struct GoalCard: View {
                         .font(.hero(34))
                         .tracking(-1.4)
                         .contentTransition(.numericText(value: goal.progress))
-                    Text("%").font(.callout.weight(.medium)).foregroundStyle(Color.inkTertiary)
+                    Text("%").font(.allo(.callout, .medium)).foregroundStyle(Color.inkTertiary)
                 }
                 .foregroundStyle(Color.ink)
             }
@@ -54,7 +54,7 @@ struct GoalCard: View {
                 Spacer()
                 if let text = goal.deadlineText { Text(text) }
             }
-            .font(.footnote)
+            .font(.allo(.footnote))
             .foregroundStyle((goal.daysLeft ?? 1) < 0 ? Color.danger : Color.inkTertiary)
             .padding(.top, 14)
         }

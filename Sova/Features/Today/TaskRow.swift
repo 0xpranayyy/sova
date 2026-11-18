@@ -22,11 +22,11 @@ struct TaskRow: View {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     if !task.priority.marks.isEmpty && !task.isDone {
                         Text(task.priority.marks)
-                            .font(.body.weight(.bold))
+                            .font(.allo(.body, .bold))
                             .foregroundStyle(Color.danger)
                     }
                     Text(task.title)
-                        .font(.body)
+                        .font(.allo(.body))
                         .foregroundStyle(task.isDone ? Color.inkTertiary : Color.ink)
                         .lineLimit(2)
                 }

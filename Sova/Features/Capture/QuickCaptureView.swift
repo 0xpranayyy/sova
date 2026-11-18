@@ -38,7 +38,7 @@ struct QuickCaptureView: View {
     private var accent: Color { theme.accent.color }
     private var parsed: ParsedTask { QuickParse.parse(text) }
     private var canSave: Bool { !parsed.title.isEmpty }
-    private let fieldFont = Font.system(size: 24, weight: .semibold)
+    private let fieldFont = Font.allo(size: 24, weight: .semibold)
 
     /// The typed text with what the parser understood highlighted.
     private var highlighted: AttributedString {
@@ -109,7 +109,7 @@ struct QuickCaptureView: View {
                 Spacer(minLength: 4)
                 Button(action: openDetails) {
                     Image(systemName: "slider.horizontal.3")
-                        .font(.subheadline.weight(.medium))
+                        .font(.allo(.subheadline, .medium))
                         .foregroundStyle(Color.inkSecondary)
                         .frame(width: 40, height: 40)
                 }
@@ -117,7 +117,7 @@ struct QuickCaptureView: View {
                 .accessibilityLabel("More options")
                 Button(action: save) {
                     Image(systemName: "arrow.up")
-                        .font(.body.weight(.bold))
+                        .font(.allo(.body, .bold))
                         .foregroundStyle(Color.inkInverse)
                         .frame(width: 40, height: 40)
                         .background(accent, in: .circle)
@@ -182,7 +182,7 @@ private struct Token: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            if let symbol { Image(systemName: symbol).font(.caption2.weight(.semibold)) }
+            if let symbol { Image(systemName: symbol).font(.allo(.caption2, .semibold)) }
             Text(text).font(.mono(11.5))
         }
         .foregroundStyle(selected ? Color.inkSecondary : Color.inkTertiary)

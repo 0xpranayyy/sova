@@ -140,7 +140,7 @@ struct TodayView: View {
         VStack(alignment: .leading, spacing: 0) {
             MonoCaps(Date.now.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))
             Text(greeting)
-                .font(.callout)
+                .font(.allo(.callout))
                 .foregroundStyle(Color.inkSecondary)
                 .padding(.top, 22)
             HStack(alignment: .bottom) {
@@ -161,10 +161,10 @@ struct TodayView: View {
 
                 VStack(alignment: .trailing, spacing: 3) {
                     Text(status(done: done, total: total, overdue: overdue))
-                        .font(.subheadline.weight(.semibold))
+                        .font(.allo(.subheadline, .semibold))
                         .foregroundStyle(overdue > 0 ? Color.danger : Color.ink)
                     Text(total == done ? String(localized: "Nothing left") : String(localized: "\(total - done) left"))
-                        .font(.footnote)
+                        .font(.allo(.footnote))
                         .foregroundStyle(Color.inkTertiary)
                 }
                 .padding(.bottom, 12)

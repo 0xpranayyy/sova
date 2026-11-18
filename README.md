@@ -7,7 +7,7 @@ A native iOS app for **daily tasks, goals and routines**, built with SwiftUI and
 Inspired by Opal, Arc and Linear: dark-first, confident and precise.
 
 - **Near-black canvas, one electric accent.** Lime by default (Coral, Ice, Violet and Mint are the alternatives). The accent marks only what matters: progress, selection, "now" and the create button. No glows, gradients or decorative motifs.
-- **Big, tight type.** SF Pro Display for the hero numbers (the day score, goal percentages, consistency), plain sentence-case labels, and SF Mono only for times and counts. Copy is plain and specific, with no slogans.
+- **Big, tight type.** Set in Allo throughout: big numbers (the day score, goal percentages, consistency), plain sentence-case labels, and SF Mono only for times and counts. Copy is plain and specific, with no slogans.
 - **Today as a timeline.** Rituals and tasks merge into one line through Morning, Afternoon and Evening, plus Overdue and Anytime. A live "now" marker shows where you are, and an **Up next** card highlights the one thing that deserves attention. Round markers are rituals; square markers are tasks.
 - **Quiet surfaces, glass where it floats.** Content sits on near-transparent cards with hairline edges. Liquid Glass is used for the tab bar (with a separated "+" create button), toolbar buttons, sheets, notifications and the undo bar.
 - **Details:** a check that draws itself, milestone nodes on goal progress lines, a 17-week activity heatmap, inline highlighting of what quick capture understood, haptics throughout, and an owl mascot that blinks, follows your finger and smiles when you're done.
@@ -71,3 +71,7 @@ Sova/
   Support/      natural-language parsing, reminders, task actions with undo, TipKit tips
   Features/     Onboarding, Capture, Today, Goals, Routines, Insights, Editors, Settings
 ```
+
+## Credits
+
+Typeface: [Allo](https://github.com/joshpuckett/allo) by Josh Puckett, used under the SIL Open Font License 1.1. The license ships in `Sova/Resources/Fonts/Allo-OFL.txt`.

@@ -22,7 +22,7 @@ struct GoalDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         SectionLabel(String(localized: "Why it matters"))
                         Text(goal.notes)
-                            .font(.body)
+                            .font(.allo(.body))
                             .foregroundStyle(Color.inkSecondary)
                             .surface(cornerRadius: 20, padding: 18)
                     }
@@ -104,7 +104,7 @@ struct GoalDetailView: View {
                 }
                 .tint(SovaTheme.current.accent.color)
                 Text("No steps yet. Set progress here, or add steps below.")
-                    .font(.footnote)
+                    .font(.allo(.footnote))
                     .foregroundStyle(Color.inkSecondary)
             }
             .surface(cornerRadius: 22, padding: 18)
@@ -140,7 +140,7 @@ struct GoalDetailView: View {
 
                 HStack(spacing: 4) {
                     Image(systemName: "plus")
-                        .font(.body.weight(.medium))
+                        .font(.allo(.body, .medium))
                         .foregroundStyle(Color.inkTertiary)
                         .frame(width: 44, height: 44)
                     TextField("Add a step", text: $newMilestone)

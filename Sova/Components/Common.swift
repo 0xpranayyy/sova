@@ -12,7 +12,7 @@ struct IconTile: View {
     var body: some View {
         let tint = SovaTheme.current.accent.color
         Image(systemName: symbol)
-            .font(.system(size: size * 0.46, weight: .medium))
+            .font(.allo(size: size * 0.46, weight: .medium))
             .foregroundStyle(filled ? Color.inkInverse : (active ? tint : Color.inkSecondary))
             .frame(width: size, height: size)
             .background(filled ? tint : (active ? tint.opacity(0.12) : Color.surfaceRaised),
@@ -37,7 +37,7 @@ struct MetaLine: View {
                 Text(part.text).foregroundStyle(part.color)
             }
         }
-        .font(.footnote)
+        .font(.allo(.footnote))
         .lineLimit(1)
     }
 }
@@ -72,10 +72,10 @@ struct EmptyState: View {
             OwlMark(size: 44, blinks: true)
                 .padding(.bottom, 8)
             Text(title)
-                .font(.title2.weight(.bold))
+                .font(.allo(.title2, .bold))
                 .foregroundStyle(Color.ink)
             Text(message)
-                .font(.subheadline)
+                .font(.allo(.subheadline))
                 .foregroundStyle(Color.inkSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             if let actionTitle, let action {
@@ -112,7 +112,7 @@ struct ThemeSwatches: View {
                                     .scaleEffect(option == selected ? 1 : 0.85)
                             }
                         Text(option.name)
-                            .font(.caption.weight(.medium))
+                            .font(.allo(.caption, .medium))
                             .foregroundStyle(option == selected ? Color.ink : Color.inkTertiary)
                     }
                     .frame(maxWidth: .infinity, minHeight: 76)
