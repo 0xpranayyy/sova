@@ -15,6 +15,8 @@
 <link rel="icon" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/Allo-Black.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/Allo-ExtraBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/screens/today.webp" as="image">
 <style>
 @font-face{font-family:Allo;src:url(assets/fonts/Allo-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:Allo;src:url(assets/fonts/Allo-Medium.woff2) format("woff2");font-weight:500;font-display:swap}
@@ -384,6 +386,117 @@ html{overflow-x:clip}
 .giant .owl{position:absolute;left:50%;top:0;margin-left:clamp(40px,10vw,150px);width:clamp(90px,12vw,150px);height:auto;animation:peek 4s ease-in-out infinite}
 @keyframes peek{0%,100%{transform:translateY(16px) rotate(6deg)}50%{transform:translateY(0) rotate(-4deg)}}
 
+/* ===================== v3: polish + mobile ===================== */
+html{-webkit-tap-highlight-color:transparent}
+.panel::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:6;opacity:.09;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+.f-night::after,.final::after,.film::after{mix-blend-mode:screen;opacity:.05}
+main>section:nth-of-type(n+4){content-visibility:auto;contain-intrinsic-size:auto 900px}
+#features{content-visibility:visible}
+@media (hover:none){
+  .btn:hover,.card:hover{transform:none;box-shadow:none}
+}
+.btn:focus-visible,summary:focus-visible,.toggle button:focus-visible,a:focus-visible{outline:3px solid #3DCBFF;outline-offset:3px;border-radius:999px}
+
+/* sticky download bar (phones) */
+.mbar{display:none}
+@media (max-width:760px){
+  .mbar{display:flex;position:fixed;z-index:60;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));align-items:center;gap:12px;padding:10px 10px 10px 12px;border-radius:24px;
+    background:var(--glass);backdrop-filter:saturate(1.6) blur(20px);-webkit-backdrop-filter:saturate(1.6) blur(20px);border:1px solid var(--hair);box-shadow:0 18px 40px -16px rgba(20,10,60,.45);
+    transform:translateY(calc(100% + 30px));transition:transform .5s cubic-bezier(.2,.9,.2,1)}
+  .mbar.show{transform:none}
+  .mbar img{width:44px;height:44px;border-radius:11px}
+  .mbar b{display:block;font-weight:900;font-size:16px;letter-spacing:-.02em;line-height:1.1}
+  .mbar span{font-weight:700;font-size:13px;color:var(--ink2)}
+  .mbar .btn{margin-left:auto;background:#2B1677;color:var(--yellow);padding:12px 20px;font-size:16px;min-height:44px}
+  footer{padding-bottom:110px}
+}
+
+/* ---------- phones (≤760px) ---------- */
+@media (max-width:760px){
+  body{padding-top:76px}
+  .nav{top:max(10px,env(safe-area-inset-top));padding:6px 6px 6px 12px}
+  .brand{font-size:21px}.brand img{width:32px;height:32px;border-radius:9px}
+  .wrap{width:calc(100% - 20px)}
+  :root{--r-xl:34px;--r-lg:28px}
+
+  /* hero */
+  .hero{margin-top:6px;padding:34px 20px 0}
+  .hero h1{font-size:clamp(50px,15.5vw,68px);margin:20px 0 16px}
+  .hero .lead{font-size:17px}
+  .hero-cta{flex-direction:column;align-items:stretch;margin:26px 0 16px}
+  .hero-cta .btn{justify-content:center}
+  .btn-big{padding:18px 22px;font-size:18px}
+  .btn-ghost{padding:16px 22px;font-size:17px}
+  .hero-meta{font-size:13px;gap:6px 14px}
+  .fan{height:440px;width:100%}
+  .fan .p-left,.fan .p-right{display:none}
+  .fan .phone{width:236px;bottom:-60px}
+  .fan .hero-owl{bottom:356px;margin-left:-112px}
+  .fan .hero-owl svg{width:88px;height:auto}
+  .fan .bubble{bottom:398px;right:2%;font-size:14px;padding:10px 14px}
+  .fan .stk{font-size:13px;padding:8px 11px;border-width:2.5px}
+  .fan .stk.mint{top:150px!important;right:0!important}
+  .fan .stk.pink{bottom:120px!important;left:0!important}
+
+  .marquee{padding:22px 0 4px}
+  .track .stk{font-size:16px;padding:9px 15px}
+
+  /* story: one colored card per chapter, phone peeking from the bottom */
+  .story{background:transparent!important;overflow:visible;margin-top:14px}
+  .story>.spark{display:none}
+  .story-grid{padding:0;gap:0}
+  .step{background:var(--c-bg);color:var(--c-ink);border-radius:var(--r-xl);padding:34px 22px 0;margin-bottom:12px;overflow:clip;position:relative}
+  .story::after{display:none}
+  .step[data-theme=mint]{--c-bg:#4DF2B0;--c-ink:#0B5A3C;--s-chip:#0B5A3C;--s-chip-ink:#4DF2B0}
+  .step[data-theme=yellow]{--c-bg:#FFE94D;--c-ink:#2B1677;--s-chip:#2B1677;--s-chip-ink:#FFE94D}
+  .step[data-theme=lilac]{--c-bg:#D9CEFF;--c-ink:#2B1677;--s-chip:#4423B8;--s-chip-ink:#fff}
+  .step[data-theme=pink]{--c-bg:#FF5C93;--c-ink:#fff;--s-chip:#15102E;--s-chip-ink:#FF5C93}
+  .step h2{font-size:clamp(40px,12vw,54px);margin:16px 0 12px}
+  .step .lead{font-size:17px}
+  .step .capture{padding:18px 18px 16px;margin-top:22px}
+  .step .capture .line{font-size:23px}
+  .step .points{margin-top:20px}
+  .step .points li{font-size:15px}
+  .step .bars{margin-top:22px}
+  .inline-phone{display:block;width:250px;margin:30px auto -150px}
+  .step .ring-demo{margin-top:20px}
+
+  /* dark + film + sections */
+  .feature,.film{padding:38px 22px}
+  .f-night .feature-grid{gap:28px}
+  .f-night .stage .phone{width:250px;margin-bottom:-120px}
+  .f-night{padding-bottom:0}
+  .film .video{width:min(260px,70vw)}
+  .section-head{margin:70px auto 26px}
+  .section-head h2{font-size:clamp(40px,11.5vw,54px)}
+
+  /* little things: swipeable carousel */
+  .bento{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin:0 -10px;padding:4px 10px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-padding:0 10px}
+  .bento::-webkit-scrollbar{display:none}
+  .bento .card{flex:0 0 86%;scroll-snap-align:center;min-height:330px;opacity:1;transform:none}
+  .bento .card.span3{flex-direction:column;align-items:flex-start}
+  .widgets{flex-direction:column}
+  .w-small{width:120px;height:120px}
+  .w-medium{min-width:0;height:118px}
+  .dots{display:flex;justify-content:center;gap:7px;margin-top:14px}
+  .dots i{width:7px;height:7px;border-radius:9px;background:var(--ink3);transition:width .35s var(--ease),background .3s}
+  .dots i.on{width:22px;background:var(--ink)}
+
+  .plans{gap:12px}
+  .plan{padding:26px 22px}
+  .plan .price{font-size:48px}
+  .toggle button{padding:10px 14px}
+  details{padding:18px 18px}
+  summary{font-size:17px}
+  .final{padding:50px 22px}
+  .giant{padding-top:50px}
+  footer .wrap{justify-content:center;text-align:center}
+  footer nav{margin-left:0}
+}
+.dots{display:none}
+@media (max-width:760px){.dots{display:flex}}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
@@ -431,9 +544,9 @@ html{overflow-x:clip}
           </div>
         </div>
         <div class="fan" id="fan">
-          <div class="phone p-left"><img src="assets/screens/rituals.webp" alt="Rituals screen" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
-          <div class="phone p-right"><img src="assets/screens/goals.webp" alt="Goals screen" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
-          <div class="phone p-center"><img src="assets/screens/today.webp" alt="Sova's Today screen with the owl in a progress ring" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
+          <div class="phone p-left"><img decoding="async" src="assets/screens/rituals.webp" alt="Rituals screen" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
+          <div class="phone p-right"><img decoding="async" src="assets/screens/goals.webp" alt="Goals screen" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
+          <div class="phone p-center"><img decoding="async" src="assets/screens/today.webp" alt="Sova's Today screen with the owl in a progress ring" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
           <div class="hero-owl"><svg class="owl track" viewBox="-14 -6 128 136" width="120" height="128" aria-hidden="true">
 <ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
 <path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
@@ -480,7 +593,7 @@ html{overflow-x:clip}
               <div class="line"><span id="typed"></span><span class="caret"></span></div>
               <div class="chips" id="chips"></div>
             </div>
-            <div class="phone inline-phone"><img src="assets/screens/capture.webp" alt="Quick capture highlighting tomorrow 6pm" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
+            <div class="phone inline-phone"><img decoding="async" src="assets/screens/capture.webp" alt="Quick capture highlighting tomorrow 6pm" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="today" data-theme="yellow">
             <div class="num">02</div>
@@ -503,7 +616,7 @@ html{overflow-x:clip}
               </div>
               <div><b>3 of 4 done</b><span>Swipe the rest to tomorrow</span></div>
             </div>
-            <div class="phone inline-phone"><img src="assets/screens/today.webp" alt="Today screen" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
+            <div class="phone inline-phone"><img decoding="async" src="assets/screens/today.webp" alt="Today screen" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="rituals" data-theme="lilac">
             <div class="num">03</div>
@@ -515,7 +628,7 @@ html{overflow-x:clip}
               <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg></span>Grouped by morning, afternoon and evening</li>
               <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>A happy little wiggle every time you tick</li>
             </ul>
-            <div class="phone inline-phone"><img src="assets/screens/rituals.webp" alt="Rituals with a 12 day streak" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
+            <div class="phone inline-phone"><img decoding="async" src="assets/screens/rituals.webp" alt="Rituals with a 12 day streak" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="goals" data-theme="pink">
             <div class="num">04</div>
@@ -527,7 +640,7 @@ html{overflow-x:clip}
               <div class="bar"><div><span>Launch my side project</span><span>40%</span></div><i><span class="on"></span><span class="on"></span><span></span><span></span><span></span></i></div>
               <div class="bar"><div><span>Read 24 books</span><span>60%</span></div><i><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></i></div>
             </div>
-            <div class="phone inline-phone"><img src="assets/screens/goals.webp" alt="Goals with progress" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
+            <div class="phone inline-phone"><img decoding="async" src="assets/screens/goals.webp" alt="Goals with progress" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
         </div>
         <div class="story-phone" aria-hidden="true">
@@ -556,7 +669,7 @@ html{overflow-x:clip}
       </div>
       <svg class="moon" style="position:absolute;top:44px;right:56px" width="90" height="90" viewBox="0 0 100 100" aria-hidden="true"><path d="M70 10 A42 42 0 1 0 90 72 A34 34 0 1 1 70 10Z" fill="#FFE94D"/></svg>
       <div class="feature-grid">
-        <div class="stage"><div class="phone "><img src="assets/screens/dark.webp" alt="Sova in dark mode with a yellow night owl" loading="lazy" width="760" height="1670"><span class="glare"></span></div></div>
+        <div class="stage"><div class="phone "><img decoding="async" src="assets/screens/dark.webp" alt="Sova in dark mode with a yellow night owl" loading="lazy" width="760" height="1670"><span class="glare"></span></div></div>
         <div class="feature-copy">
           <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>Dark mode</span>
           <h2 class="h-lg">Gorgeous, day and night.</h2>
@@ -629,6 +742,7 @@ html{overflow-x:clip}
         <div class="private-tags"><span>No sign-up</span><span>No tracking</span><span>No ads</span><span>On-device</span></div>
       </div>
     </div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
   </section>
 
   <!-- FILM -->
@@ -753,6 +867,11 @@ html{overflow-x:clip}
   </section>
 </main>
 
+<div class="mbar" id="mbar" role="region" aria-label="Download Sova">
+  <img src="assets/icon.png" alt="" width="44" height="44">
+  <div><b>Sova</b><span>Tasks, habits &amp; goals</span></div>
+  <a class="btn js-store" href="#get">Get</a>
+</div>
 <div class="giant" aria-hidden="true"><svg class="owl track" viewBox="-14 -6 128 136" width="150" height="159" aria-hidden="true">
 <ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
 <path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
@@ -862,6 +981,28 @@ document.querySelectorAll(".toggle button").forEach(b => b.addEventListener("cli
   priceEl.classList.add("swap");
   setTimeout(() => { const [a, p, n] = PLANS[b.dataset.plan]; amt.textContent = a; per.textContent = p; pnote.textContent = n; priceEl.classList.remove("swap"); }, 180);
 }));
+
+// Phones: sticky download bar after the hero, hidden at the final call to action
+const mbar = document.getElementById("mbar");
+const heroEl = document.querySelector(".hero"), finalEl = document.getElementById("get");
+let pastHero = false, atFinal = false;
+const setBar = () => mbar.classList.toggle("show", pastHero && !atFinal);
+new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting; setBar(); }).observe(heroEl);
+new IntersectionObserver(([e]) => { atFinal = e.isIntersecting; setBar(); }, { threshold: .2 }).observe(finalEl);
+
+// Carousel dots for the little things
+const bento = document.querySelector(".bento"), dots = document.getElementById("dots");
+const cards = [...bento.children];
+dots.innerHTML = cards.map(() => "<i></i>").join("");
+const dotEls = [...dots.children];
+const markDot = () => {
+  const mid = bento.scrollLeft + bento.clientWidth / 2;
+  let best = 0, bestD = Infinity;
+  cards.forEach((c, i) => { const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid); if (d < bestD) { bestD = d; best = i; } });
+  dotEls.forEach((d, i) => d.classList.toggle("on", i === best));
+};
+bento.addEventListener("scroll", () => requestAnimationFrame(markDot), { passive: true });
+markDot();
 </script>
 </body>
 </html>
