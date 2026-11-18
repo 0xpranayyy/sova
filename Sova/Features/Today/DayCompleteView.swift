@@ -13,6 +13,7 @@ struct DayCompleteView: View {
     var onClose: () -> Void
 
     @AppStorage("userName") private var userName = ""
+    @Environment(WaveDirector.self) private var waves
 
     private var farewell: String {
         userName.isEmpty ? String(localized: "See you tomorrow")
@@ -89,11 +90,12 @@ struct DayCompleteView: View {
             .padding(.top, 8)
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 16)
+        .padding(.bottom, max(waves.insets.bottom, 16) + 8)
     }
 }
 
 #Preview {
     DayCompleteView(summary: DaySummary(tasks: 4, rituals: 3, streak: 6),
                     owlFrame: CGRect(x: 154, y: 262, width: 84, height: 84)) {}
+        .environment(WaveDirector())
 }

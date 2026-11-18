@@ -44,10 +44,21 @@ extension DistortionWaveStyle {
 /// A picture of what's on screen right now.
 enum ScreenSnapshot {
     @MainActor
-    static func take() -> UIImage? {
+    static var window: UIWindow? {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
-        guard let window = scenes.first(where: { $0.activationState == .foregroundActive })?.keyWindow
-                ?? scenes.first?.keyWindow else { return nil }
+        return scenes.first(where: { $0.activationState == .foregroundActive })?.keyWindow
+            ?? scenes.first?.keyWindow
+    }
+
+    @MainActor
+    static func safeArea() -> EdgeInsets {
+        guard let i = window?.safeAreaInsets else { return EdgeInsets() }
+        return EdgeInsets(top: i.top, leading: i.left, bottom: i.bottom, trailing: i.right)
+    }
+
+    @MainActor
+    static func take() -> UIImage? {
+        guard let window else { return nil }
         let renderer = UIGraphicsImageRenderer(bounds: window.bounds)
         return renderer.image { _ in
             window.drawHierarchy(in: window.bounds, afterScreenUpdates: false)
@@ -64,6 +75,18 @@ enum WaveScene: Equatable {
         switch self {
         case .welcome: .sovaRise
         case .dayDone: .sovaRing
+        }
+    }
+
+    /// Seconds after the wave sets off when the real screen takes over at the
+    /// latest. The welcome hands over once the front has crossed the screen,
+    /// without waiting for the colored edges to fade, so the stand-in Today
+    /// isn't left on screen; the day summary waits for the whole wave.
+    var handOver: Double {
+        let style = self.style
+        switch self {
+        case .welcome: return style.anticipation + style.travel * 0.6 + 0.6
+        case .dayDone: return style.duration + 0.8
         }
     }
 }
@@ -84,8 +107,13 @@ final class WaveDirector {
     private(set) var source: CGRect = .zero
     private(set) var focus: CGPoint?
     private(set) var revealed = false
+    /// The screen's safe area when the wave started. The wave's stage spans
+    /// the whole screen and passes no safe area down, so the destination
+    /// views pad themselves with this.
+    private(set) var insets = EdgeInsets()
     private var onFinished: (() -> Void)?
     private var afterDismiss: (() -> Void)?
+    private var announced = false
 
     var isActive: Bool { scene != nil }
 
@@ -98,9 +126,11 @@ final class WaveDirector {
               afterDismiss: (() -> Void)? = nil) -> Bool {
         guard !isActive, let picture = ScreenSnapshot.take() else { return false }
         snapshot = picture
+        insets = ScreenSnapshot.safeArea()
         self.source = source
         focus = CGPoint(x: source.midX, y: source.midY)
         revealed = false
+        announced = false
         onFinished = finished
         self.afterDismiss = afterDismiss
         self.scene = scene
@@ -110,13 +140,20 @@ final class WaveDirector {
             // The day-done moment already celebrated when the last thing was ticked.
             if scene == .welcome { Haptics.celebrate() }
             self.revealed = true
+            // Don't rely on the wave's completion alone: if it never reports
+            // back, hand over anyway so the app can't stay covered.
+            try? await Task.sleep(for: .seconds(scene.handOver))
+            guard self.scene == scene else { return }
+            self.waveFinished()
         }
         return true
     }
 
     /// Called by the wave when it has left and the edges have cleared.
     func waveFinished() {
-        if case .dayDone? = scene {
+        guard onFinished != nil || afterDismiss != nil else { return }
+        if case .dayDone? = scene, !announced {
+            announced = true
             AccessibilityNotification.Announcement(String(localized: "Day complete")).post()
         }
         let finished = onFinished
