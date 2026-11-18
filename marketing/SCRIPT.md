@@ -21,4 +21,4 @@ The music is 120 BPM in C major: marimba chords, a glockenspiel hook, a soft rou
 | 18.0–22.0 | **Goals** (pink) | **Big goals.** The season goes 0 → 64% and the progress bars fill. One step ticked: half marathon goes 60 → 80%, season to 72%. **Small steps.** | Ding, celebration |
 | 22.0–25.0 | **Dark mode** | A circle wipe turns the frame and the phone into the indigo night: stars, moon, the night owl. **Day or night.** → **It just glows.** | The drums drop out; twinkling bells over a pad, then a riser |
 | 25.0–27.5 | **The payoff** | **Less juggling.** (white) **More living.** (yellow). The owl rises from the bottom and smiles | Two big slams, snare roll |
-| 27.5–31.0 | **End card** (yellow) | The app icon pops in with sparkles, then **Sova.**, "Tasks. Rituals. Goals.", the pink sticker **One happy owl.**, and **Coming soon to iPhone** | Final hit, a held major chord, bells ringing out |
+| 27.5–31.0 | **End card** (yellow) | The app icon pops in with sparkles, then **Sova.**, "Tasks. Rituals. Goals.", the pink sticker **One happy owl.**, and **Available on the App Store** | Final hit, a held major chord, bells ringing out |
