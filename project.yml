@@ -22,3 +22,22 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: AppIcon-Indigo
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_ENTITLEMENTS: Config/Sova.entitlements
+    dependencies:
+      - target: SovaWidgetsExtension
+  SovaWidgetsExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: SovaWidgets
+        excludes: [Info.plist]
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.sova.Sova.Widgets
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: SovaWidgets/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Sova
+        CODE_SIGN_ENTITLEMENTS: Config/SovaWidgets.entitlements
