@@ -55,7 +55,7 @@ struct HelloStep: View {
                         .foregroundStyle(Color.ink)
                     Text("Sova")
                         .font(.system(size: titleSize, weight: .heavy))
-                        .foregroundStyle(SovaTheme.ember.swatch)
+                        .foregroundStyle(Accent.ember.color)
                 }
                 .padding(.top, 28)
                 .reveal(1)

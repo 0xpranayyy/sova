@@ -49,7 +49,7 @@ extension Color {
 
 // MARK: - Accents
 
-/// Vivid accents, each paired with a neighbor for a soft two-tone blend.
+/// Vivid, flat accents. Used as solid fills, never blended.
 enum Accent: String, CaseIterable, Identifiable {
     case ember, marigold, moss, lagoon, tide, plum, rose, clay, graphite
 
@@ -97,17 +97,16 @@ enum Accent: String, CaseIterable, Identifiable {
         }
     }
 
-    var gradient: LinearGradient {
-        LinearGradient(colors: [color, partner], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
+    /// Solid fill as a ShapeStyle. (Named for history; it is intentionally
+    /// a single flat color.)
+    var gradient: Color { color }
 
     var soft: Color { color.opacity(0.18) }
 }
 
 // MARK: - Themes
 
-/// The app's mood: an accent plus a full 3×3 mesh of colors that blends
-/// behind every screen.
+/// The app's mood: one accent, and a flat page tinted with it.
 enum SovaTheme: String, CaseIterable, Identifiable {
     case ember, tide, moss, plum, graphite
 
@@ -143,36 +142,13 @@ enum SovaTheme: String, CaseIterable, Identifiable {
         }
     }
 
-    var swatch: LinearGradient {
-        LinearGradient(colors: [accent.color, companion.color], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
+    var swatch: Color { accent.color }
 
-    private var mesh: [UInt32] {
-        switch self {
-        case .ember:    [0xFF8A5C, 0xFF5E7E, 0xC86BFF,
-                         0xFFB340, 0xFF7A6B, 0x8A5CFF,
-                         0xFFD27A, 0xFF5E3A, 0x5B4BFF]
-        case .tide:     [0x2F7BFF, 0x00B5B8, 0x5AD8FF,
-                         0x6A6BFF, 0x3FA9FF, 0x30D5D8,
-                         0x8A5CFF, 0x2F7BFF, 0x19C37D]
-        case .moss:     [0x19C37D, 0x7BE07A, 0x00B5B8,
-                         0x30D5A0, 0xA8E05F, 0x3FA9FF,
-                         0x00B5B8, 0x19C37D, 0x6A6BFF]
-        case .plum:     [0x5B4BFF, 0x8A5CFF, 0x00B5B8,
-                         0xC86BFF, 0xFF5E9E, 0x3FA9FF,
-                         0xFF3B7F, 0x8A5CFF, 0x19C37D]
-        case .graphite: [0x1E1B4B, 0x3730A3, 0x5856D6,
-                         0x312E81, 0x7D7AFF, 0x2F7BFF,
-                         0xA855F7, 0x4338CA, 0x0E7490]
-        }
-    }
-
-    /// Bright pastel in light mode, deep and glowing in dark mode.
-    func meshColors(dark: Bool) -> [Color] {
-        mesh.map { hex in
-            let c = Color(hex: hex)
-            return dark ? c.mix(with: .black, by: 0.45) : c.mix(with: .white, by: 0.42)
-        }
+    /// A flat page color: a whisper of the accent in light mode, a deep
+    /// tinted near-black in dark mode.
+    func canvas(dark: Bool) -> Color {
+        let base = accent.color
+        return dark ? base.mix(with: .black, by: 0.84) : base.mix(with: .white, by: 0.88)
     }
 
     static var current: SovaTheme {

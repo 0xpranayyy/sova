@@ -12,9 +12,8 @@ struct ProgressLine: View {
             ZStack(alignment: .leading) {
                 Capsule().fill(Color.well)
                 Capsule()
-                    .fill(LinearGradient(colors: [color.opacity(0.75), color], startPoint: .leading, endPoint: .trailing))
+                    .fill(color)
                     .frame(width: value == 0 ? 0 : max(height, geo.size.width * value))
-                    .shadow(color: color.opacity(0.45), radius: 5, y: 1)
             }
         }
         .frame(height: height)
@@ -72,7 +71,8 @@ struct MiniRing: View {
     }
 }
 
-/// The day's progress as a glowing two-tone ring.
+/// The day's progress as a solid ring, Fitness-style: the track is a
+/// faint version of the same color.
 struct ProgressRing: View {
     var progress: Double
     var lineWidth: CGFloat = 12
@@ -80,15 +80,12 @@ struct ProgressRing: View {
 
     var body: some View {
         ZStack {
-            Circle().stroke(Color.well, lineWidth: lineWidth)
+            let color = colors.first ?? .accentColor
+            Circle().stroke(color.opacity(0.18), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: max(0.001, min(progress, 1)))
-                .stroke(
-                    AngularGradient(colors: colors + [colors.first ?? .accentColor], center: .center),
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                )
+                .stroke(color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-                .shadow(color: (colors.first ?? .accentColor).opacity(0.45), radius: 8)
                 .opacity(progress > 0 ? 1 : 0)
         }
         .padding(lineWidth / 2)

@@ -4,11 +4,11 @@ A native iOS app for **daily tasks, goals and routines**, built with SwiftUI and
 
 ## Design
 
-- **Vivid color blends.** Every screen sits on a slowly drifting `MeshGradient`. There are five themes (Sunset, Ocean, Meadow, Aurora, Midnight); each is bright pastel in Light Mode and deep and glowing in Dark Mode.
+- **Flat, confident color.** Each screen sits on one calm tint of the theme color: no mesh blends, gradients or glows. Color comes from solid accent fills on buttons, icon tiles, routine checks and the progress ring, the way Apple's Fitness, Reminders and Settings use it. There are five themes (Sunset, Ocean, Meadow, Aurora, Midnight).
 - **Liquid Glass throughout.** Cards, task rows, routine buttons, tiles, chips, text fields and buttons all use `glassEffect`, tinted with their accent and interactive where you can tap. The tab bar shrinks as you scroll, and the "New …" accessory floats above it.
 - **Native type.** SF Pro with bold, Apple-style headlines and rounded numerals for stats.
-- **Nine vivid accents**, each paired with a neighbor for two-tone gradients on icons, progress and selections.
-- **Crafted details:** a checkbox that draws its own tick, a glowing two-tone progress ring for the day, springy pressable tiles, haptics on every meaningful change, and an owl mascot that blinks, follows your finger and smiles when you're done.
+- **Nine vivid accents**, always used as solid fills.
+- **Crafted details:** a checkbox that draws its own tick, a Fitness-style progress ring for the day, springy pressable tiles, haptics on every meaningful change, and an owl mascot that blinks, follows your finger and smiles when you're done.
 
 ## Onboarding
 

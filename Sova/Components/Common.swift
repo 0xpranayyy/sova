@@ -16,7 +16,6 @@ struct IconTile: View {
                 RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
                     .fill(filled ? AnyShapeStyle(accent.gradient) : AnyShapeStyle(accent.soft))
             }
-            .shadow(color: filled ? accent.color.opacity(0.35) : .clear, radius: 8, y: 4)
             .accessibilityHidden(true)
     }
 }
@@ -113,7 +112,6 @@ struct ThemeSwatches: View {
                         Circle()
                             .fill(option.swatch)
                             .frame(width: 40, height: 40)
-                            .shadow(color: option.accent.color.opacity(0.4), radius: 6, y: 3)
                             .overlay {
                                 Circle()
                                     .strokeBorder(Color.ink, lineWidth: 2)
