@@ -23,6 +23,7 @@ targets:
         ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: AppIcon-Indigo
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         CODE_SIGN_ENTITLEMENTS: Config/Sova.entitlements
+        INFOPLIST_FILE: Config/Sova-Info.plist
     dependencies:
       - target: SovaWidgetsExtension
   SovaWidgetsExtension:

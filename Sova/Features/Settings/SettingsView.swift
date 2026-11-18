@@ -23,6 +23,8 @@ struct SettingsView: View {
     @AppStorage(SovaSettings.Key.alertOffset) private var alertOffset = 0
     @AppStorage(SovaSettings.Key.badgeOverdue) private var badgeOverdue = true
     @AppStorage(SovaSettings.Key.haptics) private var hapticsOn = true
+    @AppStorage(SovaSettings.Key.iCloudSync) private var iCloudSync = false
+    @State private var showSyncNote = false
 
     @State private var notificationsDenied = false
     @State private var confirmErase = false
@@ -54,6 +56,25 @@ struct SettingsView: View {
 
                     Section {
                         plusRow
+                    }
+
+                    Section {
+                        Toggle(isOn: syncBinding) {
+                            Label {
+                                HStack(spacing: 6) {
+                                    Text("Sync with iCloud")
+                                    if !store.isPlus {
+                                        Image(systemName: "lock.fill")
+                                            .font(.caption2.weight(.heavy))
+                                            .foregroundStyle(Color.inkTertiary)
+                                    }
+                                }
+                            } icon: {
+                                Image(systemName: "icloud")
+                            }
+                        }
+                    } footer: {
+                        Text("Keep your tasks, rituals and goals on all your devices, privately in your own iCloud.")
                     }
 
                     Section("Your name") {
@@ -166,7 +187,8 @@ struct SettingsView: View {
                     Section {
                         Button("Erase All Data", systemImage: "trash", role: .destructive) { confirmErase = true }
                     } footer: {
-                        Text("Everything you add stays on this iPhone.")
+                        Text(iCloudSync && store.isPlus ? "This erases your data everywhere it syncs."
+                                                        : "Everything you add stays on this iPhone.")
                     }
                 }
                 .listRowBackground(Color.surface)
@@ -181,6 +203,11 @@ struct SettingsView: View {
                 }
             }
             .sheet(item: $plusReason) { PlusView(reason: $0) }
+            .alert(iCloudSync ? "iCloud sync is on" : "iCloud sync is off", isPresented: $showSyncNote) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("It takes effect the next time you open Sova.")
+            }
             .manageSubscriptionsSheet(isPresented: $showManage)
             .confirmationDialog("Erase everything?", isPresented: $confirmErase, titleVisibility: .visible) {
                 Button("Erase All Data", role: .destructive, action: eraseAll)
@@ -197,6 +224,17 @@ struct SettingsView: View {
     }
 
     // MARK: Plus
+
+    private var syncBinding: Binding<Bool> {
+        Binding(
+            get: { iCloudSync && store.isPlus },
+            set: { on in
+                if on && !store.isPlus { plusReason = .sync; return }
+                iCloudSync = on
+                showSyncNote = true
+            }
+        )
+    }
 
     private var plusRow: some View {
         Button {
