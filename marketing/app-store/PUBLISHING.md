@@ -37,7 +37,7 @@ Work through these in order. Everything Sova needs inside the project is already
 | Field | Value |
 | --- | --- |
 | Platform | iOS |
-| Name | Sova: Tasks, Habits & Goals |
+| Name | Sova: To-Do List & Habits |
 | Primary language | English (U.S.) |
 | Bundle ID | app.sova.Sova |
 | SKU | sova-ios-1 |
