@@ -14,7 +14,7 @@ Work through these in order. Everything Sova needs inside the project is already
 
 ## 2. Fill in two placeholders
 - [ ] `Sova/Support/Links.swift` → set `supportEmail` to your real address.
-- [ ] `docs/support.html` → replace both `SUPPORT_EMAIL` with the same address.
+- [ ] `docs/support.html` → replace every `SUPPORT_EMAIL` with the same address (the page and its Contact card).
 
 ## 3. Turn on the website (privacy + support pages)
 - [ ] GitHub → repo **Settings → Pages** → Source: *Deploy from a branch* → `main` / `/docs` → Save.
@@ -67,7 +67,7 @@ For each product:
 - **Privacy Policy URL:** https://0xpranayyy.github.io/sova/privacy.html
 - **Support URL:** https://0xpranayyy.github.io/sova/support.html
 - **Marketing URL:** https://0xpranayyy.github.io/sova/ (the Sova website in `docs/index.html`)
-- **License agreement:** keep Apple's standard EULA.
+- **License agreement:** keep Apple's standard EULA. Sova's own Terms of Use are at https://0xpranayyy.github.io/sova/terms.html
 - **Copyright:** © 2026 0xpranayyy
 
 ## 8. App Privacy

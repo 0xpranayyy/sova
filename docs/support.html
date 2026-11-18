@@ -2,65 +2,145 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sova Support</title>
+<meta name="description" content="Help with Sova: tasks, rituals, goals, widgets, Sova Plus and your data.">
+<meta name="theme-color" content="#FCFCFA" id="themeColor">
+<link rel="icon" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="canonical" href="https://0xpranayyy.github.io/sova/support.html">
+<meta property="og:title" content="Sova Support"><meta property="og:description" content="Help with Sova: tasks, rituals, goals, widgets, Sova Plus and your data."><meta property="og:image" content="https://0xpranayyy.github.io/sova/assets/og.jpg">
+<script>(function(){var t=null;try{t=localStorage.getItem("sova-theme")}catch(e){}if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;var d=t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches;document.getElementById("themeColor").content=d?"#0E0B1F":"#FCFCFA"})();</script>
 <style>
-  :root { --bg:#FCFCFA; --ink:#15102E; --soft:rgba(21,16,46,.62); --card:#fff; --yellow:#FFE94D; --indigo:#2B1677; --line:rgba(21,16,46,.08); }
-  @media (prefers-color-scheme: dark) { :root { --bg:#0E0B1F; --ink:#F4F1FF; --soft:rgba(244,241,255,.65); --card:#1B1636; --line:rgba(255,255,255,.08); } }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; }
-  main { max-width:680px; margin:0 auto; padding:56px 20px 80px; }
-  .badge { display:inline-block; background:var(--indigo); color:var(--yellow); font-weight:800; letter-spacing:.14em; text-transform:uppercase; font-size:12px; padding:8px 14px; border-radius:99px; transform:rotate(-3deg); }
-  h1 { font-size:46px; line-height:1; letter-spacing:-1.5px; margin:18px 0 6px; }
-  .date { color:var(--soft); margin:0 0 28px; }
-  .card { background:var(--card); border:1.5px solid var(--line); border-radius:24px; padding:22px 24px; margin:14px 0; }
-  .card.hero { background:var(--yellow); color:#15102E; border:none; font-size:19px; font-weight:600; }
-  h2 { font-size:20px; margin:0 0 6px; letter-spacing:-.3px; }
-  p { margin:0 0 8px; } p:last-child { margin-bottom:0; }
-  a { color:inherit; }
+@font-face{font-family:Allo;src:url(assets/fonts/Allo-Medium.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:Allo;src:url(assets/fonts/Allo-Bold.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:Allo;src:url(assets/fonts/Allo-ExtraBold.woff2) format("woff2");font-weight:800;font-display:swap}
+@font-face{font-family:Allo;src:url(assets/fonts/Allo-Black.woff2) format("woff2");font-weight:900;font-display:swap}
+:root{color-scheme:light;--canvas:#FCFCFA;--ink:#15102E;--ink2:rgba(21,16,46,.66);--ink3:rgba(21,16,46,.42);--surface:#fff;--hair:rgba(21,16,46,.09);--well:rgba(21,16,46,.05);--glass:rgba(252,252,250,.75);--accent:#2B1677}
+:root[data-theme=dark]{color-scheme:dark;--canvas:#0E0B1F;--ink:#F4F1FF;--ink2:rgba(244,241,255,.7);--ink3:rgba(244,241,255,.45);--surface:#1B1636;--hair:rgba(255,255,255,.09);--well:rgba(255,255,255,.06);--glass:rgba(14,11,31,.72);--accent:#B6A9FF}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--canvas:#0E0B1F;--ink:#F4F1FF;--ink2:rgba(244,241,255,.7);--ink3:rgba(244,241,255,.45);--surface:#1B1636;--hair:rgba(255,255,255,.09);--well:rgba(255,255,255,.06);--glass:rgba(14,11,31,.72);--accent:#B6A9FF}}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;scroll-padding-top:100px}
+body{background:var(--canvas);color:var(--ink);font-family:Allo,ui-rounded,system-ui,sans-serif;font-weight:500;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img,svg{display:block}
+.wrap{width:min(1120px,calc(100% - 32px));margin-inline:auto}
+.top{position:sticky;top:0;z-index:20;background:var(--glass);backdrop-filter:saturate(1.6) blur(18px);-webkit-backdrop-filter:saturate(1.6) blur(18px);border-bottom:1px solid var(--hair)}
+.top .wrap{display:flex;align-items:center;gap:22px;height:64px}
+.top .brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:22px;letter-spacing:-.04em}
+.top .brand img{width:32px;height:32px;border-radius:9px}
+.top nav{display:flex;gap:20px;margin-left:auto;font-weight:700;font-size:15px;color:var(--ink2)}
+.top nav a:hover,.top nav a[aria-current]{color:var(--ink)}
+.top .get{background:var(--ink);color:var(--canvas);font-weight:900;font-size:14.5px;padding:10px 16px;border-radius:999px}
+@media (max-width:640px){.top nav{display:none}.top .get{margin-left:auto}}
+.hero{padding:64px 0 20px;position:relative}
+.hero .owl{width:78px;height:auto;margin-bottom:14px}
+.hero h1{font-weight:900;font-size:clamp(44px,7vw,84px);letter-spacing:-.05em;line-height:.92}
+.hero p{font-weight:600;font-size:clamp(17px,1.6vw,20px);color:var(--ink2);max-width:640px;margin-top:16px}
+.hero .meta{font-weight:700;font-size:14px;color:var(--ink3);margin-top:10px}
+.layout{display:grid;grid-template-columns:240px 1fr;gap:48px;margin-top:40px;align-items:start}
+.toc{position:sticky;top:96px;display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:15px}
+.toc a{color:var(--ink2);padding:7px 12px;border-radius:12px}
+.toc a:hover{background:var(--well);color:var(--ink)}
+.doc section{scroll-margin-top:100px;padding:28px 0;border-top:1.5px solid var(--hair)}
+.doc section:first-child{border-top:0;padding-top:0}
+.doc h2{font-weight:900;font-size:clamp(24px,2.6vw,30px);letter-spacing:-.03em;margin-bottom:10px}
+.doc h3{font-weight:900;font-size:19px;margin:18px 0 6px}
+.doc p,.doc li{color:var(--ink2);font-weight:600;font-size:17px;max-width:720px}
+.doc p+p{margin-top:10px}
+.doc ul{padding-left:20px;display:grid;gap:6px;margin-top:8px}
+.doc a{color:var(--accent);font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.callout{background:#FFE94D;color:#15102E;border-radius:24px;padding:20px 24px;font-weight:700;font-size:18px;margin-bottom:30px}
+.callout p{color:#15102E!important;font-size:18px!important}
+@media (max-width:860px){.layout{grid-template-columns:1fr}.toc{position:static;flex-direction:row;flex-wrap:wrap}}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:30px}
+.card{background:var(--surface);border:1.5px solid var(--hair);border-radius:26px;padding:22px;scroll-margin-top:100px}
+.card h2{font-size:20px;margin-bottom:6px}
+.card p{font-size:15.5px}
+.tag{display:inline-block;font-weight:900;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:999px;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:16px;padding:14px 22px;border-radius:999px;background:#2B1677;color:#FFE94D}
+.grid-assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:16px}
+.asset{background:var(--surface);border:1.5px solid var(--hair);border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:10px;font-weight:800;font-size:14px}
+.asset img{width:100%;border-radius:14px;background:var(--well)}
+.asset span{color:var(--ink3);font-weight:700;font-size:12.5px}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}
+.facts div{background:var(--well);border-radius:18px;padding:14px 16px}
+.facts b{display:block;font-weight:900;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.facts span{font-weight:800;font-size:16px}
+
+.foot{border-top:1.5px solid var(--hair);margin-top:clamp(70px,9vw,120px);padding:56px 0 calc(40px + env(safe-area-inset-bottom));color:var(--ink2)}
+.foot .foot-grid{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:32px;justify-content:initial;text-align:left}
+.foot .brand{color:var(--ink);font-weight:900;font-size:24px;letter-spacing:-.04em;display:inline-flex;align-items:center;gap:10px}
+.foot .brand img{width:34px;height:34px;border-radius:9px}
+.foot-brand p{margin:12px 0 18px;font-weight:600;max-width:280px}
+.foot-store{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--canvas);font-weight:900;font-size:15px;padding:12px 18px;border-radius:999px}
+.foot nav.foot-col{display:flex;flex-direction:column;gap:10px;margin-left:0}
+.foot-col h4{font-weight:900;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+.foot-col a{font-weight:700;font-size:15px;transition:color .2s}
+.foot-col a:hover,.foot-col a:focus-visible{color:var(--ink)}
+.foot .foot-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;margin-top:44px;padding-top:22px;border-top:1.5px solid var(--hair);font-weight:600;font-size:13.5px;color:var(--ink3)}
+@media (max-width:900px){.foot .foot-grid{grid-template-columns:1fr 1fr}.foot-brand{grid-column:1/-1}}
+@media (max-width:760px){.foot{padding-bottom:calc(120px + env(safe-area-inset-bottom))}}
 </style>
 </head>
 <body>
-<main>
-  <span class="badge">Sova</span>
-  <h1>Support</h1>
-  <p class="date">Help with Sova: tasks, rituals and goals with a happy owl.</p>
-
-  <div class="card hero">Need a hand? Check the answers below, or write to us. We read every message.</div>
-
-  <div class="card">
-    <h2>How do I add a task fast?</h2>
-    <p>Tap <b>+</b> and type like you talk: “Call Mom tomorrow 6pm !!”. Sova reads the day, the time, repeats like “every Monday”, and <b>!!</b> or <b>!!!</b> for priority.</p>
-  </div>
-  <div class="card">
-    <h2>Why didn’t I get a task alert?</h2>
-    <p>Alerts only fire for tasks with a time. Check iPhone Settings → Notifications → Sova, and the alert timing in Sova’s Settings.</p>
-  </div>
-  <div class="card">
-    <h2>How do repeating tasks work?</h2>
-    <p>When you finish a repeating task, Sova creates the next one automatically. Tap Undo if you didn’t mean to.</p>
-  </div>
-  <div class="card">
-    <h2>How do I add the widgets?</h2>
-    <p>Touch and hold your Home Screen, tap <b>Edit → Add Widget</b>, then search for Sova. The Rituals widget lets you tick rituals right from the Home Screen.</p>
-  </div>
-  <div class="card">
-    <h2>What does Sova Plus include?</h2>
-    <p>Unlimited rituals and goals, iCloud sync across your devices and extra app icons. Free includes unlimited tasks, 3 rituals and 1 goal.</p>
-  </div>
-  <div class="card">
-    <h2>How do I restore or cancel Plus?</h2>
-    <p>Restore: Sova → Settings → Restore purchases. Cancel: iPhone Settings → your name → Subscriptions → Sova.</p>
-  </div>
-  <div class="card">
-    <h2>How does iCloud sync work?</h2>
-    <p>With Plus, turn on Settings → Sync with iCloud, then reopen Sova. Your data syncs privately through your own iCloud account.</p>
-  </div>
-  <div class="card">
-    <h2>Contact</h2>
-    <p>Email: <a href="mailto:SUPPORT_EMAIL">SUPPORT_EMAIL</a></p>
-  </div>
-  <p class="date"><a href="privacy.html">Privacy Policy</a></p>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html"><img src="assets/icon.png" alt="" width="32" height="32">Sova</a>
+  <nav aria-label="Site"><a href="index.html#features">Features</a><a href="index.html#plus">Pricing</a><a href="support.html" aria-current="page">Support</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav>
+  <a class="get" href="index.html#get">Get Sova</a>
+</div></header>
+<main class="wrap">
+<div class="hero"><svg class="owl" viewBox="-14 -6 128 136" width="78" height="83" aria-hidden="true">
+<ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
+<path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
+<path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
+<path d="M10 0 Q30 21.6 50 18.36 Q70 21.6 90 0 C110 45.36 104 116 50 116 C-4 116 -10 45.36 10 0Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
+<ellipse cx="50" cy="90" rx="25" ry="22" fill="#4A34A8"/>
+<path d="M40 84 q5 4 10 0 q5 4 10 0 M43 95 q4 3.5 7 0 q3.5 3.5 7 0" stroke="#2B1677" stroke-opacity=".35" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+<g class="eyes"><circle cx="30" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="31.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="34.5" cy="45.5" r="2.8" fill="#FFE94D"/></g><circle cx="70" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="71.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="74.5" cy="45.5" r="2.8" fill="#FFE94D"/></g></g>
+<circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
+<path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg><h1>Support</h1><p>Answers to common questions, and how to reach us.</p></div><div class="cards"><article class="card" id="contact"><span class="tag" style="background:#2B1677;color:#FFE94D">Contact</span><h2>Contact us</h2><p>Write to <a href="mailto:SUPPORT_EMAIL">SUPPORT_EMAIL</a>. Include your iPhone model and iOS version if something isn't working. We read every message.</p></article><article class="card" id="quick-add"><span class="tag" style="background:#4DF2B0;color:#0B5A3C">Using Sova</span><h2>Add a task fast</h2><p>Tap + and type the way you'd say it: “Call Mom tomorrow 6pm !!”. Sova reads the day, the time, repeats like “every Monday” and priority from !! or !!!.</p></article><article class="card" id="repeats"><span class="tag" style="background:#4DF2B0;color:#0B5A3C">Using Sova</span><h2>Repeating tasks</h2><p>Pick daily, weekdays, weekly, monthly or yearly when you edit a task. Finishing one creates the next. Tap Undo if you didn't mean to.</p></article><article class="card" id="widgets"><span class="tag" style="background:#4DF2B0;color:#0B5A3C">Using Sova</span><h2>Add the widgets</h2><p>Touch and hold the Home Screen, tap Edit → Add Widget, and search for Sova. For the Lock Screen, touch and hold it, tap Customize, then the widget area.</p></article><article class="card" id="notifications"><span class="tag" style="background:#D9CEFF;color:#4423B8">Using Sova</span><h2>Alerts don't arrive</h2><p>Alerts only fire for tasks with a time. Check iPhone Settings → Notifications → Sova, and the alert timing in Sova → Settings → Calendar & alerts.</p></article><article class="card" id="sync"><span class="tag" style="background:#3DCBFF;color:#063F73">Sova Plus</span><h2>iCloud sync</h2><p>With Plus, turn on Sova → Settings → Sync with iCloud, then reopen Sova. Make sure you're signed in to iCloud with the same Apple Account on each device.</p></article><article class="card" id="restore"><span class="tag" style="background:#FFE94D;color:#5E4A00">Sova Plus</span><h2>Restore purchases</h2><p>On a new iPhone, open Sova → Settings → Restore purchases. Use the same Apple Account you bought Plus with.</p></article><article class="card" id="cancel"><span class="tag" style="background:#FFE94D;color:#5E4A00">Sova Plus</span><h2>Cancel a subscription</h2><p>Open iPhone Settings → your name → Subscriptions → Sova. You keep Plus until the end of the period you paid for, and nothing is deleted.</p></article><article class="card" id="refunds"><span class="tag" style="background:#FFE94D;color:#5E4A00">Sova Plus</span><h2>Refunds</h2><p>Purchases are handled by Apple. You can request a refund at <a href="https://reportaproblem.apple.com" rel="noopener">reportaproblem.apple.com</a>.</p></article><article class="card" id="data"><span class="tag" style="background:#FF5C93;color:#5E0A26">Privacy</span><h2>Delete your data</h2><p>Sova → Settings → Erase All Data removes everything. Deleting the app also removes it from this iPhone. With iCloud sync on, also check iCloud settings.</p></article></div>
 </main>
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <a class="brand" href="index.html"><img src="assets/icon.png" alt="" width="34" height="34">Sova</a>
+      <p>Tasks, habits and goals for iPhone, with a little owl.</p>
+      <a class="foot-store js-store" href="index.html#get"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>Download on the App Store</a>
+    </div>
+    <nav class="foot-col" aria-label="Product">
+      <h4>Product</h4>
+      <a href="index.html#features">Features</a>
+      <a href="index.html#widgets">Widgets</a>
+      <a href="index.html#plus">Pricing</a>
+      <a href="index.html#film">Watch the film</a>
+      <a href="index.html#faq">FAQ</a>
+    </nav>
+    <nav class="foot-col" aria-label="Help">
+      <h4>Help</h4>
+      <a href="support.html">Support</a>
+      <a href="support.html#contact">Contact us</a>
+      <a href="support.html#restore">Restore purchases</a>
+      <a href="support.html#cancel">Cancel a subscription</a>
+    </nav>
+    <nav class="foot-col" aria-label="Legal">
+      <h4>Legal</h4>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Use</a>
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" rel="noopener">Apple Standard EULA</a>
+      <a href="acknowledgments.html">Acknowledgments</a>
+    </nav>
+    <nav class="foot-col" aria-label="More">
+      <h4>More</h4>
+      <a href="press.html">Press kit</a>
+      <a href="sitemap.xml">Sitemap</a>
+    </nav>
+  </div>
+  <div class="wrap foot-bottom">
+    <span>© <span class="js-year">2026</span> 0xpranayyy. All rights reserved.</span>
+    <span>Apple, iPhone and App Store are trademarks of Apple Inc.</span>
+  </div>
+</footer>
+<script>document.querySelectorAll(".js-year").forEach(e=>e.textContent=new Date().getFullYear());</script>
 </body>
 </html>

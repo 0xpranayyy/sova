@@ -853,6 +853,21 @@ html.lenis,html.lenis body{height:auto}
   .word{opacity:1;transform:none}
   .step{opacity:1}
 }
+
+.foot{border-top:1.5px solid var(--hair);margin-top:clamp(70px,9vw,120px);padding:56px 0 calc(40px + env(safe-area-inset-bottom));color:var(--ink2)}
+.foot .foot-grid{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:32px;justify-content:initial;text-align:left}
+.foot .brand{color:var(--ink);font-weight:900;font-size:24px;letter-spacing:-.04em;display:inline-flex;align-items:center;gap:10px}
+.foot .brand img{width:34px;height:34px;border-radius:9px}
+.foot-brand p{margin:12px 0 18px;font-weight:600;max-width:280px}
+.foot-store{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--canvas);font-weight:900;font-size:15px;padding:12px 18px;border-radius:999px}
+.foot nav.foot-col{display:flex;flex-direction:column;gap:10px;margin-left:0}
+.foot-col h4{font-weight:900;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-bottom:4px}
+.foot-col a{font-weight:700;font-size:15px;transition:color .2s}
+.foot-col a:hover,.foot-col a:focus-visible{color:var(--ink)}
+.foot .foot-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;margin-top:44px;padding-top:22px;border-top:1.5px solid var(--hair);font-weight:600;font-size:13.5px;color:var(--ink3)}
+@media (max-width:900px){.foot .foot-grid{grid-template-columns:1fr 1fr}.foot-brand{grid-column:1/-1}}
+@media (max-width:760px){.foot{padding-bottom:calc(120px + env(safe-area-inset-bottom))}}
+
 </style>
 </head>
 <body>
@@ -1337,15 +1352,44 @@ html.lenis,html.lenis body{height:auto}
   <div><b>Sova</b><span>Tasks, habits &amp; goals</span></div>
   <a class="btn js-store" href="#get">Get</a>
 </div>
-<footer>
-  <div class="wrap">
-    <a class="brand" href="#top"><img src="assets/icon.png" alt="" width="30" height="30" style="width:30px;height:30px;border-radius:8px">Sova</a>
-    <span>© <span id="year">2026</span> 0xpranayyy</span>
-    <nav aria-label="Footer">
-      <a href="support.html">Support</a>
-      <a href="privacy.html">Privacy</a>
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <a class="brand" href="#top"><img src="assets/icon.png" alt="" width="34" height="34">Sova</a>
+      <p>Tasks, habits and goals for iPhone, with a little owl.</p>
+      <a class="foot-store js-store" href="#get"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>Download on the App Store</a>
+    </div>
+    <nav class="foot-col" aria-label="Product">
+      <h4>Product</h4>
+      <a href="#features">Features</a>
+      <a href="#widgets">Widgets</a>
       <a href="#plus">Pricing</a>
+      <a href="#film">Watch the film</a>
+      <a href="#faq">FAQ</a>
     </nav>
+    <nav class="foot-col" aria-label="Help">
+      <h4>Help</h4>
+      <a href="support.html">Support</a>
+      <a href="support.html#contact">Contact us</a>
+      <a href="support.html#restore">Restore purchases</a>
+      <a href="support.html#cancel">Cancel a subscription</a>
+    </nav>
+    <nav class="foot-col" aria-label="Legal">
+      <h4>Legal</h4>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Use</a>
+      <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" rel="noopener">Apple Standard EULA</a>
+      <a href="acknowledgments.html">Acknowledgments</a>
+    </nav>
+    <nav class="foot-col" aria-label="More">
+      <h4>More</h4>
+      <a href="press.html">Press kit</a>
+      <a href="sitemap.xml">Sitemap</a>
+    </nav>
+  </div>
+  <div class="wrap foot-bottom">
+    <span>© <span class="js-year">2026</span> 0xpranayyy. All rights reserved.</span>
+    <span>Apple, iPhone and App Store are trademarks of Apple Inc.</span>
   </div>
 </footer>
 
@@ -1359,7 +1403,7 @@ html.lenis,html.lenis body{height:auto}
 const APP_STORE_URL = "";
 if (APP_STORE_URL) document.querySelectorAll(".js-store").forEach(a => { a.href = APP_STORE_URL; a.target = "_blank"; a.rel = "noopener"; });
 
-document.getElementById("year").textContent = new Date().getFullYear();
+document.querySelectorAll(".js-year").forEach(e => e.textContent = new Date().getFullYear());
 
 // Reveal on scroll
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .14 });
