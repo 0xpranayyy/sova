@@ -8,7 +8,7 @@ struct OwlMark: View {
     var look: CGSize = .zero
     var happy = false
     var blinks = true
-    var bodyColor: Color = .night
+    var bodyColor: Color = .ink
     var eyeColor: Color = .canvas
 
     @State private var blinking = false
@@ -26,7 +26,7 @@ struct OwlMark: View {
             .offset(y: h * 0.44 - h / 2)
 
             Beak()
-                .fill(Color.ember)
+                .fill(StickerTone.orange.fill)
                 .frame(width: w * 0.11, height: w * 0.10)
                 .offset(y: h * 0.62 - h / 2 + w * 0.05)
         }

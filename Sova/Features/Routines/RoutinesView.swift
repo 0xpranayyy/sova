@@ -11,7 +11,7 @@ struct RoutinesView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
                     ScreenTitle(title: String(localized: "Rituals"),
-                                subtitle: String(localized: "\(routines.filter { $0.isDone(on: .now) }.count) of \(routines.filter { $0.isScheduled(on: .now) }.count) done today")) {
+                                subtitle: String(localized: "\(routines.filter { $0.isDone(on: .now) }.count) of \(routines.filter { $0.isScheduled(on: .now) }.count) today")) {
                         CircleAction(symbol: "plus", label: String(localized: "New ritual")) { router.sheet = .newRoutine }
                     }
                     .padding(.top, 4)
@@ -21,7 +21,7 @@ struct RoutinesView: View {
                                    message: String(localized: "Rituals are things you do on a schedule, like reading or a morning walk."),
                                    actionTitle: String(localized: "Add a routine")) { router.sheet = .newRoutine }
                     } else {
-                        WeekStrip(routines: routines, color: .ember)
+                        WeekStrip(routines: routines, color: StickerTone.indigo.fill)
                             .padding(.bottom, 4)
                         ForEach(DayPeriod.allCases) { period in
                             let items = routines.filter { $0.period == period }
@@ -31,8 +31,10 @@ struct RoutinesView: View {
                                         period.name,
                                         trailing: "\(items.filter { $0.isDone(on: .now) }.count) of \(items.filter { $0.isScheduled(on: .now) }.count)"
                                     )
-                                    GroupedList(items: items, inset: 64) { routine in
-                                        RoutineRow(routine: routine) { router.sheet = .routine(routine) }
+                                    VStack(spacing: 8) {
+                                        ForEach(items) { routine in
+                                            RoutineRow(routine: routine) { router.sheet = .routine(routine) }
+                                        }
                                     }
                                 }
                             }

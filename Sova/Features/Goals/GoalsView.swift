@@ -18,10 +18,10 @@ struct GoalsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 10) {
                     ScreenTitle(title: String(localized: "Goals"),
-                                subtitle: active.isEmpty ? String(localized: "Nothing in progress yet")
-                                    : String(localized: "\(active.count) in progress · \(averageText) on average")) {
+                                subtitle: active.isEmpty ? String(localized: "Nothing in progress")
+                                    : String(localized: "\(active.count) in progress")) {
                         CircleAction(symbol: "plus", label: String(localized: "New goal")) { router.sheet = .newGoal }
                     }
                     .padding(.top, 4)

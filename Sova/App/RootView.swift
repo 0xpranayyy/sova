@@ -61,7 +61,7 @@ struct MainTabView: View {
         .sheet(item: $router.sheet) { sheet in
             editor(for: sheet)
         }
-        .tint(accent)
+        .tint(Color.ink)
         .environment(router)
     }
 

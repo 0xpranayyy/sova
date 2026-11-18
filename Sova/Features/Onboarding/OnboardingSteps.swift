@@ -6,12 +6,12 @@ import SwiftUI
 private struct StepHeadline: View {
     let text: String
     var index = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 34
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 44
 
     var body: some View {
         Text(text)
             .font(.hero(size, weight: .heavy))
-            .tracking(-1.4)
+            .tracking(-2)
             .foregroundStyle(Color.ink)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -25,7 +25,7 @@ private struct StepBody: View {
 
     var body: some View {
         Text(text)
-            .font(.allo(.body, .medium))
+            .font(.allo(size: 17, weight: .bold, relativeTo: .body))
             .foregroundStyle(Color.inkSecondary)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -43,45 +43,131 @@ struct HelloStep: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // A loose pile of what a Sova day is made of.
-            ZStack(alignment: .topLeading) {
-                Sticker(text: "Morning pages", tone: .lilac, caption: "Ritual · 7:00", size: 19, tilt: -6)
-                    .offset(x: 126, y: 0)
-                Sticker(text: "Call Mom", tone: .yellow, size: 19, tilt: 5)
-                    .offset(x: 0, y: 80)
-                Starburst(value: "12", caption: "Day streak", tone: .mint, size: 100, tilt: -10)
-                    .offset(x: 214, y: 76)
-                Sticker(text: "Read 12 books", tone: .pink, caption: "Goal · 71%", size: 23, tilt: -4)
-                    .offset(x: 16, y: 164)
-                Sticker(text: "!!", tone: .orange, size: 28, tilt: 8)
-                    .offset(x: 214, y: 192)
-                Sticker(text: "Drink water", tone: .cyan, size: 17, tilt: 3)
-                    .offset(x: 126, y: 258)
-                OwlMark(size: 60, look: look)
-                    .rotationEffect(.degrees(-8))
-                    .offset(x: 2, y: 272)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.top, 8)
-            .reveal(0)
+            WelcomeBlocks(look: look)
+                .padding(.top, 6)
+
+            Spacer(minLength: 20)
 
             Text("Sova.")
                 .font(.hero(titleSize, weight: .heavy))
-                .tracking(-5)
+                .tracking(-4.5)
                 .foregroundStyle(Color.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
-                .reveal(1)
-            Text("Tasks, rituals and goals.\nOne good day at a time.")
-                .font(.allo(size: 20, weight: .semibold, relativeTo: .title3))
-                .tracking(-0.4)
+                .reveal(7)
+            Text("Your day, your rituals, your goals.\nPlanned in a minute.")
+                .font(.allo(size: 20, weight: .bold, relativeTo: .title3))
+                .tracking(-0.3)
                 .foregroundStyle(Color.inkSecondary)
-                .padding(.top, 10)
-                .padding(.bottom, 26)
-                .reveal(2)
+                .padding(.top, 8)
+                .padding(.bottom, 22)
+                .reveal(8)
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 20)
     }
+}
+
+/// A taste of the app, as blocks that pop in one by one.
+private struct WelcomeBlocks: View {
+    var look: CGSize
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
+                    MonoCaps(String(localized: "Today"), color: StickerTone.yellow.deep)
+                    Text("3/8")
+                        .font(.hero(56, weight: .heavy))
+                        .tracking(-2.4)
+                    Spacer(minLength: 0)
+                    DaySegments(done: 3, total: 8, color: StickerTone.yellow.deep, height: 8)
+                }
+                .foregroundStyle(StickerTone.yellow.deep)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(16)
+                .background(StickerTone.yellow.fill, in: .rect(cornerRadius: 28, style: .continuous))
+                .pop(0)
+
+                VStack(spacing: 8) {
+                    Label("Meditate", systemImage: "checkmark")
+                        .font(.allo(size: 17, weight: .heavy, relativeTo: .headline))
+                        .foregroundStyle(StickerTone.mint.deep)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .background(StickerTone.mint.fill, in: .rect(cornerRadius: 28, style: .continuous))
+                        .pop(1)
+                    VStack(alignment: .leading, spacing: 2) {
+                        MonoCaps(String(localized: "Goal"), color: StickerTone.pink.deep, size: 10)
+                        Text("Read 12 books")
+                            .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                    .foregroundStyle(StickerTone.pink.deep)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .background(StickerTone.pink.fill, in: .rect(cornerRadius: 28, style: .continuous))
+                    .pop(2)
+                }
+            }
+            .frame(height: 150)
+
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 6) {
+                    MonoCaps(String(localized: "Up next"), color: StickerTone.indigo.deep)
+                    Text("Call Mom\nat 6 PM")
+                        .font(.allo(size: 24, weight: .heavy, relativeTo: .title2))
+                        .tracking(-0.6)
+                        .foregroundStyle(.white)
+                }
+                .frame(maxHeight: .infinity, alignment: .top)
+                Spacer()
+                OwlMark(size: 76, look: look, bodyColor: Color.canvas,
+                        eyeColor: StickerTone.indigo.fill)
+            }
+            .padding(18)
+            .frame(height: 150)
+            .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 28, style: .continuous))
+            .pop(3)
+
+            HStack(spacing: 8) {
+                pill(String(localized: "Rituals"), .lilac).pop(4)
+                pill(String(localized: "12 days"), .orange).pop(5)
+                pill(String(localized: "Goals"), .cyan).pop(6)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func pill(_ text: String, _ tone: StickerTone) -> some View {
+        Text(text)
+            .font(.allo(size: 17, weight: .heavy, relativeTo: .headline))
+            .foregroundStyle(tone.deep)
+            .frame(maxWidth: .infinity, minHeight: 58)
+            .background(tone.fill, in: .capsule)
+    }
+}
+
+/// Springs a block in from slightly smaller, a beat after the one before.
+private struct Pop: ViewModifier {
+    let index: Int
+    @State private var shown = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(shown || reduceMotion ? 1 : 0.85)
+            .opacity(shown ? 1 : 0)
+            .onAppear {
+                withAnimation(.spring(response: 0.55, dampingFraction: 0.62).delay(0.08 + Double(index) * 0.06)) {
+                    shown = true
+                }
+            }
+    }
+}
+
+private extension View {
+    func pop(_ index: Int) -> some View { modifier(Pop(index: index)) }
 }
 
 // MARK: - 2. How it works
@@ -115,10 +201,10 @@ struct PillarsStep: View {
                     }
                     .reveal(2)
 
-                    PillarCard(label: String(localized: "Rituals")) {
+                    PillarCard(label: String(localized: "Rituals"), tone: .mint) {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
-                                Text("Morning pages").font(.allo(.body, .medium)).foregroundStyle(Color.ink)
+                                Text("Morning pages").font(.allo(size: 18, weight: .heavy, relativeTo: .headline)).foregroundStyle(StickerTone.mint.deep)
                                 Spacer()
                                 Text("\(streakDays)d streak")
                                     .font(.mono(11.5))
@@ -128,7 +214,7 @@ struct PillarsStep: View {
                             HStack(spacing: 5) {
                                 ForEach(0..<7, id: \.self) { day in
                                     RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                        .fill(day < streakDays ? accent : Color.well)
+                                        .fill(day < streakDays ? StickerTone.mint.deep : StickerTone.mint.deep.opacity(0.15))
                                         .frame(height: 20)
                                 }
                             }
@@ -136,17 +222,17 @@ struct PillarsStep: View {
                     }
                     .reveal(3)
 
-                    PillarCard(label: String(localized: "Goals")) {
+                    PillarCard(label: String(localized: "Goals"), tone: .pink) {
                         VStack(alignment: .leading, spacing: 14) {
                             HStack(alignment: .firstTextBaseline) {
-                                Text("Run a half marathon").font(.allo(.body, .medium)).foregroundStyle(Color.ink)
+                                Text("Run a half marathon").font(.allo(size: 18, weight: .heavy, relativeTo: .headline)).foregroundStyle(StickerTone.pink.deep)
                                 Spacer()
                                 Text(goalProgress, format: .percent.precision(.fractionLength(0)))
-                                    .font(.hero(22))
-                                    .foregroundStyle(Color.ink)
+                                    .font(.hero(26, weight: .heavy))
+                                    .foregroundStyle(StickerTone.pink.deep)
                                     .contentTransition(.numericText(value: goalProgress))
                             }
-                            ProgressLine(progress: goalProgress, color: accent, milestones: [true, true, false, false])
+                            StepBar(progress: goalProgress, steps: [goalProgress > 0.1, goalProgress > 0.3, false, false], color: StickerTone.pink.deep)
                         }
                     }
                     .reveal(4)
@@ -175,14 +261,18 @@ struct PillarsStep: View {
 
 private struct PillarCard<Content: View>: View {
     let label: String
+    var tone: StickerTone? = nil
     @ViewBuilder var content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            MonoCaps(label, size: 10.5)
+            MonoCaps(label, color: tone?.deep ?? .inkSecondary)
             content
         }
-        .surface(cornerRadius: 22, padding: 18)
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(tone?.fill ?? Color.white, in: .rect(cornerRadius: 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).strokeBorder(Color.hairline, lineWidth: tone == nil ? 1.5 : 0))
     }
 }
 
@@ -200,10 +290,10 @@ struct GlassField: View {
 
     var body: some View {
         TextField("", text: $text, prompt: Text(placeholder).foregroundStyle(Color.inkTertiary), axis: .vertical)
-            .font(.hero(size))
+            .font(.hero(size, weight: .heavy))
             .tracking(-0.6)
             .foregroundStyle(Color.ink)
-            .tint(accent)
+            .tint(StickerTone.indigo.fill)
             .lineLimit(1...3)
             .textContentType(contentType)
             .textInputAutocapitalization(.sentences)
@@ -215,12 +305,12 @@ struct GlassField: View {
                     onSubmit()
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 18)
-            .background(Color.surface, in: .rect(cornerRadius: 20, style: .continuous))
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
+            .background(Color.white, in: .rect(cornerRadius: 26, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .strokeBorder(focused ? accent.opacity(0.6) : Color.white.opacity(0.07), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .strokeBorder(focused ? StickerTone.indigo.fill : Color.hairline, lineWidth: focused ? 2.5 : 1.5)
             }
             .animation(.smooth(duration: 0.25), value: focused)
             .task {
@@ -285,7 +375,7 @@ struct RitualsStep: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                StepHeadline(text: String(localized: "Pick a few rituals."))
+                StepHeadline(text: String(localized: "Pick your\nrituals."))
                 StepBody(text: String(localized: "Small things you want to do regularly."))
                     .padding(.top, 10)
 
@@ -312,24 +402,30 @@ struct RitualsStep: View {
     }
 }
 
-/// A ritual as a tile that becomes a sticker when chosen.
+/// A ritual tile: white with a colored dot until chosen, then a full block
+/// of its color.
 private struct RitualTile: View {
     let ritual: RitualOption
     let selected: Bool
     let action: () -> Void
 
     private var tone: StickerTone { StickerTone(ritual.accent) }
+    private var ink: Color { tone == .indigo ? .white : tone.deep }
 
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
                     Image(systemName: ritual.symbol)
-                        .font(.system(size: 21, weight: .semibold))
+                        .font(.system(size: selected ? 24 : 19, weight: .semibold))
+                        .foregroundStyle(selected ? ink : ink)
+                        .frame(width: 40, height: 40)
+                        .background(selected ? Color.clear : tone.fill, in: .circle)
+                        .padding(selected ? -8 : 0)
                     Spacer()
                     ZStack {
                         Circle()
-                            .strokeBorder(Color.night.opacity(0.15), lineWidth: 2)
+                            .strokeBorder(Color.ink.opacity(0.15), lineWidth: 2.5)
                             .opacity(selected ? 0 : 1)
                         Circle()
                             .fill(tone.deep)
@@ -337,39 +433,29 @@ private struct RitualTile: View {
                             .opacity(selected ? 1 : 0)
                         CheckmarkShape()
                             .trim(from: 0, to: selected ? 1 : 0)
-                            .stroke(tone.fill, style: StrokeStyle(lineWidth: 2.6, lineCap: .round, lineJoin: .round))
-                            .padding(6.5)
+                            .stroke(tone.fill, style: StrokeStyle(lineWidth: 2.8, lineCap: .round, lineJoin: .round))
+                            .padding(7.5)
                     }
-                    .frame(width: 24, height: 24)
+                    .frame(width: 28, height: 28)
                 }
-                Spacer(minLength: 18)
+                Spacer(minLength: 16)
                 Text(ritual.title)
-                    .font(.allo(size: 16.5, weight: .heavy, relativeTo: .headline))
+                    .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
                     .tracking(-0.4)
+                    .foregroundStyle(selected ? ink : Color.ink)
                     .multilineTextAlignment(.leading)
-                Text(Weekdays.summary(for: ritual.weekdays) == String(localized: "Every day")
-                     ? ritual.period.name : Weekdays.summary(for: ritual.weekdays))
-                    .font(.allo(size: 10.5, weight: .bold, relativeTo: .caption2))
-                    .tracking(1)
-                    .textCase(.uppercase)
-                    .opacity(0.6)
-                    .padding(.top, 2)
             }
-            .foregroundStyle(selected ? tone.deep : Color.ink)
-            .padding(14)
-            .frame(maxWidth: .infinity, minHeight: 112, alignment: .topLeading)
-            .background(selected ? tone.fill : Color.white, in: .rect(cornerRadius: 22, style: .continuous))
+            .padding(16)
+            .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
+            .background(selected ? tone.fill : Color.white, in: .rect(cornerRadius: 28, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .strokeBorder(selected ? tone.border : Color.night.opacity(0.08), lineWidth: 2.5)
-            }
-            .background {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(tone.border.opacity(selected ? 0.2 : 0))
-                    .offset(x: 3, y: 4)
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .strokeBorder(Color.ink.opacity(0.08), lineWidth: 1.5)
+                    .opacity(selected ? 0 : 1)
             }
         }
         .buttonStyle(.pressable)
+        .animation(.spring(response: 0.35, dampingFraction: 0.7), value: selected)
         .accessibilityLabel(ritual.title)
         .accessibilityValue(ritual.period.name)
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -412,12 +498,12 @@ struct GoalStep: View {
                                 Image(systemName: suggestion.symbol)
                                     .font(.allo(.footnote, .semibold))
                                 Text(suggestion.title)
-                                    .font(.allo(.subheadline, .medium))
+                                    .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
                             }
-                            .foregroundStyle(selected ? Color.inkInverse : Color.ink)
-                            .padding(.horizontal, 14)
-                            .frame(height: 40)
-                            .background(selected ? Color.night : Color.white, in: .capsule)
+                            .foregroundStyle(selected ? StickerTone.indigo.deep : suggestion.tone.deep)
+                            .padding(.horizontal, 16)
+                            .frame(height: 46)
+                            .background(selected ? StickerTone.indigo.fill : suggestion.tone.fill, in: .capsule)
                         }
                         .buttonStyle(.pressable)
                         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -680,51 +766,74 @@ struct FinishStep: View {
     var remindersOn: Bool
     var theme: SovaTheme
     @State private var hop = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 44
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 52
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SkyCard(progress: hop > 0 ? 1 : 0.15, sky: .skyEvening, owlHappy: hop > 0) {
-                ZStack(alignment: .topLeading) {
-                    if ritualCount > 0 {
-                        Sticker(text: ritualCount == 1 ? String(localized: "1 ritual") : String(localized: "\(ritualCount) rituals"),
-                                tone: .mint, caption: String(localized: "Set up"), size: 21, tilt: -6)
-                            .offset(x: 24, y: 40)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                OwlMark(size: 96, happy: true, blinks: false, bodyColor: Color.canvas, eyeColor: StickerTone.indigo.fill)
+                    .keyframeAnimator(initialValue: 0.0, trigger: hop) { view, y in
+                        view.offset(y: y)
+                    } keyframes: { _ in
+                        KeyframeTrack {
+                            CubicKeyframe(-18, duration: 0.22)
+                            SpringKeyframe(0, duration: 0.5, spring: .bouncy)
+                        }
                     }
-                    if !goalTitle.isEmpty {
-                        Sticker(text: goalTitle, tone: .pink, caption: String(localized: "Goal"), size: 17, tilt: 5)
-                            .frame(maxWidth: 190, alignment: .leading)
-                            .offset(x: 150, y: 24)
-                    }
-                    if remindersOn {
-                        Sticker(text: String(localized: "On"), tone: .yellow, caption: String(localized: "Reminders"), size: 17, tilt: -3)
-                            .offset(x: 140, y: 120)
-                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 30, style: .continuous))
+                VStack(spacing: 8) {
+                    summary(ritualCount == 0 ? String(localized: "No rituals") :
+                            ritualCount == 1 ? String(localized: "1 ritual") : String(localized: "\(ritualCount) rituals"),
+                            label: String(localized: "Set up"), tone: .mint)
+                    summary(remindersOn ? String(localized: "On") : String(localized: "Off"),
+                            label: String(localized: "Reminders"), tone: .yellow)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .padding(.top, 16)
+            .frame(height: 176)
+            .padding(.top, 10)
             .reveal(0)
+
+            if !goalTitle.isEmpty {
+                summary(goalTitle, label: String(localized: "Your goal · 90 days"), tone: .pink)
+                    .frame(height: 84)
+                    .reveal(1)
+            }
+
+            Spacer(minLength: 16)
 
             Text(name.isEmpty ? String(localized: "You're all set.") : String(localized: "You're all set,\n\(name)."))
                 .font(.hero(size, weight: .heavy))
-                .tracking(-2)
+                .tracking(-2.4)
                 .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 30)
-                .reveal(1)
-            Text("Your first day starts now.")
-                .font(.allo(.body, .medium))
-                .foregroundStyle(Color.inkSecondary)
-                .padding(.top, 10)
                 .reveal(2)
-            Spacer()
+            Text("Your first day starts now.")
+                .font(.allo(size: 20, weight: .bold, relativeTo: .title3))
+                .foregroundStyle(Color.inkSecondary)
+                .padding(.bottom, 20)
+                .reveal(3)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 20)
         .sensoryFeedback(.success, trigger: hop)
         .task {
             try? await Task.sleep(for: .milliseconds(500))
             hop += 1
         }
+    }
+
+    private func summary(_ value: String, label: String, tone: StickerTone) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            MonoCaps(label, color: tone.deep, size: 10)
+            Text(value)
+                .font(.allo(size: 20, weight: .heavy, relativeTo: .title3))
+                .tracking(-0.5)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .foregroundStyle(tone.deep)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(.horizontal, 18)
+        .background(tone.fill, in: .rect(cornerRadius: 30, style: .continuous))
     }
 }

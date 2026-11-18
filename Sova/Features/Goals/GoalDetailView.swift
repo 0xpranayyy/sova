@@ -61,37 +61,33 @@ struct GoalDetailView: View {
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 10) {
-                StickerIcon(symbol: goal.symbol, tone: StickerTone(goal.accent), size: 34, tilt: -4)
+        let tone = StickerTone(goal.accent)
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack {
                 MonoCaps(goal.deadlineText ?? String(localized: "No deadline"),
-                         color: (goal.daysLeft ?? 1) < 0 ? Color.danger : .inkTertiary)
+                         color: tone == .indigo ? tone.deep : tone.deep)
+                Spacer()
+                Image(systemName: goal.symbol).font(.system(size: 22, weight: .semibold))
             }
             Text(goal.title)
-                .font(.hero(32, weight: .heavy))
+                .font(.hero(34, weight: .heavy))
                 .tracking(-1.2)
-                .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 16)
-
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                .padding(.top, 14)
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
                 Text(Int((goal.progress * 100).rounded()), format: .number)
-                    .font(.hero(percentSize, weight: .bold))
+                    .font(.hero(percentSize, weight: .heavy))
                     .tracking(-4)
                     .contentTransition(.numericText(value: goal.progress))
-                Text("%")
-                    .font(.hero(30))
-                    .foregroundStyle(Color.inkTertiary)
+                Text("%").font(.hero(36, weight: .heavy)).opacity(0.5)
             }
-            .foregroundStyle(Color.ink)
-            .padding(.top, 18)
-
-            ProgressLine(progress: goal.progress, color: .ember, height: 12,
-                         milestones: Array(goal.sortedMilestones.map(\.isDone).dropLast()))
-                .padding(.top, 14)
+            .padding(.top, 6)
+            StepBar(progress: goal.progress, steps: goal.sortedMilestones.map(\.isDone), color: tone.deep, height: 16)
+                .padding(.top, 10)
         }
+        .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+        .block(tone, cornerRadius: 32, padding: 22)
         .padding(.top, 8)
-        .padding(.horizontal, 4)
         .accessibilityElement(children: .combine)
     }
 
@@ -118,7 +114,8 @@ struct GoalDetailView: View {
             VStack(spacing: 0) {
                 ForEach(goal.sortedMilestones) { milestone in
                     HStack(spacing: 4) {
-                        CheckButton(isOn: milestone.isDone, round: true, label: milestone.title) {
+                        CheckButton(isOn: milestone.isDone, color: StickerTone(goal.accent).deep, round: true,
+                                    checkColor: StickerTone(goal.accent).fill, label: milestone.title) {
                             withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { milestone.isDone.toggle() }
                         }
                         Text(milestone.title)

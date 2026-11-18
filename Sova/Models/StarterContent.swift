@@ -29,6 +29,7 @@ struct GoalSuggestion: Identifiable, Hashable {
     let symbol: String
     let accent: Accent
     var id: String { title }
+    var tone: StickerTone { StickerTone(accent) }
 
     static let all: [GoalSuggestion] = [
         GoalSuggestion(title: "Run a 10K", symbol: "figure.run", accent: .ember),

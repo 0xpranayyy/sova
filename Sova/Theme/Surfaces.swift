@@ -1,21 +1,28 @@
 import SwiftUI
 
-// Content sits on quiet, near-transparent cards with hairline edges.
-// Liquid Glass is reserved for what floats: the tab bar, toolbar buttons,
-// sheets and the quick-capture card.
+// Content is either a white card with a soft ring, or a flat block of one
+// Allo color with tonal text. Liquid Glass stays on the system tab bar,
+// sheets and the undo bar.
 
 extension View {
-    /// A content card. `tint` gives it a faint accent edge and fill, for
-    /// the one thing on screen that deserves attention.
-    func surface(cornerRadius: CGFloat = 22, padding: CGFloat = 16, tint: Color? = nil,
+    /// A white card. Pass `tint` to fill it with a flat color instead.
+    func surface(cornerRadius: CGFloat = 24, padding: CGFloat = 16, tint: Color? = nil,
                  interactive: Bool = false) -> some View {
-        let shape = RoundedRectangle(cornerRadius: max(cornerRadius, 20), style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: max(cornerRadius, 22), style: .continuous)
         return self
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(tint ?? Color.surface, in: shape)
-            .shadow(color: Color.night.opacity(0.05), radius: 0, y: 1)
-            .shadow(color: Color.night.opacity(0.05), radius: 9, y: 6)
+            .background(tint ?? Color.white, in: shape)
+            .overlay(shape.strokeBorder(Color.hairline, lineWidth: tint == nil ? 1.5 : 0))
+    }
+
+    /// A flat block in one Allo tone.
+    func block(_ tone: StickerTone, cornerRadius: CGFloat = 30, padding: CGFloat = 20) -> some View {
+        self
+            .padding(padding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+            .background(tone.fill, in: .rect(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
@@ -30,36 +37,39 @@ extension Glass {
 
 // MARK: - Buttons
 
-/// The primary action: a solid night pill, or ember for the moments that
-/// start something.
-struct InkButtonStyle: ButtonStyle {
-    var compact = false
-    var ember = false
+/// Big, pretty buttons: tall rounded blocks of one tone with heavy text.
+struct BigButtonStyle: ButtonStyle {
+    var tone: StickerTone = .indigo
+    var height: CGFloat = 60
+    var fullWidth = true
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(compact ? .allo(.subheadline, .bold) : .allo(.body, .bold))
-            .foregroundStyle(ember ? Color.white : Color.inkInverse)
-            .padding(.horizontal, compact ? 18 : 24)
-            .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? 44 : 54)
-            .background(ember ? Color.ember : Color.night, in: .capsule)
-            .opacity(isEnabled ? 1 : 0.35)
+            .font(.allo(size: height >= 58 ? 18 : 16, weight: .heavy, relativeTo: .headline))
+            .tracking(-0.3)
+            .foregroundStyle(tone.deep)
+            .padding(.horizontal, 22)
+            .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: height)
+            .background(tone.fill, in: .capsule)
+            .opacity(isEnabled ? 1 : 0.4)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 
-/// A secondary action: a quiet capsule.
+/// The quiet partner of a big button: white with a soft ring.
 struct QuietButtonStyle: ButtonStyle {
+    var height: CGFloat = 50
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.allo(.subheadline, .bold))
+            .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
             .foregroundStyle(Color.ink)
-            .padding(.horizontal, 18)
-            .frame(minHeight: 44)
+            .padding(.horizontal, 20)
+            .frame(minHeight: height)
             .background(Color.white, in: .capsule)
-            .shadow(color: Color.night.opacity(0.06), radius: 6, y: 2)
+            .overlay(Capsule().strokeBorder(Color.hairline, lineWidth: 1.5))
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .animation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
     }
@@ -72,16 +82,28 @@ struct PressableStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? scale : 1)
-            .opacity(configuration.isPressed ? 0.85 : 1)
             .animation(.spring(response: 0.25, dampingFraction: 0.65), value: configuration.isPressed)
     }
 }
 
-extension ButtonStyle where Self == InkButtonStyle {
-    static var ink: InkButtonStyle { InkButtonStyle() }
-    static var inkCompact: InkButtonStyle { InkButtonStyle(compact: true) }
-    static var ember: InkButtonStyle { InkButtonStyle(ember: true) }
-    static var emberCompact: InkButtonStyle { InkButtonStyle(compact: true, ember: true) }
+/// Kept names for existing call sites.
+typealias InkButtonStyle = BigButtonStyle
+
+extension BigButtonStyle {
+    init(compact: Bool, ember: Bool = false) {
+        self.init(tone: .indigo, height: compact ? 50 : 60, fullWidth: !compact)
+    }
+}
+
+extension ButtonStyle where Self == BigButtonStyle {
+    static var big: BigButtonStyle { BigButtonStyle() }
+    static func big(_ tone: StickerTone, height: CGFloat = 60) -> BigButtonStyle {
+        BigButtonStyle(tone: tone, height: height)
+    }
+    static var ink: BigButtonStyle { BigButtonStyle() }
+    static var inkCompact: BigButtonStyle { BigButtonStyle(tone: .indigo, height: 50, fullWidth: false) }
+    static var ember: BigButtonStyle { BigButtonStyle() }
+    static var emberCompact: BigButtonStyle { BigButtonStyle(tone: .indigo, height: 50, fullWidth: false) }
 }
 
 extension ButtonStyle where Self == QuietButtonStyle {

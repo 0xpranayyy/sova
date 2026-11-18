@@ -81,32 +81,34 @@ extension Font {
     }
 }
 
-/// A small secondary label (name kept for existing call sites).
+/// A small uppercase label, Allo heavy with open tracking ("UP NEXT").
 struct MonoCaps: View {
     let text: String
     var color: Color = .inkSecondary
-    var size: CGFloat = 13
+    var size: CGFloat = 11
 
-    init(_ text: String, color: Color = .inkSecondary, size: CGFloat = 13) {
+    init(_ text: String, color: Color = .inkSecondary, size: CGFloat = 11) {
         self.text = text
         self.color = color
-        self.size = max(size, 12)
+        self.size = min(max(size, 10), 12)
     }
 
     var body: some View {
         Text(text)
-            .font(.allo(size: size, weight: .semibold, relativeTo: .footnote))
+            .font(.allo(size: size, weight: .heavy, relativeTo: .caption))
+            .tracking(1.4)
+            .textCase(.uppercase)
             .foregroundStyle(color)
     }
 }
 
-/// A section heading: bold, night.
+/// A section heading: a small uppercase label.
 struct SectionLabel: View {
     let title: String
     var trailing: String? = nil
-    var color: Color = .ink
+    var color: Color = .inkSecondary
 
-    init(_ title: String, trailing: String? = nil, color: Color = .ink) {
+    init(_ title: String, trailing: String? = nil, color: Color = .inkSecondary) {
         self.title = title
         self.trailing = trailing
         self.color = color
@@ -114,50 +116,45 @@ struct SectionLabel: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(title)
-                .font(.allo(.subheadline, .bold))
-                .foregroundStyle(color)
+            MonoCaps(title, color: color)
             Spacer()
             if let trailing {
-                Text(trailing)
-                    .font(.allo(.footnote, .semibold).monospacedDigit())
-                    .foregroundStyle(Color.inkSecondary)
+                MonoCaps(trailing, color: .inkTertiary)
                     .contentTransition(.numericText())
             }
         }
-        .textCase(nil)
         .padding(.horizontal, 4)
         .accessibilityAddTraits(.isHeader)
     }
 }
 
-/// A big, tight, heavy screen title.
+/// A screen header: a small label and action on top, then a huge heavy
+/// title that ends with a period, the way Allo sets its name.
 struct ScreenTitle<Trailing: View>: View {
     let title: String
     var subtitle: String? = nil
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .center) {
-                Text(title)
-                    .font(.hero(34, weight: .heavy))
-                    .tracking(-1.4)
-                    .foregroundStyle(Color.ink)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                if let subtitle { MonoCaps(subtitle) }
                 Spacer()
                 trailing
             }
-            if let subtitle {
-                Text(subtitle)
-                    .font(.allo(.subheadline, .semibold))
-                    .foregroundStyle(Color.inkSecondary)
-            }
+            .frame(minHeight: 44)
+            Text(title + ".")
+                .font(.hero(58, weight: .heavy))
+                .tracking(-2.6)
+                .foregroundStyle(Color.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
         .padding(.horizontal, 4)
     }
 }
 
-/// A round white button for the top-right action of a screen.
+/// A round white button for a screen's top-right action.
 struct CircleAction: View {
     let symbol: String
     let label: String
@@ -166,12 +163,11 @@ struct CircleAction: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(Color.ink)
-                .frame(width: 42, height: 42)
-                .background(Color.white, in: .circle)
-                .shadow(color: Color.night.opacity(0.06), radius: 6, y: 2)
                 .frame(width: 44, height: 44)
+                .background(Color.white, in: .circle)
+                .overlay(Circle().strokeBorder(Color.hairline, lineWidth: 1.5))
         }
         .buttonStyle(.pressable)
         .accessibilityLabel(label)

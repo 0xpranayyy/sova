@@ -4,29 +4,28 @@ A native iOS app for **daily tasks, goals and routines**, built with SwiftUI and
 
 ## Design
 
-Inspired by [Dia](https://www.diabrowser.com/) for warmth and calm, and by GO Club for confidence and character.
+Bold, modern and colorful, built on the palette and type of [Allo](https://allo.joshpuckett.me/).
 
-- **Paper and sunlight.** A warm off-white page with soft-black ink. The one signature moment is a hero of sunlight falling through leaves, which ends in a wide arc into the page. It appears on Welcome and Today.
-- **Allo throughout.** Medium-weight headlines with tight tracking, big bold numbers (the day, goal percentages, consistency) and tabular figures for times.
-- **Monochrome UI.** Black pill buttons, white cards with hairline edges, black checks that draw themselves, and tiny uppercase mono labels on cards ("UP NEXT · 14:00"). Gold is reserved for sunlight: the hero, quick-capture highlights, today's bar and the heatmap.
-- **Today.** A greeting over the sunlight, then one **Up next** card with Mark done and Tomorrow, then grouped cards (This afternoon, This evening, Anytime, Overdue, Done today) with native swipe actions.
-- **Character.** Fat capsule bars for the week, and an owl mascot that blinks, follows your finger on the welcome screen and smiles from the hero when your day is done.
-- **Liquid Glass** stays on the system tab bar (with its separated "+" create button), sheets and the undo bar.
+- **Allo's palette as flat blocks.** Sunny yellow, mint, lilac, hot pink, orange, cyan, lime and deep indigo on a near-white page. Text on each block is a deep shade of the same color, so every block reads as one piece.
+- **Allo, set big.** Huge heavy titles that end with a period ("Today.", "Goals.", "Sova."), small uppercase labels with open tracking ("UP NEXT · IN 48 MIN"), and big heavy numbers.
+- **Big, pretty buttons.** 60pt rounded buttons with heavy text, like indigo with yellow text. Checkboxes take the color of their ritual.
+- **Today.** A yellow progress block (3/8 with chunky ticks and the owl), an indigo **Up next** block with **Done** and **Tomorrow**, then rituals as blocks in their own color and tasks as white cards, all with swipe actions.
+- **Goals, Rituals, Insights.** Every goal and ritual has its own color. Insights shows the 30-day number on indigo with fat week bars, big stat blocks and a mint heatmap.
+- **The owl** blinks, follows your finger on the welcome screen and smiles when your day is done. The app icon is the indigo owl on Allo yellow.
 
 ![Today](screenshots/3-today.png)
 
 ## Onboarding
 
-Eight short steps. Each has one idea, a staggered blur-in reveal, and drifting washes of color that change mood per step. Swipe right to go back.
+Short, colorful steps with big buttons and a chunky progress bar. Swipe right to go back.
 
-1. **Welcome.** A sunlit hero with the owl (its eyes follow your touch), "A calmer way to plan your day." and a huge "Sova".
-2. **Three kinds of intention.** Fanned cards explain Today, Always and Someday. The example task is live, so tick it.
-3. **Your name**, with a live preview of your greeting.
-4. **Rituals.** Tactile tiles; each one you pick becomes a real routine.
-5. **One goal for this season.** Write your own or tap a suggestion. It's created with a 90-day horizon.
-6. **Reminders.** A preview of the real notification, then morning and evening times. The system permission prompt only appears after you choose "Turn on reminders".
-7. **Pick your color.** A preview of *your* first day (your rituals, your goal) recolors live as you choose an accent.
-8. **All set.** A summary of what was created; the owl hops and smiles.
+1. **Welcome.** Color blocks that preview the app pop in one by one, then a huge "Sova.".
+2. **How it works.** Tasks, rituals (mint) and goals (pink), with a live task you can tick.
+3. **Your name.**
+4. **Rituals.** Tiles fill with their color when you choose them; each becomes a real ritual.
+5. **A goal**, written yourself or picked from colorful suggestions. It gets 90 days.
+6. **Reminders**, previewing the real notification before the system asks for permission.
+7. **All set.** A celebration in blocks: the happy owl, your rituals, reminders and goal.
 
 Onboarding creates only what you choose; there is no sample or placeholder data. Inside the app, TipKit carries on teaching: first quick capture, then swiping.
 

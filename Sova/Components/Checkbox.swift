@@ -4,19 +4,23 @@ import SwiftUI
 /// solid and the check draws itself in.
 struct Checkbox: View {
     var isOn: Bool
-    var color: Color = SovaTheme.current.accent.color
+    /// Fill when done (a tone's deep color).
+    var color: Color = Color.ink
     var round = false
-    var size: CGFloat = 26
+    var size: CGFloat = 28
     var emphasized = false
+    /// The tick's color (a tone's fill color).
+    var checkColor: Color = .white
 
     var body: some View {
         let radius = round ? size / 2 : size * 0.32
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         ZStack {
             shape
-                .fill(Color.white)
+                .fill(Color.white.opacity(0.55))
+                .opacity(isOn ? 0 : 1)
             shape
-                .strokeBorder(emphasized ? color : Color.night.opacity(0.18), lineWidth: 2)
+                .strokeBorder(color.opacity(emphasized ? 1 : 0.3), lineWidth: 2.5)
                 .opacity(isOn ? 0 : 1)
             shape
                 .fill(color)
@@ -24,7 +28,7 @@ struct Checkbox: View {
                 .opacity(isOn ? 1 : 0)
             CheckmarkShape()
                 .trim(from: 0, to: isOn ? 1 : 0)
-                .stroke(Color.inkInverse, style: StrokeStyle(lineWidth: size * 0.11, lineCap: .round, lineJoin: .round))
+                .stroke(checkColor, style: StrokeStyle(lineWidth: size * 0.11, lineCap: .round, lineJoin: .round))
                 .padding(size * 0.28)
         }
         .frame(width: size, height: size)
@@ -54,7 +58,7 @@ struct CheckButton: View {
 
     var body: some View {
         Button(action: action) {
-            Checkbox(isOn: isOn, color: color, round: round, size: size, emphasized: emphasized)
+            Checkbox(isOn: isOn, color: color, round: round, size: size, emphasized: emphasized, checkColor: checkColor)
                 .frame(width: 44, height: 44)
                 .contentShape(.rect)
         }

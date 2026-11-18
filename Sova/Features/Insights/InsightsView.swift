@@ -67,62 +67,58 @@ struct InsightsView: View {
 
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    ScreenTitle(title: String(localized: "Insights")) { EmptyView() }
+                VStack(alignment: .leading, spacing: 10) {
+                    ScreenTitle(title: String(localized: "Insights"),
+                                subtitle: String(localized: "Last 30 days")) { EmptyView() }
                         .padding(.top, 4)
-                        .padding(.bottom, 14)
+                        .padding(.bottom, 6)
 
-                    // The headline number, on indigo.
+                    // Rituals kept, on indigo, with the week as fat bars.
                     VStack(alignment: .leading, spacing: 0) {
-                        Text(hasHistory ? String(localized: "Rituals kept · 30 days") : String(localized: "No history yet"))
-                            .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
-                            .tracking(1.2)
-                            .textCase(.uppercase)
-                            .opacity(0.7)
-                        HStack(alignment: .bottom, spacing: 10) {
-                            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                        MonoCaps(hasHistory ? String(localized: "Rituals kept") : String(localized: "No history yet"),
+                                 color: StickerTone.indigo.deep)
+                        HStack(alignment: .bottom, spacing: 12) {
+                            HStack(alignment: .firstTextBaseline, spacing: 0) {
                                 Text(Int((current * 100).rounded()), format: .number)
-                                    .font(.hero(84, weight: .heavy))
-                                    .tracking(-4.5)
+                                    .font(.hero(88, weight: .heavy))
+                                    .tracking(-4)
                                     .contentTransition(.numericText(value: current))
-                                Text("%").font(.hero(36, weight: .heavy)).opacity(0.6)
+                                Text("%").font(.hero(40, weight: .heavy)).opacity(0.6)
                             }
-                            .foregroundStyle(StickerTone.yellow.fill)
+                            .foregroundStyle(StickerTone.indigo.deep)
                             if hasHistory, routines.contains(where: { $0.createdAt < Date.now.adding(days: -30) }) {
-                                Sticker(text: delta >= 0 ? "↑ \(delta)%" : "↓ \(-delta)%",
-                                        tone: delta >= 0 ? .mint : .pink, size: 14, tilt: -4)
+                                Text(delta >= 0 ? String(localized: "up \(delta)% from\nlast month")
+                                                : String(localized: "down \(-delta)% from\nlast month"))
+                                    .font(.allo(.subheadline, .heavy))
                                     .padding(.bottom, 14)
                             }
                         }
                         WeekBars(values: weekCounts)
                             .padding(.top, 12)
                     }
-                    .foregroundStyle(Color.canvas)
-                    .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 28, style: .continuous))
-
-                    HStack(alignment: .center, spacing: 12) {
-                        Sticker(text: "\(tasksDone)", tone: .pink, caption: String(localized: "Tasks done"), size: 40, tilt: -2)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Starburst(value: "\(bestStreak)", caption: String(localized: "Day streak"), tone: .mint, size: 112, tilt: 8)
-                    }
-                    .padding(.top, 14)
-                    .padding(.horizontal, 2)
-
-                    heatmap
-                        .surface(cornerRadius: 22, padding: 16)
-                        .padding(.top, 14)
+                    .block(.indigo)
 
                     HStack(spacing: 10) {
-                        StatTile(value: perDay.formatted(.number.precision(.fractionLength(1))), label: String(localized: "Done per day"))
-                        StatTile(value: goalAverage.formatted(.percent.precision(.fractionLength(0))), label: String(localized: "Goal progress"))
+                        StatBlock(label: String(localized: "Tasks done"), value: "\(tasksDone)", tone: .pink)
+                        StatBlock(label: String(localized: "Best streak"), value: "\(bestStreak)", unit: "d", tone: .orange)
                     }
-                    .padding(.top, 10)
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        MonoCaps(String(localized: "Every day, \(Self.weeks) weeks"), color: StickerTone.mint.deep)
+                        heatmap
+                    }
+                    .padding(18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(StickerTone.mint.fill.opacity(0.35), in: .rect(cornerRadius: 28, style: .continuous))
+
+                    HStack(spacing: 10) {
+                        StatBlock(label: String(localized: "Per day"), value: perDay.formatted(.number.precision(.fractionLength(1))), tone: .cyan)
+                        StatBlock(label: String(localized: "Goal progress"), value: "\(Int((goalAverage * 100).rounded()))", unit: "%", tone: .lilac)
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
-                .padding(.bottom, 90)
+                .padding(.bottom, 100)
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
@@ -177,6 +173,15 @@ struct InsightsView: View {
         .accessibilityLabel("Activity over the last \(Self.weeks) weeks")
     }
 
+    static func greenScale(_ level: Double) -> Color {
+        switch level {
+        case ..<0.3: Color(hex: 0xB8F7DC)
+        case ..<0.55: Color(hex: 0x7EF0C2)
+        case ..<0.8: Color(hex: 0x4DF2B0)
+        default: Color(hex: 0x12C985)
+        }
+    }
+
     /// Four steps of sunlight, from pale to deep gold.
     static func sunScale(_ level: Double) -> Color {
         switch level {
@@ -193,12 +198,12 @@ struct InsightsView: View {
             let count = activity(on: day)
             let level = count == 0 ? 0 : Double(count) / Double(peak)
             RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .fill(count == 0 ? Color.well : Color.ember.opacity(0.22 + 0.78 * level))
+                .fill(count == 0 ? StickerTone.mint.deep.opacity(0.08) : Self.greenScale(level))
                 .frame(width: 15, height: 15)
                 .overlay {
                     if day.isSameDay(as: .now) {
                         RoundedRectangle(cornerRadius: 5, style: .continuous)
-                            .strokeBorder(Color.night, lineWidth: 1.5)
+                            .strokeBorder(StickerTone.mint.deep, lineWidth: 1.5)
                     }
                 }
         } else {
@@ -207,22 +212,28 @@ struct InsightsView: View {
     }
 }
 
-private struct StatTile: View {
-    let value: String
+/// A big number on a block of color.
+private struct StatBlock: View {
     let label: String
+    let value: String
+    var unit: String? = nil
+    let tone: StickerTone
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value)
-                .font(.hero(28, weight: .heavy))
-                .tracking(-1.2)
-                .foregroundStyle(Color.ink)
-                .contentTransition(.numericText())
-            Text(label)
-                .font(.allo(.footnote, .semibold))
-                .foregroundStyle(Color.inkSecondary)
+        VStack(alignment: .leading, spacing: 8) {
+            MonoCaps(label, color: tone.deep)
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                Text(value)
+                    .font(.hero(46, weight: .heavy))
+                    .tracking(-2)
+                    .contentTransition(.numericText())
+                if let unit { Text(unit).font(.hero(22, weight: .heavy)) }
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
         }
-        .surface(cornerRadius: 22, padding: 16)
+        .foregroundStyle(tone.deep)
+        .block(tone, cornerRadius: 28, padding: 18)
         .accessibilityElement(children: .combine)
     }
 }
@@ -240,11 +251,11 @@ private struct WeekBars: View {
                 let isToday = day.isSameDay(as: .now)
                 VStack(spacing: 6) {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(isToday ? StickerTone.yellow.fill : Color.canvas.opacity(count == 0 ? 0.18 : 0.88))
+                        .fill(isToday ? StickerTone.yellow.fill : Color.white.opacity(count == 0 ? 0.18 : 0.9))
                         .frame(height: max(14, 92 * Double(count) / Double(peak)))
                         .frame(maxWidth: .infinity)
                     Text(Weekdays.letter(day.weekday))
-                        .font(.allo(.caption, .heavy))
+                        .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
                         .opacity(isToday ? 1 : 0.55)
                 }
             }

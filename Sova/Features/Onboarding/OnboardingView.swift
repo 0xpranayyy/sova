@@ -6,11 +6,18 @@ enum OnboardingStep: Int, CaseIterable, Comparable {
 
     static func < (a: Self, b: Self) -> Bool { a.rawValue < b.rawValue }
 
-    var next: OnboardingStep? { OnboardingStep(rawValue: rawValue + 1) }
-    var previous: OnboardingStep? { OnboardingStep(rawValue: rawValue - 1) }
+    // The accent step is skipped: the design uses Allo's full palette.
+    var next: OnboardingStep? {
+        let n = OnboardingStep(rawValue: rawValue + 1)
+        return n == .theme ? .finish : n
+    }
+    var previous: OnboardingStep? {
+        let p = OnboardingStep(rawValue: rawValue - 1)
+        return p == .theme ? .rhythm : p
+    }
 
     /// The steps that show in the progress indicator.
-    static let indicated: [OnboardingStep] = [.pillars, .name, .rituals, .goal, .rhythm, .theme]
+    static let indicated: [OnboardingStep] = [.pillars, .name, .rituals, .goal, .rhythm]
 }
 
 struct OnboardingView: View {
@@ -81,7 +88,7 @@ struct OnboardingView: View {
                     }
             )
         }
-        .tint(Color.ember)
+        .tint(Color.ink)
         .sensoryFeedback(.selection, trigger: step)
     }
 
@@ -106,26 +113,24 @@ struct OnboardingView: View {
     private var topBar: some View {
         let indicated = OnboardingStep.indicated
         let position = indicated.firstIndex(of: step) ?? 0
-        return ZStack {
+        return HStack(spacing: 14) {
+            if step > .hello && step < .finish {
+                CircleAction(symbol: "chevron.left", label: String(localized: "Back"), action: back)
+                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
+            }
             if indicated.contains(step) {
                 HStack(spacing: 4) {
                     ForEach(0..<indicated.count, id: \.self) { i in
                         Capsule()
-                            .fill(i <= position ? Color.night : Color.night.opacity(0.15))
-                            .frame(width: i == position ? 20 : 6, height: 6)
+                            .fill(i <= position ? Color.ink : Color.ink.opacity(0.12))
+                            .frame(height: 6)
                     }
                 }
                 .accessibilityElement()
                 .accessibilityLabel("Step \(position + 1) of \(indicated.count)")
                 .transition(.opacity)
             }
-            HStack {
-                if step > .hello && step < .finish {
-                    CircleAction(symbol: "chevron.left", label: String(localized: "Back"), action: back)
-                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
-                }
-                Spacer()
-            }
+            Spacer(minLength: 0)
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.85), value: step)
     }
@@ -136,9 +141,9 @@ struct OnboardingView: View {
         case .name: trimmedName.isEmpty ? String(localized: "Skip for now") : String(localized: "Continue")
         case .rituals: rituals.isEmpty ? String(localized: "Skip for now")
                                        : String(localized: "Continue with \(rituals.count)")
+        case .finish: String(localized: "Open Sova")
         case .goal: trimmedGoal.isEmpty ? String(localized: "Skip for now") : String(localized: "Set this goal")
         case .rhythm: (morningOn || eveningOn) ? String(localized: "Turn on reminders") : String(localized: "Continue")
-        case .finish: String(localized: "Open Sova")
         default: String(localized: "Continue")
         }
     }
@@ -146,15 +151,18 @@ struct OnboardingView: View {
     private var bottomBar: some View {
         VStack(spacing: 14) {
             Button(action: primaryAction) {
-                ZStack {
+                HStack(spacing: 8) {
                     Text(primaryTitle)
                         .contentTransition(.numericText())
                         .animation(.smooth(duration: 0.3), value: primaryTitle)
                         .opacity(isRequesting ? 0 : 1)
-                    if isRequesting { ProgressView().tint(Color.inkInverse) }
+                    if isRequesting { ProgressView().tint(StickerTone.indigo.deep) }
+                    if !isRequesting && step == .hello {
+                        Image(systemName: "arrow.right").font(.system(size: 17, weight: .heavy))
+                    }
                 }
             }
-            .buttonStyle(InkButtonStyle(ember: step == .finish))
+            .buttonStyle(.big)
             .disabled(isRequesting)
 
             if step == .rhythm && (morningOn || eveningOn) {

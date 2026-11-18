@@ -22,31 +22,29 @@ extension Color {
 
 // MARK: - Semantic tokens
 //
-// Sova's own palette: warm cream paper, deep night-indigo ink, and ember,
-// the color of the owl's eye, as the single accent. The sky colors follow
-// the time of day.
+// Near-white page, deep ink, and Allo's palette (see Components/Sticker.swift)
+// used as big flat blocks with tonal text.
 
 extension Color {
-    static let night = Color(hex: 0x17153B)
-    static let ember = Color(hex: 0xFF5B24)
+    static let ink = Color(hex: 0x15102E)
+    static let night = Color.ink
+    /// Priority marks and overdue text.
+    static let ember = Color(hex: 0xE63E2E)
 
-    static let canvas = Color(hex: 0xF5F0E6)
-    static let ink = Color.night
-    static let inkSecondary = Color.night.opacity(0.56)
-    static let inkTertiary = Color.night.opacity(0.32)
-    /// Text on night and ember fills.
-    static let inkInverse = Color(hex: 0xF5F0E6)
-    static let well = Color.night.opacity(0.06)
+    static let canvas = Color(hex: 0xFCFCFA)
+    static let inkSecondary = Color.ink.opacity(0.5)
+    static let inkTertiary = Color.ink.opacity(0.3)
+    static let inkInverse = Color.white
+    static let well = Color.ink.opacity(0.06)
     static let surface = Color.white
     static let surfaceRaised = Color.white
-    static let hairline = Color.night.opacity(0.07)
+    static let hairline = Color.ink.opacity(0.07)
     static let danger = Color.ember
 
-    static let skyMorning = Color(hex: 0xFFD9B8)
-    static let skyAfternoon = Color(hex: 0xFFE7A1)
-    static let skyEvening = Color(hex: 0xD9CCFF)
+    static let skyMorning = StickerTone.orange.fill
+    static let skyAfternoon = StickerTone.yellow.fill
+    static let skyEvening = StickerTone.lilac.fill
 
-    /// The sky for a given time of day.
     static func sky(for date: Date = .now) -> Color {
         switch Calendar.current.component(.hour, from: date) {
         case 5..<12: .skyMorning
@@ -90,9 +88,9 @@ enum Accent: String, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
-        case .ink: Color.night
+        case .ink: Color.ink
         case .lime: Color(hex: 0x6E9A1F)
-        case .ember: Color.ember
+        case .ember: StickerTone.orange.fill
         case .marigold: Color(hex: 0xE0A100)
         case .moss: Color(hex: 0x2E9E6B)
         case .lagoon: Color(hex: 0x14919A)

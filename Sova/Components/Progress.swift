@@ -7,12 +7,13 @@ struct ProgressLine: View {
     var height: CGFloat = 4
     /// Completion state of each milestone, drawn as evenly spaced nodes.
     var milestones: [Bool] = []
+    var track: Color = Color.well
 
     var body: some View {
         GeometryReader { geo in
             let value = min(max(progress, 0), 1)
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.canvas)
+                Capsule().fill(track)
                 Capsule()
                     .fill(color)
                     .frame(width: value == 0 ? 0 : max(height, geo.size.width * value))
@@ -34,32 +35,59 @@ struct ProgressLine: View {
     }
 }
 
-/// The day as a row of ticks, one per task or ritual.
+/// The day as chunky ticks, one per task or ritual.
 struct DaySegments: View {
     var done: Int
     var total: Int
     var color: Color
+    var height: CGFloat = 14
 
     var body: some View {
         Group {
-            if total == 0 {
-                Capsule().fill(Color.well).frame(height: 4)
-            } else if total <= 24 {
+            if total <= 24 {
                 HStack(spacing: 4) {
-                    ForEach(0..<total, id: \.self) { index in
+                    ForEach(0..<max(total, 1), id: \.self) { index in
                         Capsule()
-                            .fill(index < done ? color : Color.well)
-                            .frame(height: 4)
-                            .animation(.spring(response: 0.45, dampingFraction: 0.8).delay(Double(index) * 0.02), value: done)
+                            .fill(index < done ? color : color.opacity(0.14))
+                            .frame(height: height)
+                            .animation(.spring(response: 0.45, dampingFraction: 0.75).delay(Double(index) * 0.03), value: done)
                     }
                 }
             } else {
-                ProgressLine(progress: Double(done) / Double(total), color: color)
+                ProgressLine(progress: Double(done) / Double(total), color: color, height: height)
             }
         }
         .accessibilityElement()
         .accessibilityLabel("Today's progress")
         .accessibilityValue("\(done) of \(total) done")
+    }
+}
+
+/// A goal's progress: one chunky segment per step, or a single bar.
+struct StepBar: View {
+    var progress: Double
+    var steps: [Bool]
+    var color: Color
+    var height: CGFloat = 14
+
+    var body: some View {
+        Group {
+            if steps.isEmpty {
+                ProgressLine(progress: progress, color: color, height: height, track: color.opacity(0.2))
+            } else {
+                HStack(spacing: 4) {
+                    ForEach(Array(steps.enumerated()), id: \.offset) { _, done in
+                        Capsule()
+                            .fill(done ? color : color.opacity(0.2))
+                            .frame(height: height)
+                    }
+                }
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: steps)
+            }
+        }
+        .accessibilityElement()
+        .accessibilityLabel("Progress")
+        .accessibilityValue(Text(progress, format: .percent.precision(.fractionLength(0))))
     }
 }
 

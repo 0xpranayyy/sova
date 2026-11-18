@@ -38,18 +38,19 @@ struct QuickCaptureView: View {
     private var accent: Color { theme.accent.color }
     private var parsed: ParsedTask { QuickParse.parse(text) }
     private var canSave: Bool { !parsed.title.isEmpty }
-    private let fieldFont = Font.allo(size: 26, weight: .bold, relativeTo: .title2)
+    private let fieldFont = Font.allo(size: 27, weight: .heavy, relativeTo: .title2)
 
     /// The typed text with what the parser understood highlighted.
     private var highlighted: AttributedString {
         var attributed = AttributedString(text)
         attributed.foregroundColor = Color.ink
         if let range = parsed.dateRange, let r = Range(range, in: attributed) {
-            attributed[r].backgroundColor = Color.skyMorning
+            attributed[r].foregroundColor = StickerTone.yellow.deep
+            attributed[r].backgroundColor = StickerTone.yellow.fill
         }
         if let range = parsed.priorityRange, let r = Range(range, in: attributed) {
-            attributed[r].foregroundColor = Color.white
-            attributed[r].backgroundColor = Color.ember
+            attributed[r].foregroundColor = StickerTone.pink.deep
+            attributed[r].backgroundColor = StickerTone.pink.fill
         }
         return attributed
     }
@@ -58,7 +59,7 @@ struct QuickCaptureView: View {
         VStack(alignment: .leading, spacing: 0) {
             MonoCaps(added == 0 ? String(localized: "New task")
                      : String(localized: "\(added) added · keep going"),
-                     color: added == 0 ? .inkSecondary : .ember)
+                     color: added == 0 ? .inkSecondary : StickerTone.mint.deep)
                 .contentTransition(.numericText())
 
             ZStack(alignment: .topLeading) {
@@ -73,7 +74,7 @@ struct QuickCaptureView: View {
                     .font(fieldFont)
                     .tracking(-0.4)
                     .foregroundStyle(Color.clear)
-                    .tint(Color.ember)
+                    .tint(StickerTone.indigo.fill)
                     .lineLimit(1...4)
                     .focused($focused)
                     .submitLabel(.done)
@@ -117,9 +118,9 @@ struct QuickCaptureView: View {
                 Button(action: save) {
                     Image(systemName: "arrow.up")
                         .font(.allo(.body, .bold))
-                        .foregroundStyle(Color.white)
-                        .frame(width: 40, height: 40)
-                        .background(Color.ember, in: .circle)
+                        .foregroundStyle(StickerTone.indigo.deep)
+                        .frame(width: 46, height: 46)
+                        .background(StickerTone.indigo.fill, in: .circle)
                 }
                 .buttonStyle(.pressable)
                 .disabled(!canSave)
