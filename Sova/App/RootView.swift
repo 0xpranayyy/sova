@@ -45,6 +45,9 @@ struct MainTabView: View {
             Tab("Today", systemImage: "sun.max", value: AppTab.today) {
                 TodayView().id(today)
             }
+            Tab("Tasks", systemImage: "checklist", value: AppTab.tasks) {
+                TasksView().id(today)
+            }
             Tab("Goals", systemImage: "flag", value: AppTab.goals) {
                 GoalsView()
             }

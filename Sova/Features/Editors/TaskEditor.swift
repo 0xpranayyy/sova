@@ -498,7 +498,9 @@ struct TaskEditor: View {
         if target.hasTime { Task { await TaskAlerts.requestPermissionIfNeeded() } }
         if isNew {
             let when = chosenDue.map { $0.relativeDayText(includingTime: hasTime) } ?? String(localized: "someday")
-            router.show(Toast(message: String(localized: "Added for \(when)")))
+            let laterOn = chosenDue.map { $0 >= Date.now.endOfDay } ?? false
+            router.show(Toast(message: laterOn ? String(localized: "Added for \(when). It's in Tasks.")
+                                               : String(localized: "Added for \(when)")))
         }
         dismiss()
     }

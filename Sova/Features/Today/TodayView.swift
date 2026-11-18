@@ -75,6 +75,8 @@ struct TodayView: View {
         let later = openTasks.filter { $0.section != .overdue }
         let doneTasks = taskEntries.filter(\.isDone)
         let streak = routines.map(\.streak).max() ?? 0
+        let upcoming = tasks.filter { !$0.isDone && ($0.dueDate.map { $0 >= Date.now.endOfDay } ?? false) }
+            .sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }
 
         NavigationStack {
             List {
@@ -158,6 +160,11 @@ struct TodayView: View {
                     if showDone { ForEach(doneTasks) { row($0) } }
                 }
 
+                if let first = upcoming.first {
+                    ComingUpCard(count: upcoming.count, next: first) { router.tab = .tasks }
+                        .cardRow(top: 22, bottom: 4)
+                }
+
                 Color.clear.frame(height: 80).cardRow()
             }
             .listStyle(.plain)
@@ -201,6 +208,45 @@ extension View {
             .listRowInsets(EdgeInsets(top: top, leading: 16, bottom: bottom, trailing: 16))
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
+    }
+}
+
+/// What's planned after today, as one card that opens the Tasks tab.
+struct ComingUpCard: View {
+    let count: Int
+    let next: TaskItem
+    let onOpen: () -> Void
+
+    var body: some View {
+        Button(action: onOpen) {
+            HStack(spacing: 14) {
+                Image(systemName: "calendar")
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundStyle(StickerTone.lilac.deep)
+                    .frame(width: 46, height: 46)
+                    .background(StickerTone.lilac.fill, in: .rect(cornerRadius: 15, style: .continuous))
+                    .rotationEffect(.degrees(-5))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(count == 1 ? String(localized: "1 task coming up") : String(localized: "\(count) tasks coming up"))
+                        .font(.allo(size: 17, weight: .heavy, relativeTo: .headline))
+                        .tracking(-0.3)
+                        .foregroundStyle(Color.ink)
+                    Text(String(localized: "Next: \(next.title), \((next.dueDate ?? .now).relativeDayText(includingTime: next.hasTime))"))
+                        .font(.allo(.footnote, .bold))
+                        .foregroundStyle(Color.inkSecondary)
+                        .lineLimit(1)
+                }
+                Spacer(minLength: 6)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(Color.inkTertiary)
+            }
+            .padding(14)
+            .background(Color.surface, in: .rect(cornerRadius: 26, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
+        }
+        .buttonStyle(.pressable)
+        .accessibilityHint(String(localized: "Opens Tasks"))
     }
 }
 

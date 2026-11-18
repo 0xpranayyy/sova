@@ -2,7 +2,7 @@ import SwiftUI
 import Observation
 
 enum AppTab: Hashable {
-    case today, goals, routines, insights
+    case today, tasks, goals, routines, insights
     /// The separated "+" button in the tab bar. Selecting it opens the
     /// right creator for the tab you were on, then snaps back.
     case create

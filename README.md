@@ -84,7 +84,7 @@ Give a goal a deadline, break it into steps and link tasks to it. Every step you
 | | |
 | :-- | :-- |
 | **Today** | A greeting, the owl inside a ring that fills as you finish things, one **Up Next** card, today's rituals as sticker tiles, overdue and open tasks, and what you've done |
-| **Tasks** | Natural-language capture, repeats (daily, weekdays, weekly, monthly, yearly), alerts at the time or a few minutes before, swipe to finish or push to tomorrow, and Undo everywhere |
+| **Tasks** | A Tasks tab with everything grouped into Overdue, Today, Tomorrow, the days ahead, Later and Someday, plus a 7-day strip to see one day. Natural-language capture, repeats (daily, weekdays, weekly, monthly, yearly), alerts at the time or a few minutes before, swipe to finish or push to tomorrow, and Undo everywhere |
 | **Rituals** | Weekday schedules, morning / afternoon / evening / anytime groups, 🔥 streaks and a week view on an indigo stage |
 | **Goals** | Deadlines, numbered steps, linked tasks, a big percentage and archiving |
 | **Insights** | This week's bars, a 17-week activity calendar and which rituals you keep most |
@@ -234,7 +234,7 @@ xcodebuild -downloadComponent MetalToolchain
 ```
 Sova/                 the app
 ├── App/              entry point, root view, tabs and routing
-├── Features/         Today, Goals, Rituals, Insights, editors, onboarding, Plus, settings
+├── Features/         Today, Tasks, Goals, Rituals, Insights, editors, onboarding, Plus, settings
 ├── Components/       the owl, stickers, checkboxes and shared views
 ├── Theme/            type, surfaces and button styles
 ├── Models/           starter content for onboarding
