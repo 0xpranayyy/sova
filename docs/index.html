@@ -5,8 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sova: Tasks, Habits & Goals</title>
 <meta name="description" content="Sova keeps your tasks, daily habits and big goals in one happy app, with a little owl cheering you on. For iPhone.">
-<meta name="theme-color" content="#FFE94D" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E0B1F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FCFCFA" id="themeColor">
+<script>
+/* Apply the saved theme before the first paint, so there's no flash. */
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("sova-theme"); } catch (e) {}
+  if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  var dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.getElementById("themeColor").content = dark ? "#0E0B1F" : "#FCFCFA";
+})();
+</script>
 <meta property="og:title" content="Sova: Tasks, Habits & Goals">
 <meta property="og:description" content="Your day, beautifully done. Tasks, rituals and goals in one happy app.">
 <meta property="og:image" content="https://0xpranayyy.github.io/sova/assets/og.jpg">
@@ -34,11 +43,18 @@
   --r-xl:48px; --r-lg:34px; --r-md:24px;
   --ease:cubic-bezier(.2,.9,.25,1.15);
 }
-@media (prefers-color-scheme:dark){
-  :root{
+:root{color-scheme:light;--lilacLogo:#D9CEFF}
+/* Dark: the user's choice wins; otherwise follow the system. */
+:root[data-theme=dark]{color-scheme:dark;
     --canvas:#0E0B1F; --ink:#F4F1FF; --ink2:rgba(244,241,255,.68); --ink3:rgba(244,241,255,.42);
     --surface:#1B1636; --hair:rgba(255,255,255,.09); --well:rgba(255,255,255,.06);
-    --indigo:#3B26A6; --glass:rgba(14,11,31,.7);
+    --indigo:#3B26A6; --glass:rgba(14,11,31,.7); --lilacLogo:#2B1677;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme=light]){color-scheme:dark;
+    --canvas:#0E0B1F; --ink:#F4F1FF; --ink2:rgba(244,241,255,.68); --ink3:rgba(244,241,255,.42);
+    --surface:#1B1636; --hair:rgba(255,255,255,.09); --well:rgba(255,255,255,.06);
+    --indigo:#3B26A6; --glass:rgba(14,11,31,.7); --lilacLogo:#2B1677;
   }
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -381,8 +397,8 @@ html{overflow-x:clip}
 
 /* giant footer */
 .giant{position:relative;margin-top:clamp(60px,8vw,110px);overflow:hidden;padding-top:70px}
-.giant h2{font-weight:900;font-size:clamp(120px,27vw,400px);letter-spacing:-.07em;line-height:.78;text-align:center;color:var(--lilac);user-select:none}
-@media (prefers-color-scheme:dark){.giant h2{color:#2B1677}}
+.giant h2{color:var(--lilacLogo)!important;font-weight:900;font-size:clamp(120px,27vw,400px);letter-spacing:-.07em;line-height:.78;text-align:center;color:var(--lilac);user-select:none}
+
 .giant .owl{position:absolute;left:50%;top:0;margin-left:clamp(40px,10vw,150px);width:clamp(90px,12vw,150px);height:auto;animation:peek 4s ease-in-out infinite}
 @keyframes peek{0%,100%{transform:translateY(16px) rotate(6deg)}50%{transform:translateY(0) rotate(-4deg)}}
 
@@ -497,6 +513,25 @@ main>section:nth-of-type(n+4){content-visibility:auto;contain-intrinsic-size:aut
 .dots{display:none}
 @media (max-width:760px){.dots{display:flex}}
 
+/* ===================== theme toggle ===================== */
+.theme-btn{position:relative;width:44px;height:44px;flex:none;border-radius:50%;border:1.5px solid var(--hair);background:var(--surface);color:var(--ink);cursor:pointer;display:grid;place-items:center;overflow:hidden;transition:transform .3s var(--ease),background .3s}
+.theme-btn:active{transform:scale(.92)}
+@media (hover:hover){.theme-btn:hover{transform:rotate(-12deg) scale(1.06)}}
+.theme-btn>span{position:absolute;inset:0;display:grid;place-items:center;transition:transform .55s cubic-bezier(.2,.9,.2,1.2),opacity .3s}
+.theme-btn .i-sun{color:#E8A400}
+.theme-btn .i-moon{color:#FFE94D}
+:root .theme-btn .i-moon{transform:translateY(130%) rotate(-90deg);opacity:0}
+:root[data-mode=dark] .theme-btn .i-sun{transform:translateY(-130%) rotate(90deg);opacity:0}
+:root[data-mode=dark] .theme-btn .i-moon{transform:none;opacity:1}
+.nav .wrap{gap:12px}
+.nav-links{margin-right:12px}
+@media (max-width:760px){.nav .wrap{gap:8px}.nav .theme-btn{margin-left:auto;width:40px;height:40px}.nav .btn-dark{margin-left:0}}
+/* circular reveal when switching */
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){clip-path:circle(0 at var(--vx,50%) var(--vy,0));animation:reveal .65s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes reveal{to{clip-path:circle(var(--vr,150vmax) at var(--vx,50%) var(--vy,0))}}
+html.theme-fade *,html.theme-fade *::before,html.theme-fade *::after{transition:background-color .35s ease,color .35s ease,border-color .35s ease!important}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
@@ -516,6 +551,9 @@ main>section:nth-of-type(n+4){content-visibility:auto;contain-intrinsic-size:aut
       <a href="#plus">Plus</a>
       <a href="#faq">FAQ</a>
     </nav>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to dark mode" title="Light or dark">
+      <span class="i-sun"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg></span><span class="i-moon"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg></span>
+    </button>
     <a class="btn btn-dark js-store" href="#get"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>Get Sova</a>
   </div>
 </header>
@@ -1003,6 +1041,42 @@ const markDot = () => {
 };
 bento.addEventListener("scroll", () => requestAnimationFrame(markDot), { passive: true });
 markDot();
+
+// Light / dark toggle: follows the system until the user picks, then remembers.
+(() => {
+  const root = document.documentElement, btn = document.getElementById("themeBtn");
+  const meta = document.getElementById("themeColor");
+  const sys = matchMedia("(prefers-color-scheme: dark)");
+  const saved = () => { try { return localStorage.getItem("sova-theme"); } catch (e) { return null; } };
+  const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : sys.matches;
+  const sync = () => {
+    const dark = isDark();
+    root.dataset.mode = dark ? "dark" : "light";
+    meta.content = dark ? "#0E0B1F" : "#FCFCFA";
+    btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    btn.setAttribute("aria-pressed", String(dark));
+  };
+  sync();
+  sys.addEventListener("change", () => { if (!saved()) sync(); });
+  btn.addEventListener("click", e => {
+    const next = isDark() ? "light" : "dark";
+    const apply = () => {
+      root.dataset.theme = next;
+      try { localStorage.setItem("sova-theme", next); } catch (err) {}
+      sync();
+    };
+    if (reduce) return apply();
+    if (document.startViewTransition) {
+      const r = btn.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      root.style.setProperty("--vx", x + "px"); root.style.setProperty("--vy", y + "px");
+      root.style.setProperty("--vr", Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + "px");
+      document.startViewTransition(apply);
+    } else {
+      root.classList.add("theme-fade"); apply();
+      setTimeout(() => root.classList.remove("theme-fade"), 400);
+    }
+  });
+})();
 </script>
 </body>
 </html>
