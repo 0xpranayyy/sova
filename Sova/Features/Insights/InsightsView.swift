@@ -22,7 +22,7 @@ struct InsightsView: View {
 
     /// Columns of seven days (one per week), oldest first, ending this week.
     private var grid: [[Date?]] {
-        let cal = Calendar.current
+        let cal = Calendar.sova
         let today = Date.now.startOfDay
         let weekStart = cal.dateInterval(of: .weekOfYear, for: today)?.start ?? today
         return (0..<Self.weeks).map { column in

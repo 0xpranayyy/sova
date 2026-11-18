@@ -56,7 +56,7 @@ struct BigButtonStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .brightness(configuration.isPressed ? -0.03 : 0)
             .animation(.spring(response: 0.22, dampingFraction: 0.6), value: configuration.isPressed)
-            .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.55), trigger: configuration.isPressed) { _, pressed in pressed }
+            .sovaFeedback(.impact(flexibility: .soft, intensity: 0.55), trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
 
@@ -74,7 +74,7 @@ struct QuietButtonStyle: ButtonStyle {
             .overlay(Capsule().strokeBorder(Color.hairline, lineWidth: 1.5))
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .animation(.spring(response: 0.22, dampingFraction: 0.6), value: configuration.isPressed)
-            .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.4), trigger: configuration.isPressed) { _, pressed in pressed }
+            .sovaFeedback(.impact(flexibility: .soft, intensity: 0.4), trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
 

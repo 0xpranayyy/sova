@@ -57,7 +57,7 @@ struct GoalDetailView: View {
         } message: {
             Text("Its steps are deleted too. Linked tasks are kept.")
         }
-        .sensoryFeedback(.success, trigger: goal.progress >= 1)
+        .sovaFeedback(.success, trigger: goal.progress >= 1)
     }
 
     private var hero: some View {

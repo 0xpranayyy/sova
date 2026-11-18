@@ -69,7 +69,7 @@ struct MainTabView: View {
             // Leaving the app: make the widgets and the badge match what just changed.
             if phase == .background { SovaRefresh.changed(context) }
         }
-        .sensoryFeedback(.selection, trigger: router.tab)
+        .sovaFeedback(.selection, trigger: router.tab)
         .onChange(of: router.tab) { previous, current in
             guard current == .create else { return }
             router.tab = previous
@@ -137,7 +137,7 @@ struct ToastBar: View {
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: router.toast)
-        .sensoryFeedback(.impact(weight: .light), trigger: router.toast)
+        .sovaFeedback(.impact(weight: .light), trigger: router.toast)
     }
 }
 

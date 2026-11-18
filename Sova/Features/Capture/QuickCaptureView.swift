@@ -143,10 +143,10 @@ struct QuickCaptureView: View {
         .presentationDetents([.height(200)])
         .presentationDragIndicator(.visible)
         .presentationBackground(Color.canvas)
-        .sensoryFeedback(.success, trigger: added)
-        .sensoryFeedback(.selection, trigger: parsed.dueDate != nil) { _, found in found }
-        .sensoryFeedback(.selection, trigger: parsed.priority)
-        .sensoryFeedback(.selection, trigger: parsed.repeatRule)
+        .sovaFeedback(.success, trigger: added)
+        .sovaFeedback(.selection, trigger: parsed.dueDate != nil) { _, found in found }
+        .sovaFeedback(.selection, trigger: parsed.priority)
+        .sovaFeedback(.selection, trigger: parsed.repeatRule)
         .task { focused = true }
     }
 

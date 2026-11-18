@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import TipKit
+import StoreKit
 
 struct TodayView: View {
     @Environment(AppRouter.self) private var router
@@ -178,6 +179,8 @@ struct DayStage: View {
     let total: Int
     let streak: Int
 
+    @Environment(\.requestReview) private var requestReview
+
     @State private var cheers = 0
 
     private var progress: Double { total == 0 ? 0 : Double(done) / Double(total) }
@@ -238,6 +241,12 @@ struct DayStage: View {
             if total > 0, new == total, old < total {
                 cheers += 1
                 Haptics.celebrate()
+                if ReviewPrompt.shouldAskAfterCelebration() {
+                    Task {
+                        try? await Task.sleep(for: .seconds(2.5))
+                        requestReview()
+                    }
+                }
             }
         }
         .accessibilityElement(children: .ignore)

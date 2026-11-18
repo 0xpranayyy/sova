@@ -424,7 +424,7 @@ struct RitualsStep: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .scrollIndicators(.hidden)
-        .sensoryFeedback(.selection, trigger: selection)
+        .sovaFeedback(.selection, trigger: selection)
     }
 }
 
@@ -546,7 +546,7 @@ struct GoalStep: View {
         .scrollBounceBehavior(.basedOnSize)
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.interactively)
-        .sensoryFeedback(.selection, trigger: title)
+        .sovaFeedback(.selection, trigger: title)
     }
 }
 
@@ -629,7 +629,7 @@ struct RhythmStep: View {
             try? await Task.sleep(for: .milliseconds(450))
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { dropped = true }
         }
-        .sensoryFeedback(.impact(weight: .light), trigger: dropped)
+        .sovaFeedback(.impact(weight: .light), trigger: dropped)
     }
 
     private func reminderRow(title: String, symbol: String, tone: StickerTone,

@@ -27,7 +27,7 @@ struct AccentPicker: View {
                 .accessibilityAddTraits(selection == accent ? .isSelected : [])
             }
         }
-        .sensoryFeedback(.selection, trigger: selection)
+        .sovaFeedback(.selection, trigger: selection)
     }
 }
 
@@ -71,7 +71,7 @@ struct SymbolPicker: View {
             }
         }
         .padding(.vertical, 4)
-        .sensoryFeedback(.selection, trigger: selection)
+        .sovaFeedback(.selection, trigger: selection)
     }
 }
 
@@ -108,7 +108,7 @@ struct WeekdayPicker: View {
                 preset("Weekends", days: [1, 7])
             }
         }
-        .sensoryFeedback(.selection, trigger: selection)
+        .sovaFeedback(.selection, trigger: selection)
     }
 
     private func preset(_ title: LocalizedStringKey, days: [Int]) -> some View {

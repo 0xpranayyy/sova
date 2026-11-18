@@ -16,6 +16,10 @@ enum PlusReason: String, Hashable {
     }
 }
 
+extension PlusReason: Identifiable {
+    var id: String { rawValue }
+}
+
 /// What's free, and what Plus unlocks.
 enum PlusGate {
     static let freeRituals = 3

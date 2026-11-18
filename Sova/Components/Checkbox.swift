@@ -66,7 +66,7 @@ struct CheckButton: View {
                 .contentShape(.rect)
         }
         .buttonStyle(.pressable)
-        .sensoryFeedback(trigger: isOn) { _, newValue in
+        .sovaFeedback(trigger: isOn) { _, newValue in
             newValue ? .success : .impact(weight: .light)
         }
         .onChange(of: isOn) { _, newValue in Sounds.play(newValue ? .check : .uncheck) }

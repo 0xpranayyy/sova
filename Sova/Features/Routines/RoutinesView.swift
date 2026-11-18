@@ -66,7 +66,7 @@ struct WeekStage: View {
 
     private var days: [Date] {
         let today = Date.now.startOfDay
-        let start = Calendar.current.dateInterval(of: .weekOfYear, for: today)?.start ?? today
+        let start = Calendar.sova.dateInterval(of: .weekOfYear, for: today)?.start ?? today
         return (0..<7).map { start.adding(days: $0) }
     }
 

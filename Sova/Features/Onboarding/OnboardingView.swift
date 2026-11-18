@@ -89,7 +89,7 @@ struct OnboardingView: View {
             )
         }
         .tint(Color.ink)
-        .sensoryFeedback(.selection, trigger: step)
+        .sovaFeedback(.selection, trigger: step)
         // Replaying the welcome keeps the name you already gave.
         .onAppear { if name.isEmpty { name = userName } }
     }

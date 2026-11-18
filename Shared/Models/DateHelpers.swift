@@ -28,10 +28,23 @@ extension Date {
     }
 }
 
+extension Calendar {
+    /// The user's calendar with the week-start setting applied.
+    static var sova: Calendar {
+        var cal = Calendar.current
+        switch SovaSettings.weekStart {
+        case 1: cal.firstWeekday = 1   // Sunday
+        case 2: cal.firstWeekday = 2   // Monday
+        default: break
+        }
+        return cal
+    }
+}
+
 enum Weekdays {
     /// Calendar weekday numbers (1 = Sunday) ordered by the user's locale.
     static var ordered: [Int] {
-        let first = Calendar.current.firstWeekday
+        let first = Calendar.sova.firstWeekday
         return (0..<7).map { (first - 1 + $0) % 7 + 1 }
     }
 

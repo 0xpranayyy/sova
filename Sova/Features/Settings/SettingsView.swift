@@ -1,11 +1,14 @@
 import SwiftUI
 import SwiftData
 import UserNotifications
+import StoreKit
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Environment(\.openURL) private var openURL
+    @Environment(\.requestReview) private var requestReview
+    @Environment(PlusStore.self) private var store
 
     @AppStorage("userName") private var userName = ""
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
@@ -16,9 +19,16 @@ struct SettingsView: View {
     @AppStorage("morningReminderMinutes") private var morningMinutes = 8 * 60
     @AppStorage("eveningReminderOn") private var eveningOn = false
     @AppStorage("eveningReminderMinutes") private var eveningMinutes = 21 * 60
+    @AppStorage(SovaSettings.Key.weekStart, store: SovaSettings.shared) private var weekStart = 0
+    @AppStorage(SovaSettings.Key.alertOffset) private var alertOffset = 0
+    @AppStorage(SovaSettings.Key.badgeOverdue) private var badgeOverdue = true
+    @AppStorage(SovaSettings.Key.haptics) private var hapticsOn = true
 
     @State private var notificationsDenied = false
     @State private var confirmErase = false
+    @State private var plusReason: PlusReason?
+    @State private var showManage = false
+    @State private var iconName: String? = UIApplication.shared.alternateIconName
 
     private var version: String {
         let info = Bundle.main.infoDictionary
@@ -42,6 +52,10 @@ struct SettingsView: View {
                         .padding(.vertical, 6)
                     }
 
+                    Section {
+                        plusRow
+                    }
+
                     Section("Your name") {
                         TextField("Used in your greeting", text: $userName)
                             .textContentType(.givenName)
@@ -55,7 +69,7 @@ struct SettingsView: View {
                         .pickerStyle(.segmented)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets())
-                        .sensoryFeedback(.selection, trigger: appearanceRaw)
+                        .sovaFeedback(.selection, trigger: appearanceRaw)
                     }
 
                     Section("Theme") {
@@ -63,13 +77,46 @@ struct SettingsView: View {
                             .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
                     }
 
+                    Section("App icon") {
+                        iconPicker
+                            .listRowInsets(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
+                    }
+
                     Section {
                         Toggle(isOn: $soundsOn) {
                             Label("Little sounds", systemImage: "speaker.wave.2")
                         }
                         .onChange(of: soundsOn) { if soundsOn { Sounds.play(.tick) } }
+                        Toggle(isOn: $hapticsOn) {
+                            Label("Haptics", systemImage: "hand.tap")
+                        }
+                        .onChange(of: hapticsOn) { if hapticsOn { Haptics.pop(0.7) } }
                     } footer: {
-                        Text("Soft taps when you check things off. They follow your silent switch.")
+                        Text("Soft taps and sounds when you check things off. Sounds follow your silent switch.")
+                    }
+
+                    Section("Calendar & alerts") {
+                        Picker(selection: $weekStart) {
+                            Text("System").tag(0)
+                            Text("Sunday").tag(1)
+                            Text("Monday").tag(2)
+                        } label: {
+                            Label("Week starts on", systemImage: "calendar")
+                        }
+                        Picker(selection: $alertOffset) {
+                            Text("At the time").tag(0)
+                            Text("5 min before").tag(5)
+                            Text("15 min before").tag(15)
+                            Text("30 min before").tag(30)
+                            Text("1 hour before").tag(60)
+                        } label: {
+                            Label("Task alerts", systemImage: "bell")
+                        }
+                        .onChange(of: alertOffset) { Task { await TaskAlerts.resync(in: context) } }
+                        Toggle(isOn: $badgeOverdue) {
+                            Label("Overdue count on icon", systemImage: "app.badge")
+                        }
+                        .onChange(of: badgeOverdue) { SovaRefresh.updateBadge(context) }
                     }
 
                     Section {
@@ -92,6 +139,21 @@ struct SettingsView: View {
                             Text("Two quiet notes a day, at the times you choose. Nothing else.")
                         }
                     }
+
+                    Section("Help") {
+                        if Links.hasSupportEmail, let mail = URL(string: "mailto:\(Links.supportEmail)?subject=Sova%20feedback") {
+                            Button("Help & feedback", systemImage: "envelope") { openURL(mail) }
+                        }
+                        Button("Rate Sova", systemImage: "star") {
+                            if let url = Links.writeReview { openURL(url) } else { requestReview() }
+                        }
+                        Button("Restore purchases", systemImage: "arrow.clockwise") {
+                            Task { await store.restore() }
+                        }
+                        Button("Privacy policy", systemImage: "hand.raised") { openURL(Links.privacy) }
+                        Button("Terms of use", systemImage: "doc.text") { openURL(Links.terms) }
+                    }
+                    .foregroundStyle(Color.ink)
 
                     Section {
                         Button("Replay Welcome", systemImage: "hand.wave") {
@@ -118,6 +180,8 @@ struct SettingsView: View {
                     Button(role: .confirm) { dismiss() }
                 }
             }
+            .sheet(item: $plusReason) { PlusView(reason: $0) }
+            .manageSubscriptionsSheet(isPresented: $showManage)
             .confirmationDialog("Erase everything?", isPresented: $confirmErase, titleVisibility: .visible) {
                 Button("Erase All Data", role: .destructive, action: eraseAll)
             } message: {
@@ -130,6 +194,90 @@ struct SettingsView: View {
             .task { await refreshPermission() }
         }
         .tint((SovaTheme(rawValue: themeRaw) ?? .ember).accent.color)
+    }
+
+    // MARK: Plus
+
+    private var plusRow: some View {
+        Button {
+            if store.isPlus { showManage = true } else { plusReason = .general }
+        } label: {
+            HStack(spacing: 14) {
+                OwlMark(size: 34, happy: store.isPlus, blinks: false,
+                        bodyColor: StickerTone.yellow.fill, eyeColor: Color(hex: 0x2B1677),
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8))
+                    .frame(width: 52, height: 52)
+                    .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 16, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text("Sova").font(.display(.title3)).foregroundStyle(Color.ink)
+                        TiltPill(text: "Plus", tone: .yellow, tilt: -5, size: 12)
+                    }
+                    Text(store.isPlus ? String(localized: "Active. Thank you! 💛")
+                                      : String(localized: "Unlimited rituals and goals, iCloud sync, app icons"))
+                        .font(.allo(.footnote, .medium))
+                        .foregroundStyle(Color.inkSecondary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.heavy))
+                    .foregroundStyle(Color.inkTertiary)
+            }
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .padding(.vertical, 4)
+    }
+
+    // MARK: App icon
+
+    private var iconPicker: some View {
+        HStack(spacing: 18) {
+            iconTile(name: nil, preview: "IconPreview-Default", title: String(localized: "Sova"))
+            iconTile(name: "AppIcon-Indigo", preview: "IconPreview-Indigo", title: String(localized: "Sunny"))
+            Spacer()
+        }
+    }
+
+    private func iconTile(name: String?, preview: String, title: String) -> some View {
+        let selected = iconName == name
+        let locked = name != nil && !store.isPlus
+        return Button {
+            guard !selected else { return }
+            if locked { plusReason = .icons; return }
+            UIApplication.shared.setAlternateIconName(name) { error in
+                if error == nil { iconName = name }
+            }
+        } label: {
+            VStack(spacing: 6) {
+                Image(preview)
+                    .resizable()
+                    .frame(width: 64, height: 64)
+                    .clipShape(.rect(cornerRadius: 15, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(selected ? Color.ink : .clear, lineWidth: 3)
+                            .padding(-5)
+                    }
+                    .overlay(alignment: .topTrailing) {
+                        if locked {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 11, weight: .heavy))
+                                .foregroundStyle(StickerTone.indigo.deep)
+                                .padding(5)
+                                .background(StickerTone.indigo.fill, in: .circle)
+                                .offset(x: 6, y: -6)
+                        }
+                    }
+                Text(title)
+                    .font(.allo(.caption, .bold))
+                    .foregroundStyle(selected ? Color.ink : Color.inkSecondary)
+            }
+            .padding(.top, 6)
+        }
+        .buttonStyle(.pressable)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private func reminderRow(title: String, symbol: String, accent: Accent,
