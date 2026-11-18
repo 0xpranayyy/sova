@@ -13,7 +13,7 @@ struct QuickCaptureTip: Tip {
 }
 
 struct SwipeTip: Tip {
-    @Parameter static var isReady = false
+    @Parameter static var isReady: Bool = false
 
     var title: Text { Text("Swipe to move fast") }
     var message: Text? {
