@@ -188,6 +188,8 @@ struct DayStage: View {
     let total: Int
     let streak: Int
 
+    @State private var cheers = 0
+
     private var progress: Double { total == 0 ? 0 : Double(done) / Double(total) }
 
     var body: some View {
@@ -210,9 +212,13 @@ struct DayStage: View {
                 .position(x: w / 2, y: h * 0.56)
                 .animation(.spring(response: 0.8, dampingFraction: 0.8), value: progress)
 
+                SparkleBurst(trigger: cheers)
+                    .position(x: w / 2, y: h * 0.56)
+
                 OwlMark(size: 84, happy: total > 0 && done == total,
                         bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8))
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
+                        celebrate: cheers)
                     .position(x: w / 2, y: h * 0.57)
 
                 MonoCaps(greeting, color: StickerTone.indigo.deep)
@@ -236,6 +242,14 @@ struct DayStage: View {
         }
         .frame(height: 250)
         .clipShape(.rect(cornerRadius: 36, style: .continuous))
+        .onChange(of: done) { old, new in
+            // The last thing of the day: the owl hops, sparkles burst, and a
+            // rolling haptic plays.
+            if total > 0, new == total, old < total {
+                cheers += 1
+                Haptics.celebrate()
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(greeting)
         .accessibilityValue(String(localized: "\(done) of \(total) done"))
@@ -355,6 +369,8 @@ struct RitualCard: View {
     var tilt: Double = 0
     var onOpen: () -> Void
 
+    @State private var wiggle = 0
+
     var body: some View {
         let tone = StickerTone(routine.accent)
         let ink = tone == .indigo ? Color.white : tone.deep
@@ -367,6 +383,7 @@ struct RitualCard: View {
                 CheckButton(isOn: done, color: tone.deep, round: true, size: 30, checkColor: tone.fill,
                             label: routine.title) {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.toggle(on: .now) }
+                    if routine.isDone(on: .now) { wiggle += 1 }
                 }
                 .padding(-7)
             }
@@ -382,6 +399,17 @@ struct RitualCard: View {
         .frame(width: 132, height: 132, alignment: .topLeading)
         .background(tone.fill, in: .rect(cornerRadius: 30, style: .continuous))
         .opacity(done ? 0.6 : 1)
+        // A happy wiggle when checked: a quick swell and a shake that settles.
+        .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { view, t in
+            view.scaleEffect(1 + abs(t) * 0.012).rotationEffect(.degrees(t))
+        } keyframes: { _ in
+            KeyframeTrack {
+                SpringKeyframe(-5, duration: 0.09, spring: .snappy)
+                SpringKeyframe(4, duration: 0.1, spring: .snappy)
+                SpringKeyframe(-2, duration: 0.1, spring: .snappy)
+                SpringKeyframe(0, duration: 0.3, spring: .bouncy)
+            }
+        }
         .rotationEffect(.degrees(tilt))
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)

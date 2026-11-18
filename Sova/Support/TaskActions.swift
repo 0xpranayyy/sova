@@ -44,6 +44,7 @@ enum TaskActions {
 
     static func delete(_ task: TaskItem, context: ModelContext, router: AppRouter?) {
         let snapshot = TaskSnapshot(task)
+        Haptics.warning()
         withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { context.delete(task) }
         router?.show(Toast(message: String(localized: "Deleted: \(snapshot.title)")) {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { snapshot.restore(in: context) }
@@ -53,6 +54,7 @@ enum TaskActions {
     /// Moves a task to tomorrow, keeping its time of day.
     static func moveToTomorrow(_ task: TaskItem, router: AppRouter?) {
         let previous = task.dueDate
+        Haptics.pop(0.6)
         let tomorrow = Date.now.startOfDay.adding(days: 1)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
             if task.hasTime, let due = task.dueDate {

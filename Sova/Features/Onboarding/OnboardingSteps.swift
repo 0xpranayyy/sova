@@ -46,8 +46,13 @@ private struct Pop: ViewModifier {
             .scaleEffect(shown || reduceMotion ? 1 : 0.6)
             .opacity(shown ? 1 : 0)
             .onAppear {
-                withAnimation(.spring(response: 0.55, dampingFraction: 0.6).delay(0.15 + Double(index) * 0.07)) {
+                let delay = 0.15 + Double(index) * 0.07
+                withAnimation(.spring(response: 0.55, dampingFraction: 0.6).delay(delay)) {
                     shown = true
+                }
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(Int((delay + 0.08) * 1000)))
+                    Haptics.pop(0.35 + Double(index % 3) * 0.08)
                 }
             }
     }
@@ -94,6 +99,7 @@ struct HelloStep: View {
 /// made of floating around it.
 private struct OwlStage: View {
     var look: CGSize
+    @State private var wave = 0
 
     var body: some View {
         GeometryReader { geo in
@@ -104,7 +110,7 @@ private struct OwlStage: View {
 
                 OwlMark(size: 150, look: look, bodyColor: StickerTone.yellow.fill,
                         eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
-                        bellyColor: Color(hex: 0xFFF4A8))
+                        bellyColor: Color(hex: 0xFFF4A8), celebrate: wave)
                     .position(x: w / 2, y: h * 0.42)
 
                 TiltPill(text: String(localized: "Meditate ✓"), tone: .mint, tilt: -8).position(x: w * 0.24, y: h * 0.13).pop(0)
@@ -120,6 +126,11 @@ private struct OwlStage: View {
         }
         .frame(height: 400)
         .clipShape(.rect(cornerRadius: 40, style: .continuous))
+        .task {
+            // Say hello once the stickers have landed.
+            try? await Task.sleep(for: .milliseconds(900))
+            wave += 1
+        }
         .accessibilityHidden(true)
     }
 }
@@ -280,6 +291,8 @@ struct NameStep: View {
     @Binding var name: String
     var onSubmit: () -> Void
 
+    @State private var hello = 0
+
     private var greeting: String {
         switch Calendar.current.component(.hour, from: .now) {
         case 5..<12: String(localized: "Good morning")
@@ -294,8 +307,14 @@ struct NameStep: View {
         VStack(alignment: .leading, spacing: 0) {
             // The owl asks.
             HStack(alignment: .top, spacing: 10) {
-                OwlMark(size: 76, happy: !trimmed.isEmpty)
+                OwlMark(size: 76, happy: !trimmed.isEmpty, celebrate: hello)
                     .reveal(0)
+                    .onChange(of: trimmed.isEmpty) { _, isEmpty in
+                        if !isEmpty {
+                            hello += 1
+                            Haptics.soft(0.7)
+                        }
+                    }
                 Text(trimmed.isEmpty ? String(localized: "Hi, I'm Sova! What should I call you?")
                                      : String(localized: "Nice to meet you, \(trimmed)!"))
                     .font(.allo(size: 19, weight: .heavy, relativeTo: .title3))
@@ -348,14 +367,21 @@ struct NameStep: View {
 
 struct RitualsStep: View {
     @Binding var selection: Set<String>
+    @State private var cheers = 0
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .bottom) {
                     StepHeadline(text: String(localized: "Pick your\nrituals."))
-                    OwlMark(size: 50, happy: selection.count >= 3)
+                    OwlMark(size: 50, happy: selection.count >= 3, celebrate: cheers)
                         .rotationEffect(.degrees(8))
+                        .onChange(of: selection.count) { old, new in
+                            if old < 3 && new >= 3 {
+                                cheers += 1
+                                Haptics.soft(0.8)
+                            }
+                        }
                         .padding(.bottom, 2)
                         .reveal(1)
                 }
@@ -757,17 +783,11 @@ struct FinishStep: View {
                 let h = geo.size.height
                 ZStack {
                     StickerTone.indigo.fill
+                    SparkleBurst(trigger: hop, radius: CGSize(width: 150, height: 120), count: 14)
+                        .position(x: w / 2, y: h * 0.5)
                     OwlMark(size: 140, happy: true, blinks: false, bodyColor: StickerTone.yellow.fill,
                             eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
-                            bellyColor: Color(hex: 0xFFF4A8))
-                        .keyframeAnimator(initialValue: 0.0, trigger: hop) { view, y in
-                            view.offset(y: y)
-                        } keyframes: { _ in
-                            KeyframeTrack {
-                                CubicKeyframe(-22, duration: 0.22)
-                                SpringKeyframe(0, duration: 0.5, spring: .bouncy)
-                            }
-                        }
+                            bellyColor: Color(hex: 0xFFF4A8), celebrate: hop)
                         .position(x: w / 2, y: h * 0.52)
                     SparkleDot(color: StickerTone.mint.fill, size: 40).position(x: w * 0.16, y: h * 0.22).pop(0)
                     SparkleDot(color: StickerTone.pink.fill, size: 28).position(x: w * 0.84, y: h * 0.18).pop(1)
@@ -817,10 +837,10 @@ struct FinishStep: View {
                 .reveal(3)
         }
         .padding(.horizontal, 16)
-        .sensoryFeedback(.success, trigger: hop)
         .task {
             try? await Task.sleep(for: .milliseconds(500))
             hop += 1
+            Haptics.celebrate()
         }
     }
 

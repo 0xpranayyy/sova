@@ -137,6 +137,8 @@ struct QuickCaptureView: View {
         .presentationDragIndicator(.visible)
         .presentationBackground(Color.canvas)
         .sensoryFeedback(.success, trigger: added)
+        .sensoryFeedback(.selection, trigger: parsed.dueDate != nil) { _, found in found }
+        .sensoryFeedback(.selection, trigger: parsed.priority)
         .task { focused = true }
     }
 

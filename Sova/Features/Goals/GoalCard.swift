@@ -6,6 +6,8 @@ struct GoalCard: View {
     let goal: Goal
     var number: Int? = nil
 
+    @State private var cheers = 0
+
     private var tone: StickerTone { StickerTone(goal.accent) }
     private var ink: Color { tone == .indigo ? .white : tone.deep }
     private var nextStep: Milestone? { goal.sortedMilestones.first(where: { !$0.isDone }) }
@@ -49,6 +51,10 @@ struct GoalCard: View {
                     CheckButton(isOn: false, color: tone.deep, round: true, size: 24, checkColor: tone.fill,
                                 label: step.title) {
                         withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { step.isDone = true }
+                        if goal.progress >= 1 {
+                            cheers += 1
+                            Haptics.celebrate()
+                        }
                     }
                     .padding(.leading, -8)
                     Text("\(Text("Next · ").foregroundStyle(ink.opacity(0.6)))\(step.title)")
@@ -71,6 +77,7 @@ struct GoalCard: View {
         }
         .foregroundStyle(ink)
         .block(tone, cornerRadius: 32)
+        .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 150, height: 110)) }
         .overlay(alignment: .topTrailing) {
             if goal.progress >= 0.7 {
                 SparkleDot(color: .white, size: 20)

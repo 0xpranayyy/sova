@@ -209,3 +209,43 @@ struct SparkleDot: View {
     }
 }
 
+
+/// Sparkles that burst outward from the center with spring physics, spin a
+/// little, then fade. Fires each time `trigger` changes.
+struct SparkleBurst: View {
+    var trigger: Int
+    var colors: [Color] = [StickerTone.yellow.fill, StickerTone.mint.fill, StickerTone.pink.fill,
+                           StickerTone.cyan.fill, StickerTone.lilac.fill, StickerTone.orange.fill]
+    var radius: CGSize = CGSize(width: 120, height: 95)
+    var count = 12
+
+    @State private var spread: CGFloat = 0
+    @State private var visible = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<count, id: \.self) { i in
+                let angle = Double(i) / Double(count) * 2 * .pi + (i.isMultiple(of: 2) ? 0.2 : -0.1)
+                let reach = i.isMultiple(of: 3) ? 1.0 : (i.isMultiple(of: 2) ? 0.8 : 0.65)
+                Sparkle()
+                    .fill(colors[i % colors.count])
+                    .frame(width: 12 + CGFloat(i % 3) * 5, height: 12 + CGFloat(i % 3) * 5)
+                    .rotationEffect(.degrees(Double(spread) * Double(60 + i * 9)))
+                    .scaleEffect(0.4 + spread * 0.6)
+                    .offset(x: cos(angle) * radius.width * reach * spread,
+                            y: sin(angle) * radius.height * reach * spread)
+            }
+        }
+        .opacity(visible ? 1 : 0)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .onChange(of: trigger) {
+            guard !reduceMotion else { return }
+            spread = 0
+            visible = true
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.62)) { spread = 1 }
+            withAnimation(.easeOut(duration: 0.5).delay(0.65)) { visible = false }
+        }
+    }
+}

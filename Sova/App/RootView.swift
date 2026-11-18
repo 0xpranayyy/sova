@@ -48,6 +48,7 @@ struct MainTabView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .sensoryFeedback(.selection, trigger: router.tab)
         .onChange(of: router.tab) { previous, current in
             guard current == .create else { return }
             router.tab = previous

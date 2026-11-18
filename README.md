@@ -17,6 +17,21 @@ Bold, modern and colorful, built on the palette and type of [Allo](https://allo.
 
 ![Today](screenshots/3-today.png)
 
+## Feel
+
+Small, physical details everywhere:
+
+- **The owl is alive.** It breathes, glances around on its own, leans toward where it's looking, double-blinks now and then, and flaps its wings when happy. Tap it and it squishes, hops with spring physics and squints happily. Its cheeks glow when it's pleased.
+- **Celebrations.** Finishing your whole day or a whole goal bursts sparkles outward with spring physics while the owl hops and flaps, timed to a rolling haptic flourish.
+- **Haptics with intent.**
+  - A soft press on every big button.
+  - A tick when switching tabs.
+  - A success tap when you check something off, and a warning buzz on delete.
+  - A crisp pop for "move to tomorrow".
+  - A "pop pop pop" as the welcome stickers land.
+  - A tick when quick capture recognizes a date or priority.
+- **Tactile pieces.** Buttons squish slightly darker when pressed, ritual tiles wiggle and swell when checked, and checkmarks draw themselves in. Every motion respects Reduce Motion.
+
 ## Onboarding
 
 Short, colorful steps with big buttons and a chunky progress bar. Swipe right to go back.
