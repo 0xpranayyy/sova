@@ -1,20 +1,20 @@
 # App Store listing
 
 ## App name (30 max)
-Sova: Tasks, Habits & Goals
+Sova: To-Do List & Habits
 
 ## Subtitle (30 max)
-Plan your day with a cute owl
+Daily Planner & Goal Tracker
 
 ## Promotional text (170 max)
-Tasks, habits and big goals in one app. Type a task the way you'd say it, tick it off, and watch your day come together, with a little owl along for the ride.
+A to-do list, habit tracker and goal planner in one. Type a task the way you'd say it, tick it off, and watch your day come together, with a little owl along.
 
 ## Keywords (100 max, comma separated)
-todo,planner,habit,tracker,routine,goals,reminder,daily,streak,productivity,checklist,list,focus
+todo,task,manager,reminder,routine,schedule,checklist,streak,productivity,widget,focus,morning,adhd
 
 ## Description
 
-Sova keeps your tasks, daily habits and big goals in one simple app for iPhone.
+Sova is a to-do list, habit tracker and goal planner in one simple app for iPhone. Plan your day, keep your routines and reach big goals, without juggling three apps.
 
 JUST TYPE IT
 Write the way you talk: "Call Mom tomorrow 6pm !!". Sova fills in the day, the time and the priority. Add "every Monday" and it repeats.

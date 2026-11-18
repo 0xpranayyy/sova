@@ -1,6 +1,6 @@
 # Sova: App Store listing pack
 
-Everything to enter in App Store Connect and the Apple Developer site, in the order you'll meet it. Every field is checked against Apple's character limits.
+Everything to enter in App Store Connect and the Apple Developer site, in the order you'll meet it. Every field is checked against Apple's character limits. The name, subtitle and keywords are tuned for search; see `GROWTH-PLAN.md` for why.
 
 ---
 
@@ -31,7 +31,7 @@ In-App Purchase is on by default for every App ID.
 | Field | Enter |
 | --- | --- |
 | Platforms | iOS |
-| Name | `Sova: Tasks, Habits & Goals` |
+| Name | `Sova: To-Do List & Habits` |
 | Primary Language | English (U.S.) |
 | Bundle ID | `app.sova.Sova` |
 | SKU | `sova-ios-1` |
@@ -43,8 +43,8 @@ In-App Purchase is on by default for every App ID.
 
 | Field | Enter |
 | --- | --- |
-| Name (30) | `Sova: Tasks, Habits & Goals` (27) |
-| Subtitle (30) | `Plan your day with a cute owl` (29) |
+| Name (30) | `Sova: To-Do List & Habits` (25) |
+| Subtitle (30) | `Daily Planner & Goal Tracker` (28) |
 | Primary Category | Productivity |
 | Secondary Category | Lifestyle |
 | Content Rights | "Does your app contain, show, or access third-party content?" → **No** |
@@ -74,12 +74,12 @@ In-App Purchase is on by default for every App ID.
 
 ### Promotional Text (170)
 ```
-Tasks, habits and big goals in one app. Type a task the way you'd say it, tick it off, and watch your day come together, with a little owl along for the ride.
+A to-do list, habit tracker and goal planner in one. Type a task the way you'd say it, tick it off, and watch your day come together, with a little owl along.
 ```
 
 ### Description (4000)
 ```
-Sova keeps your tasks, daily habits and big goals in one simple app for iPhone.
+Sova is a to-do list, habit tracker and goal planner in one simple app for iPhone. Plan your day, keep your routines and reach big goals, without juggling three apps.
 
 JUST TYPE IT
 Write the way you talk: "Call Mom tomorrow 6pm !!". Sova fills in the day, the time and the priority. Add "every Monday" and it repeats.
@@ -139,7 +139,7 @@ License Agreement (EULA): https://www.apple.com/legal/internet-services/itunes/d
 
 ### Keywords (100)
 ```
-todo,planner,habit,tracker,routine,goals,reminder,daily,streak,productivity,checklist,list,focus
+todo,task,manager,reminder,routine,schedule,checklist,streak,productivity,widget,focus,morning,adhd
 ```
 
 ### URLs and other fields
