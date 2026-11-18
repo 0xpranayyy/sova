@@ -8,7 +8,7 @@ struct GoalEditor: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var title: String
-    @State private var emoji: String
+    @State private var symbol: String
     @State private var notes: String
     @State private var hasDeadline: Bool
     @State private var deadline: Date
@@ -19,11 +19,11 @@ struct GoalEditor: View {
     init(goal: Goal?) {
         self.goal = goal
         _title = State(initialValue: goal?.title ?? "")
-        _emoji = State(initialValue: goal?.emoji ?? "🎯")
+        _symbol = State(initialValue: goal?.symbol ?? "flag.checkered")
         _notes = State(initialValue: goal?.notes ?? "")
         _hasDeadline = State(initialValue: goal?.deadline != nil)
         _deadline = State(initialValue: goal?.deadline ?? Date.now.adding(days: 30))
-        _accent = State(initialValue: goal?.accent ?? Accent.allCases.randomElement() ?? .iris)
+        _accent = State(initialValue: goal?.accent ?? SovaTheme.current.accent)
     }
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -33,15 +33,16 @@ struct GoalEditor: View {
             Form {
                 Section {
                     HStack(spacing: 14) {
-                        EmojiTile(emoji: emoji, accent: accent, size: 60)
+                        IconTile(symbol: symbol, accent: accent, size: 56, filled: true)
+                            .contentTransition(.symbolEffect(.replace))
                         TextField("What do you want to achieve?", text: $title, axis: .vertical)
-                            .font(.title3.weight(.semibold))
+                            .font(.display(.title3))
                     }
                     .padding(.vertical, 4)
                 }
 
                 Section("Icon") {
-                    EmojiPicker(selection: $emoji, accent: accent)
+                    SymbolPicker(selection: $symbol, accent: accent, symbols: SymbolPicker.goalSymbols)
                 }
 
                 Section("Color") {
@@ -64,7 +65,7 @@ struct GoalEditor: View {
                             Label(newMilestones[index], systemImage: "circle")
                         }
                         .onDelete { newMilestones.remove(atOffsets: $0) }
-                        TextField("Add a milestone", text: $milestoneDraft)
+                        TextField("Add a step", text: $milestoneDraft)
                             .submitLabel(.next)
                             .onSubmit {
                                 let t = milestoneDraft.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -73,9 +74,9 @@ struct GoalEditor: View {
                                 milestoneDraft = ""
                             }
                     } header: {
-                        Text("Milestones")
+                        Text("Steps")
                     } footer: {
-                        Text("Optional. Progress is calculated from completed milestones.")
+                        Text("Optional. Progress follows the steps you finish.")
                     }
                 }
 
@@ -84,6 +85,8 @@ struct GoalEditor: View {
                         .lineLimit(3...8)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.canvas)
             .navigationTitle(goal == nil ? "New Goal" : "Edit Goal")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -106,7 +109,7 @@ struct GoalEditor: View {
             return new
         }()
         target.title = trimmedTitle
-        target.emoji = emoji
+        target.symbol = symbol
         target.notes = notes
         target.deadline = hasDeadline ? deadline.startOfDay : nil
         target.accent = accent

@@ -2,19 +2,37 @@ import SwiftUI
 import SwiftData
 
 struct RootView: View {
-    @State private var router = AppRouter()
-    @Environment(\.modelContext) private var context
-    @AppStorage("didSeedSampleData") private var didSeed = false
-    @AppStorage("theme") private var themeRaw = AuroraTheme.aurora.rawValue
+    @AppStorage("hasOnboarded") private var hasOnboarded = false
 
-    private var theme: AuroraTheme { AuroraTheme(rawValue: themeRaw) ?? .aurora }
+    var body: some View {
+        ZStack {
+            if hasOnboarded {
+                MainTabView()
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 1.03)),
+                        removal: .opacity
+                    ))
+            } else {
+                OnboardingView()
+                    .transition(.opacity)
+            }
+        }
+        .animation(.smooth(duration: 0.6), value: hasOnboarded)
+    }
+}
+
+struct MainTabView: View {
+    @State private var router = AppRouter()
+    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
 
     var body: some View {
         TabView(selection: $router.tab) {
             Tab("Today", systemImage: "sun.max", value: AppTab.today) {
                 TodayView()
             }
-            Tab("Goals", systemImage: "target", value: AppTab.goals) {
+            Tab("Goals", systemImage: "flag", value: AppTab.goals) {
                 GoalsView()
             }
             Tab("Routines", systemImage: "repeat", value: AppTab.routines) {
@@ -31,13 +49,8 @@ struct RootView: View {
         .sheet(item: $router.sheet) { sheet in
             editor(for: sheet)
         }
-        .tint(theme.tint)
+        .tint(theme.accent.color)
         .environment(router)
-        .task {
-            guard !didSeed else { return }
-            SampleData.seedIfEmpty(context)
-            didSeed = true
-        }
     }
 
     @ViewBuilder
@@ -53,8 +66,8 @@ struct RootView: View {
     }
 }
 
-/// Floating Liquid Glass accessory above the tab bar: one tap to create
-/// whatever fits the current tab.
+/// Sits on the Liquid Glass bar above the tabs: one tap to create whatever
+/// fits the current tab.
 struct QuickAddAccessory: View {
     @Environment(AppRouter.self) private var router
 
@@ -64,19 +77,17 @@ struct QuickAddAccessory: View {
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: "plus")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 28, height: 28)
-                    .background(Color.accentColor.gradient, in: .circle)
-                Text(router.primaryCreateTitle)
                     .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.inkInverse)
+                    .frame(width: 26, height: 26)
+                    .background(Color.ink, in: .circle)
+                Text(router.primaryCreateTitle)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.ink)
                     .contentTransition(.interpolate)
                 Spacer(minLength: 0)
-                Text(Date.now, format: .dateTime.weekday(.abbreviated).day())
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 14)
+            .padding(.horizontal, 12)
             .frame(maxHeight: .infinity)
             .contentShape(.rect)
         }
@@ -86,7 +97,12 @@ struct QuickAddAccessory: View {
     }
 }
 
-#Preview {
-    RootView()
+#Preview("App") {
+    MainTabView()
+        .modelContainer(SampleData.previewContainer)
+}
+
+#Preview("Onboarding") {
+    OnboardingView()
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }

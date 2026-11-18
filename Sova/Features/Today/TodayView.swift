@@ -6,12 +6,13 @@ struct TodayView: View {
     @Query(sort: \TaskItem.createdAt, order: .reverse) private var tasks: [TaskItem]
     @Query(sort: \Routine.order) private var routines: [Routine]
     @Query(filter: #Predicate<Goal> { !$0.isArchived }, sort: \Goal.createdAt) private var goals: [Goal]
-    @AppStorage("theme") private var themeRaw = AuroraTheme.aurora.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("userName") private var userName = ""
     @State private var showCompleted = false
 
-    private var theme: AuroraTheme { AuroraTheme(rawValue: themeRaw) ?? .aurora }
+    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
 
-    // MARK: Derived data
+    // MARK: Derived
 
     private var dueTasks: [TaskItem] {
         tasks.filter { !$0.isDone && $0.isDueTodayOrEarlier }.sorted(by: TaskItem.ordering)
@@ -29,36 +30,24 @@ struct TodayView: View {
 
     private var todaysRoutines: [Routine] { routines.filter { $0.isScheduled(on: .now) } }
     private var routinesDone: Int { todaysRoutines.filter { $0.isDone(on: .now) }.count }
+    private var routinesLeft: Int { todaysRoutines.count - routinesDone }
 
-    private var dayTotal: Int { dueTasks.count + completedToday.count + todaysRoutines.count }
+    private var total: Int { dueTasks.count + completedToday.count + todaysRoutines.count }
+    private var done: Int { completedToday.count + routinesDone }
 
-    private var dayProgress: Double {
-        guard dayTotal > 0 else { return 0 }
-        return Double(completedToday.count + routinesDone) / Double(dayTotal)
-    }
-
-    private var spotlightGoal: Goal? {
+    private var focusGoal: Goal? {
         goals.filter { $0.progress < 1 }
             .min { ($0.deadline ?? .distantFuture) < ($1.deadline ?? .distantFuture) }
     }
 
     private var greeting: String {
-        switch Calendar.current.component(.hour, from: .now) {
+        let base: String = switch Calendar.current.component(.hour, from: .now) {
         case 5..<12: String(localized: "Good morning")
         case 12..<17: String(localized: "Good afternoon")
         case 17..<22: String(localized: "Good evening")
-        default: String(localized: "Good night")
+        default: String(localized: "Still up")
         }
-    }
-
-    private var heroMessage: String {
-        if dayTotal == 0 { return String(localized: "A calm, open day.") }
-        switch dayProgress {
-        case 0: return String(localized: "Let's get the day moving.")
-        case ..<0.5: return String(localized: "Nice start. Keep going.")
-        case ..<1: return String(localized: "Almost there!")
-        default: return String(localized: "All done. Breathe.")
-        }
+        return userName.isEmpty ? base + "." : base + ", " + userName + "."
     }
 
     // MARK: Body
@@ -66,119 +55,110 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
-                    heroCard
-                    if !todaysRoutines.isEmpty { routinesStrip }
+                VStack(alignment: .leading, spacing: 32) {
+                    header
+                    if !todaysRoutines.isEmpty { routinesSection }
                     tasksSection
-                    if let goal = spotlightGoal { goalSpotlight(goal) }
+                    if let goal = focusGoal { focusSection(goal) }
                     if !upcomingTasks.isEmpty { upcomingSection }
                     if !completedToday.isEmpty { completedSection }
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 32)
-                .animation(.snappy, value: tasks.map(\.isDone))
+                .padding(.horizontal, 20)
+                .padding(.top, 4)
+                .padding(.bottom, 40)
+                .animation(.spring(response: 0.45, dampingFraction: 0.85), value: tasks.map(\.isDone))
             }
             .scrollIndicators(.hidden)
-            .background { AuroraBackground() }
-            .navigationTitle(greeting)
-            .navigationSubtitle(Date.now.formatted(.dateTime.weekday(.wide).month(.wide).day()))
+            .background { CanvasBackground() }
+            .navigationTitle(Date.now.formatted(.dateTime.weekday(.wide)))
+            .navigationSubtitle(Date.now.formatted(.dateTime.day().month(.wide)))
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { ThemeMenu() }
+                ToolbarItem(placement: .topBarTrailing) { SettingsMenu() }
             }
         }
     }
 
-    private var heroCard: some View {
-        HStack(spacing: 20) {
-            ZStack {
-                ProgressRing(progress: dayProgress, lineWidth: 12, colors: theme.ringColors)
-                VStack(spacing: 0) {
-                    Text(dayProgress, format: .percent.precision(.fractionLength(0)))
-                        .font(.title2.weight(.bold).monospacedDigit())
-                        .contentTransition(.numericText(value: dayProgress))
-                    Text("done")
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(.secondary)
-                }
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(greeting)
+                .font(.display(.title2))
+                .foregroundStyle(Color.ink)
+            summary
+                .font(.body)
+                .foregroundStyle(Color.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 12) {
+                DaySegments(done: done, total: total, color: accent)
+                Text("\(done)/\(total)")
+                    .font(.footnote.weight(.medium).monospacedDigit())
+                    .foregroundStyle(Color.inkSecondary)
+                    .contentTransition(.numericText())
             }
-            .frame(width: 104, height: 104)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Day progress")
-
-            VStack(alignment: .leading, spacing: 10) {
-                Text(heroMessage)
-                    .font(.headline)
-                    .fixedSize(horizontal: false, vertical: true)
-                StatPill(symbol: "checklist", value: "\(dueTasks.count)",
-                         label: String(localized: "tasks left"), tint: Accent.iris.color)
-                StatPill(symbol: "repeat", value: "\(todaysRoutines.count - routinesDone)",
-                         label: String(localized: "routines to go"), tint: Accent.lagoon.color)
-            }
+            .padding(.top, 4)
         }
-        .card(tint: theme.tint, cornerRadius: 32, padding: 20)
-        .animation(.snappy, value: dayProgress)
+        .padding(.horizontal, 4)
     }
 
-    private var routinesStrip: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: String(localized: "Routines"), symbol: "repeat",
-                          trailing: "\(routinesDone)/\(todaysRoutines.count)")
+    private var summary: Text {
+        let tasksLeft = dueTasks.count
+        if total == 0 {
+            return Text("Nothing planned. A rare, open day.")
+        }
+        if tasksLeft == 0 && routinesLeft == 0 {
+            return Text("Everything’s done. Go enjoy the rest of it.")
+        }
+        let taskText = Text(tasksLeft == 1 ? String(localized: "1 task") : String(localized: "\(tasksLeft) tasks"))
+            .foregroundStyle(Color.ink)
+        let routineText = Text(routinesLeft == 1 ? String(localized: "1 routine") : String(localized: "\(routinesLeft) routines"))
+            .foregroundStyle(Color.ink)
+        if routinesLeft == 0 { return Text("You have \(taskText) left today.") }
+        if tasksLeft == 0 { return Text("Just \(routineText) left today.") }
+        return Text("You have \(taskText) and \(routineText) left today.")
+    }
+
+    private var routinesSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionLabel(String(localized: "Routines"), trailing: "\(routinesDone) of \(todaysRoutines.count)")
             ScrollView(.horizontal) {
-                GlassEffectContainer(spacing: 16) {
-                    HStack(alignment: .top, spacing: 12) {
-                        ForEach(todaysRoutines) { RoutineBubble(routine: $0) }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 6)
+                HStack(alignment: .top, spacing: 8) {
+                    ForEach(todaysRoutines) { RoutineDial(routine: $0) }
                 }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 4)
             }
             .scrollIndicators(.hidden)
-            .padding(.horizontal, -16)
+            .padding(.horizontal, -20)
         }
     }
 
     private var tasksSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: String(localized: "Tasks"), symbol: "checklist",
-                          trailing: dueTasks.isEmpty ? nil : String(localized: "\(dueTasks.count) left"))
+            SectionLabel(String(localized: "Tasks"))
             if dueTasks.isEmpty {
-                EmptyCard(symbol: "checkmark.seal.fill",
-                          title: String(localized: "All clear"),
-                          message: String(localized: "Nothing due today. Add something, or enjoy the space."),
-                          actionTitle: String(localized: "Add a Task")) { router.sheet = .newTask(nil) }
+                EmptyState(title: String(localized: "All clear"),
+                           message: String(localized: "Nothing due today. Add something, or enjoy the space."),
+                           actionTitle: String(localized: "Add a task")) { router.sheet = .newTask(nil) }
             } else {
-                LazyVStack(spacing: 10) {
-                    ForEach(dueTasks) { task in
-                        TaskRow(task: task) { router.sheet = .task(task) }
-                            .transition(.asymmetric(insertion: .scale(0.95).combined(with: .opacity),
-                                                    removal: .move(edge: .trailing).combined(with: .opacity)))
-                    }
+                GroupedList(items: dueTasks, inset: 52) { task in
+                    TaskRow(task: task) { router.sheet = .task(task) }
                 }
             }
         }
     }
 
-    private func goalSpotlight(_ goal: Goal) -> some View {
+    private func focusSection(_ goal: Goal) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: String(localized: "Focus Goal"), symbol: "target")
-            Button {
-                router.tab = .goals
-            } label: {
-                GoalCard(goal: goal)
-            }
-            .buttonStyle(.plain)
+            SectionLabel(String(localized: "In focus"))
+            Button { router.tab = .goals } label: { GoalCard(goal: goal) }
+                .buttonStyle(.pressable)
         }
     }
 
     private var upcomingSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: String(localized: "Upcoming"), symbol: "calendar",
-                          trailing: "\(upcomingTasks.count)")
-            LazyVStack(spacing: 10) {
-                ForEach(upcomingTasks.prefix(6)) { task in
-                    TaskRow(task: task) { router.sheet = .task(task) }
-                }
+            SectionLabel(String(localized: "Coming up"), trailing: "\(upcomingTasks.count)")
+            GroupedList(items: Array(upcomingTasks.prefix(6)), inset: 52) { task in
+                TaskRow(task: task) { router.sheet = .task(task) }
             }
         }
     }
@@ -186,15 +166,14 @@ struct TodayView: View {
     private var completedSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Button {
-                withAnimation(.snappy) { showCompleted.toggle() }
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { showCompleted.toggle() }
             } label: {
-                HStack {
-                    SectionHeader(title: String(localized: "Completed"), symbol: "checkmark.circle",
-                                  trailing: "\(completedToday.count)")
-                    Image(systemName: "chevron.down")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.secondary)
-                        .rotationEffect(.degrees(showCompleted ? 0 : -90))
+                HStack(spacing: 6) {
+                    SectionLabel(String(localized: "Done today"), trailing: "\(completedToday.count)")
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(Color.inkSecondary)
+                        .rotationEffect(.degrees(showCompleted ? 90 : 0))
                 }
                 .contentShape(.rect)
             }
@@ -202,13 +181,17 @@ struct TodayView: View {
             .accessibilityHint(showCompleted ? "Collapse" : "Expand")
 
             if showCompleted {
-                LazyVStack(spacing: 10) {
-                    ForEach(completedToday) { task in
-                        TaskRow(task: task) { router.sheet = .task(task) }
-                    }
+                GroupedList(items: completedToday, inset: 52) { task in
+                    TaskRow(task: task) { router.sheet = .task(task) }
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.opacity.combined(with: .offset(y: -8)))
             }
         }
     }
+}
+
+#Preview {
+    TodayView()
+        .environment(AppRouter())
+        .modelContainer(SampleData.previewContainer)
 }

@@ -4,25 +4,25 @@ struct AccentPicker: View {
     @Binding var selection: Accent
 
     var body: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 9), spacing: 4) {
+        HStack(spacing: 0) {
             ForEach(Accent.allCases) { accent in
                 Button {
-                    withAnimation(.snappy) { selection = accent }
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { selection = accent }
                 } label: {
                     Circle()
-                        .fill(accent.gradient)
-                        .frame(width: 26, height: 26)
+                        .fill(accent.color)
+                        .frame(width: 24, height: 24)
                         .overlay {
                             Circle()
-                                .strokeBorder(accent.color, lineWidth: 2.5)
+                                .strokeBorder(Color.ink, lineWidth: 2)
                                 .padding(-5)
                                 .opacity(selection == accent ? 1 : 0)
+                                .scaleEffect(selection == accent ? 1 : 0.8)
                         }
-                        .scaleEffect(selection == accent ? 0.85 : 1)
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .contentShape(.rect)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable)
                 .accessibilityLabel(accent.name)
                 .accessibilityAddTraits(selection == accent ? .isSelected : [])
             }
@@ -31,73 +31,46 @@ struct AccentPicker: View {
     }
 }
 
+/// A grid of SF Symbols, used for routines and goals.
 struct SymbolPicker: View {
     @Binding var selection: String
     var accent: Accent
+    var symbols: [String]
 
-    static let symbols = [
-        "sparkles", "sun.max.fill", "leaf.fill", "drop.fill", "figure.walk", "figure.run",
-        "figure.flexibility", "dumbbell.fill", "bicycle", "bed.double.fill", "moon.stars.fill", "heart.fill",
-        "brain.head.profile", "book.closed.fill", "books.vertical.fill", "pencil.and.scribble", "music.note", "paintbrush.fill",
-        "fork.knife", "cup.and.saucer.fill", "pills.fill", "laptopcomputer", "checklist", "phone.fill",
+    static let routineSymbols = [
+        "sun.max", "moon", "wind", "drop", "leaf", "figure.walk",
+        "figure.run", "figure.flexibility", "dumbbell", "bicycle", "bed.double", "heart",
+        "book.closed", "pencil.and.scribble", "checklist", "scope", "music.note", "paintbrush.pointed",
+        "fork.knife", "cup.and.saucer", "pills", "laptopcomputer", "phone", "envelope",
+    ]
+
+    static let goalSymbols = [
+        "flag.checkered", "figure.run", "book.closed", "paperplane", "briefcase", "house",
+        "airplane", "graduationcap", "dollarsign", "heart", "leaf", "mountain.2",
+        "paintbrush.pointed", "music.note", "camera", "globe.europe.africa", "hammer", "lightbulb",
+        "dumbbell", "bicycle", "brain", "trophy", "person.2", "star",
     ]
 
     var body: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 6), spacing: 8) {
-            ForEach(Self.symbols, id: \.self) { symbol in
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 6), spacing: 6) {
+            ForEach(symbols, id: \.self) { symbol in
                 let selected = selection == symbol
                 Button {
-                    withAnimation(.snappy) { selection = symbol }
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) { selection = symbol }
                 } label: {
                     Image(systemName: symbol)
-                        .font(.title3)
-                        .foregroundStyle(selected ? Color.white : Color.primary)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(selected ? Color.white : Color.ink)
                         .frame(width: 44, height: 44)
-                        .background {
-                            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .fill(selected ? AnyShapeStyle(accent.gradient) : AnyShapeStyle(Color.primary.opacity(0.06)))
-                        }
+                        .background(selected ? accent.color : Color.well,
+                                    in: .rect(cornerRadius: 12, style: .continuous))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressable)
                 .accessibilityLabel(symbol.replacingOccurrences(of: ".", with: " "))
                 .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
-        .sensoryFeedback(.selection, trigger: selection)
-    }
-}
-
-struct EmojiPicker: View {
-    @Binding var selection: String
-    var accent: Accent
-
-    static let emojis = [
-        "🎯", "🚀", "🏃", "📚", "💪", "🧘", "🎨", "🎸", "✍️", "💼", "💰", "🏡",
-        "🌱", "🍎", "✈️", "🧠", "❤️", "🎓", "📷", "🏔️", "🌊", "⭐️", "🛠️", "🗣️",
-    ]
-
-    var body: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 6), spacing: 8) {
-            ForEach(Self.emojis, id: \.self) { emoji in
-                Button {
-                    withAnimation(.snappy) { selection = emoji }
-                } label: {
-                    Text(emoji)
-                        .font(.title2)
-                        .frame(width: 44, height: 44)
-                        .background {
-                            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .fill(selection == emoji ? accent.color.opacity(0.28) : Color.primary.opacity(0.05))
-                        }
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .strokeBorder(accent.color, lineWidth: 2)
-                                .opacity(selection == emoji ? 1 : 0)
-                        }
-                }
-                .buttonStyle(.plain)
-            }
-        }
+        .padding(.vertical, 4)
         .sensoryFeedback(.selection, trigger: selection)
     }
 }
@@ -108,45 +81,48 @@ struct WeekdayPicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 6) {
+            HStack(spacing: 0) {
                 ForEach(Weekdays.ordered, id: \.self) { day in
                     let on = selection.contains(day)
                     Button {
-                        withAnimation(.snappy) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                             if on { selection.removeAll { $0 == day } } else { selection.append(day) }
                         }
                     } label: {
                         Text(Weekdays.letter(day))
-                            .font(.subheadline.weight(.bold))
-                            .foregroundStyle(on ? Color.white : Color.primary)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(on ? Color.white : Color.ink)
+                            .frame(width: 38, height: 38)
+                            .background(on ? accent.color : Color.well, in: .circle)
                             .frame(maxWidth: .infinity, minHeight: 44)
-                            .background {
-                                Circle()
-                                    .fill(on ? AnyShapeStyle(accent.gradient) : AnyShapeStyle(Color.primary.opacity(0.07)))
-                                    .frame(width: 40, height: 40)
-                            }
+                            .contentShape(.rect)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.pressable)
                     .accessibilityLabel(Calendar.current.weekdaySymbols[day - 1])
                     .accessibilityAddTraits(on ? .isSelected : [])
                 }
             }
             HStack(spacing: 8) {
-                presetButton("Every day", days: Array(1...7))
-                presetButton("Weekdays", days: [2, 3, 4, 5, 6])
-                presetButton("Weekends", days: [1, 7])
+                preset("Every day", days: Array(1...7))
+                preset("Weekdays", days: [2, 3, 4, 5, 6])
+                preset("Weekends", days: [1, 7])
             }
         }
         .sensoryFeedback(.selection, trigger: selection)
     }
 
-    private func presetButton(_ title: LocalizedStringKey, days: [Int]) -> some View {
-        Button(title) {
-            withAnimation(.snappy) { selection = days }
+    private func preset(_ title: LocalizedStringKey, days: [Int]) -> some View {
+        let active = Set(selection) == Set(days)
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) { selection = days }
+        } label: {
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(active ? Color.inkInverse : Color.ink)
+                .padding(.horizontal, 12)
+                .frame(height: 30)
+                .background(active ? Color.ink : Color.well, in: .capsule)
         }
-        .font(.caption.weight(.semibold))
-        .buttonStyle(.bordered)
-        .buttonBorderShape(.capsule)
-        .tint(Set(selection) == Set(days) ? accent.color : .secondary)
+        .buttonStyle(.pressable)
     }
 }

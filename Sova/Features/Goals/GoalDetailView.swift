@@ -8,31 +8,31 @@ struct GoalDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var newMilestone = ""
     @State private var confirmDelete = false
-    @State private var celebrate = 0
     @FocusState private var addFieldFocused: Bool
+    @ScaledMetric(relativeTo: .largeTitle) private var percentSize: CGFloat = 64
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 32) {
                 hero
-                if goal.milestones.isEmpty { manualProgressCard }
-                milestonesSection
-                tasksSection
+                if goal.milestones.isEmpty { manualProgress }
+                milestones
+                tasks
                 if !goal.notes.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
-                        SectionHeader(title: String(localized: "Notes"), symbol: "note.text")
+                        SectionLabel(String(localized: "Why it matters"))
                         Text(goal.notes)
-                            .font(.body)
-                            .card(cornerRadius: 22)
+                            .font(.display(.body))
+                            .foregroundStyle(Color.ink)
+                            .surface(cornerRadius: 22, padding: 18)
                     }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 40)
         }
         .scrollIndicators(.hidden)
-        .background { AuroraBackground() }
-        .navigationTitle(goal.title)
+        .background { CanvasBackground() }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -55,76 +55,76 @@ struct GoalDetailView: View {
                 context.delete(goal)
             }
         } message: {
-            Text("Its milestones will be deleted. Linked tasks are kept.")
+            Text("Its steps are deleted too. Linked tasks are kept.")
         }
-        .sensoryFeedback(.success, trigger: celebrate)
+        .sensoryFeedback(.success, trigger: goal.progress >= 1)
     }
 
     private var hero: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                ProgressRing(progress: goal.progress, lineWidth: 14,
-                             colors: [goal.accent.color, goal.accent.partner, goal.accent.color])
-                Text(goal.emoji).font(.system(size: 56))
-            }
-            .frame(width: 170, height: 170)
-            .padding(.top, 8)
+        VStack(alignment: .leading, spacing: 18) {
+            IconTile(symbol: goal.symbol, accent: goal.accent, size: 52, filled: true)
+            Text(goal.title)
+                .font(.display(.largeTitle))
+                .tracking(-0.5)
+                .foregroundStyle(Color.ink)
+                .fixedSize(horizontal: false, vertical: true)
 
-            VStack(spacing: 6) {
-                Text(goal.title)
-                    .font(.title2.weight(.bold))
-                    .multilineTextAlignment(.center)
-                Text(goal.progress, format: .percent.precision(.fractionLength(0)))
-                    .font(.headline.monospacedDigit())
-                    .foregroundStyle(goal.accent.gradient)
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(Int((goal.progress * 100).rounded()), format: .number)
+                    .font(.system(size: percentSize, weight: .light, design: .serif))
+                    .monospacedDigit()
                     .contentTransition(.numericText(value: goal.progress))
+                Text("%")
+                    .font(.display(.title2))
+                    .foregroundStyle(Color.inkSecondary)
+                Spacer()
                 if let text = goal.deadlineText {
-                    MetaChip(text: text, symbol: "hourglass", tint: goal.accent.color)
-                        .padding(.top, 2)
+                    Text(text)
+                        .font(.footnote)
+                        .foregroundStyle((goal.daysLeft ?? 1) < 0 ? Accent.ember.color : Color.inkSecondary)
                 }
             }
+            .foregroundStyle(Color.ink)
+
+            ProgressLine(progress: goal.progress, color: goal.accent.color, height: 6)
         }
-        .frame(maxWidth: .infinity)
-        .card(tint: goal.accent.color, cornerRadius: 34, padding: 22)
+        .padding(.top, 8)
+        .padding(.horizontal, 4)
         .accessibilityElement(children: .combine)
     }
 
-    private var manualProgressCard: some View {
+    private var manualProgress: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: String(localized: "Progress"), symbol: "slider.horizontal.3")
-            VStack(alignment: .leading, spacing: 8) {
+            SectionLabel(String(localized: "Progress"))
+            VStack(alignment: .leading, spacing: 10) {
                 Slider(value: $goal.manualProgress, in: 0...1, step: 0.01) {
                     Text("Progress")
-                } minimumValueLabel: {
-                    Text("0%").font(.caption)
-                } maximumValueLabel: {
-                    Text("100%").font(.caption)
                 }
                 .tint(goal.accent.color)
-                Text("No milestones yet — slide to track progress, or add milestones below.")
+                Text("No steps yet. Slide to track it by feel, or break it down below.")
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.inkSecondary)
             }
-            .card(cornerRadius: 22)
+            .surface(cornerRadius: 22, padding: 18)
         }
     }
 
-    private var milestonesSection: some View {
+    private var milestones: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: String(localized: "Milestones"), symbol: "flag.checkered",
-                          trailing: goal.milestones.isEmpty ? nil : "\(goal.completedMilestones)/\(goal.milestones.count)")
+            SectionLabel(String(localized: "Steps"),
+                         trailing: goal.milestones.isEmpty ? nil : "\(goal.completedMilestones) of \(goal.milestones.count)")
             VStack(spacing: 0) {
                 ForEach(goal.sortedMilestones) { milestone in
-                    HStack(spacing: 12) {
-                        CheckButton(isOn: milestone.isDone, accent: goal.accent) {
-                            withAnimation(.snappy) { milestone.isDone.toggle() }
-                            if goal.progress >= 1 { celebrate += 1 }
+                    HStack(spacing: 4) {
+                        CheckButton(isOn: milestone.isDone, color: goal.accent.color, round: true, label: milestone.title) {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { milestone.isDone.toggle() }
                         }
                         Text(milestone.title)
-                            .strikethrough(milestone.isDone, color: .secondary)
-                            .foregroundStyle(milestone.isDone ? Color.secondary : Color.primary)
+                            .foregroundStyle(milestone.isDone ? Color.inkSecondary : Color.ink)
+                            .strikethrough(milestone.isDone, color: Color.inkTertiary)
                         Spacer()
                     }
+                    .padding(.leading, 8)
                     .padding(.vertical, 2)
                     .contextMenu {
                         Button("Delete", systemImage: "trash", role: .destructive) {
@@ -134,43 +134,43 @@ struct GoalDetailView: View {
                             }
                         }
                     }
-                    Divider().padding(.leading, 56)
+                    Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, 52)
                 }
 
-                HStack(spacing: 12) {
+                HStack(spacing: 4) {
                     Image(systemName: "plus")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(goal.accent.color)
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(Color.inkTertiary)
                         .frame(width: 44, height: 44)
-                    TextField("Add a milestone", text: $newMilestone)
+                    TextField("Add a step", text: $newMilestone)
                         .focused($addFieldFocused)
                         .submitLabel(.done)
                         .onSubmit(addMilestone)
                 }
+                .padding(.leading, 8)
+                .padding(.vertical, 2)
             }
-            .card(cornerRadius: 22, padding: 10)
+            .surface(cornerRadius: 22, padding: 0)
         }
     }
 
-    private var tasksSection: some View {
+    private var tasks: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: String(localized: "Tasks"), symbol: "checklist")
+            SectionLabel(String(localized: "Tasks"))
             let linked = goal.tasks.sorted { a, b in
                 a.isDone != b.isDone ? !a.isDone : TaskItem.ordering(a, b)
             }
-            ForEach(linked) { task in
-                TaskRow(task: task, showGoal: false) { router.sheet = .task(task) }
+            if !linked.isEmpty {
+                GroupedList(items: linked, inset: 52) { task in
+                    TaskRow(task: task, showGoal: false) { router.sheet = .task(task) }
+                }
             }
             Button {
                 router.sheet = .newTask(goal)
             } label: {
-                Label("Add Task for This Goal", systemImage: "plus")
-                    .font(.subheadline.weight(.semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
+                Label("Add a task", systemImage: "plus")
             }
-            .buttonStyle(.glass)
-            .tint(goal.accent.color)
+            .buttonStyle(.quiet)
         }
     }
 
@@ -178,7 +178,7 @@ struct GoalDetailView: View {
         let title = newMilestone.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else { return }
         let next = (goal.milestones.map(\.order).max() ?? -1) + 1
-        withAnimation(.snappy) {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
             goal.milestones.append(Milestone(title: title, order: next))
         }
         newMilestone = ""

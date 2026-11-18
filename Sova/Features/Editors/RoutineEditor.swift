@@ -18,8 +18,8 @@ struct RoutineEditor: View {
     init(routine: Routine?) {
         self.routine = routine
         _title = State(initialValue: routine?.title ?? "")
-        _symbol = State(initialValue: routine?.symbol ?? "sparkles")
-        _accent = State(initialValue: routine?.accent ?? .lagoon)
+        _symbol = State(initialValue: routine?.symbol ?? "sun.max")
+        _accent = State(initialValue: routine?.accent ?? SovaTheme.current.accent)
         _period = State(initialValue: routine?.period ?? .morning)
         _weekdays = State(initialValue: routine?.weekdays ?? Array(1...7))
     }
@@ -31,14 +31,10 @@ struct RoutineEditor: View {
             Form {
                 Section {
                     HStack(spacing: 14) {
-                        Image(systemName: symbol)
-                            .font(.title2.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 58, height: 58)
-                            .background(accent.gradient, in: .rect(cornerRadius: 18, style: .continuous))
+                        IconTile(symbol: symbol, accent: accent, size: 56, filled: true)
                             .contentTransition(.symbolEffect(.replace))
                         TextField("New habit", text: $title)
-                            .font(.title3.weight(.semibold))
+                            .font(.display(.title3))
                     }
                     .padding(.vertical, 4)
                 }
@@ -46,11 +42,10 @@ struct RoutineEditor: View {
                 Section("Time of Day") {
                     Picker("Time of Day", selection: $period) {
                         ForEach(DayPeriod.allCases) { p in
-                            Label(p.name, systemImage: p.symbol).tag(p)
+                            Text(p.name).tag(p)
                         }
                     }
                     .pickerStyle(.segmented)
-                    .labelStyle(.iconOnly)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                 }
@@ -64,7 +59,7 @@ struct RoutineEditor: View {
                 }
 
                 Section("Icon") {
-                    SymbolPicker(selection: $symbol, accent: accent)
+                    SymbolPicker(selection: $symbol, accent: accent, symbols: SymbolPicker.routineSymbols)
                 }
 
                 Section("Color") {
@@ -75,7 +70,7 @@ struct RoutineEditor: View {
                     Section {
                         LabeledContent("Current streak") {
                             Label("\(routine.streak) days", systemImage: "flame.fill")
-                                .foregroundStyle(Accent.coral.color)
+                                .foregroundStyle(Accent.ember.color)
                         }
                         LabeledContent("Last 30 days") {
                             Text(routine.consistency(days: 30), format: .percent.precision(.fractionLength(0)))
@@ -86,6 +81,8 @@ struct RoutineEditor: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.canvas)
             .navigationTitle(routine == nil ? "New Routine" : "Edit Routine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

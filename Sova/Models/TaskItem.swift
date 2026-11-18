@@ -15,11 +15,20 @@ enum Priority: Int, CaseIterable, Identifiable {
         }
     }
 
+    /// Exclamation marks, the way people actually write urgency.
+    var marks: String {
+        switch self {
+        case .low: ""
+        case .medium: "!!"
+        case .high: "!!!"
+        }
+    }
+
     var color: Color {
         switch self {
-        case .low: .secondary
-        case .medium: Accent.peach.color
-        case .high: Accent.rose.color
+        case .low: .inkTertiary
+        case .medium: Accent.marigold.color
+        case .high: Accent.ember.color
         }
     }
 }
@@ -31,7 +40,7 @@ final class TaskItem {
     var dueDate: Date?
     var hasTime: Bool = false
     var priorityRaw: Int = 0
-    var accentRaw: String = Accent.iris.rawValue
+    var accentRaw: String = Accent.ember.rawValue
     var isDone: Bool = false
     var completedAt: Date?
     var createdAt: Date = Date.now
@@ -43,7 +52,7 @@ final class TaskItem {
         dueDate: Date? = nil,
         hasTime: Bool = false,
         priority: Priority = .low,
-        accent: Accent = .iris,
+        accent: Accent = .ember,
         goal: Goal? = nil
     ) {
         self.title = title
@@ -62,7 +71,7 @@ final class TaskItem {
     }
 
     var accent: Accent {
-        get { Accent(rawValue: accentRaw) ?? .iris }
+        get { Accent(rawValue: accentRaw) ?? .ember }
         set { accentRaw = newValue.rawValue }
     }
 

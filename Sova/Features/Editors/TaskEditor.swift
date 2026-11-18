@@ -27,7 +27,7 @@ struct TaskEditor: View {
         _hasTime = State(initialValue: task?.hasTime ?? false)
         _due = State(initialValue: task?.dueDate ?? .now)
         _priority = State(initialValue: task?.priority ?? .low)
-        _accent = State(initialValue: task?.accent ?? defaultGoal?.accent ?? .iris)
+        _accent = State(initialValue: task?.accent ?? defaultGoal?.accent ?? SovaTheme.current.accent)
         _goal = State(initialValue: task?.goal ?? defaultGoal)
     }
 
@@ -38,7 +38,7 @@ struct TaskEditor: View {
             Form {
                 Section {
                     TextField("What needs doing?", text: $title, axis: .vertical)
-                        .font(.title3.weight(.semibold))
+                        .font(.display(.title3))
                         .focused($titleFocused)
                     TextField("Notes", text: $notes, axis: .vertical)
                         .lineLimit(2...6)
@@ -75,7 +75,7 @@ struct TaskEditor: View {
                         Picker(selection: $goal) {
                             Text("None").tag(Goal?.none)
                             ForEach(goals) { goal in
-                                Text("\(goal.emoji)  \(goal.title)").tag(Optional(goal))
+                                Label(goal.title, systemImage: goal.symbol).tag(Optional(goal))
                             }
                         } label: {
                             Label("Linked Goal", systemImage: "target")
@@ -89,6 +89,8 @@ struct TaskEditor: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.canvas)
             .navigationTitle(task == nil ? "New Task" : "Edit Task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

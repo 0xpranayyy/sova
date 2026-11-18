@@ -1,57 +1,46 @@
 import SwiftUI
 import SwiftData
 
+/// A task as a row in a grouped list, Things-style: a checkbox, the title,
+/// and quiet metadata.
 struct TaskRow: View {
     let task: TaskItem
     var showGoal = true
     var onOpen: () -> Void
 
     @Environment(\.modelContext) private var context
-    @State private var completions = 0
 
     var body: some View {
-        HStack(spacing: 14) {
-            CheckButton(isOn: task.isDone, accent: task.accent) {
-                withAnimation(.snappy) { task.toggle() }
-                if task.isDone { completions += 1 }
+        HStack(alignment: .top, spacing: 4) {
+            CheckButton(isOn: task.isDone, color: task.accent.color, label: task.title) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { task.toggle() }
             }
+            .padding(.top, -2)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(task.title)
-                    .font(.body.weight(.semibold))
-                    .strikethrough(task.isDone, color: .secondary)
-                    .foregroundStyle(task.isDone ? Color.secondary : Color.primary)
-                    .lineLimit(2)
-
-                if hasMeta {
-                    HStack(spacing: 6) {
-                        if let due = task.dueDate {
-                            MetaChip(
-                                text: due.relativeDayText(includingTime: task.hasTime),
-                                symbol: task.hasTime ? "clock" : "calendar",
-                                tint: task.isOverdue ? Accent.rose.color : .secondary
-                            )
-                        }
-                        if showGoal, let goal = task.goal {
-                            MetaChip(text: "\(goal.emoji) \(goal.title)", tint: goal.accent.color)
-                        }
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    if !task.priority.marks.isEmpty && !task.isDone {
+                        Text(task.priority.marks)
+                            .font(.body.weight(.bold))
+                            .foregroundStyle(task.priority.color)
                     }
+                    Text(task.title)
+                        .font(.body)
+                        .foregroundStyle(task.isDone ? Color.inkSecondary : Color.ink)
+                        .strikethrough(task.isDone, color: Color.inkTertiary)
+                        .lineLimit(2)
+                }
+                if !meta.isEmpty {
+                    MetaLine(parts: meta)
                 }
             }
+            .padding(.vertical, 11)
 
-            Spacer(minLength: 0)
-
-            if task.priority != .low && !task.isDone {
-                Image(systemName: "flag.fill")
-                    .font(.footnote)
-                    .foregroundStyle(task.priority.color)
-                    .accessibilityLabel("\(Text(task.priority.label)) priority")
-            }
+            Spacer(minLength: 8)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .card(tint: task.accent.color, cornerRadius: 22, padding: 0)
-        .contentShape(.rect(cornerRadius: 22))
+        .padding(.leading, 8)
+        .padding(.trailing, 14)
+        .contentShape(.rect)
         .onTapGesture(perform: onOpen)
         .contextMenu {
             Button(task.isDone ? "Mark as Not Done" : "Mark as Done",
@@ -64,46 +53,24 @@ struct TaskRow: View {
                 withAnimation { context.delete(task) }
             }
         }
-        .sensoryFeedback(.success, trigger: completions)
         .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(task.isDone ? .isSelected : [])
         .accessibilityAction(named: task.isDone ? "Mark as not done" : "Mark as done") {
             withAnimation(.snappy) { task.toggle() }
         }
     }
 
-    private var hasMeta: Bool { task.dueDate != nil || (showGoal && task.goal != nil) }
-}
-
-/// A Liquid Glass checkbox: a real control, so it gets interactive glass.
-struct CheckButton: View {
-    var isOn: Bool
-    var accent: Accent
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "checkmark")
-                .font(.footnote.weight(.heavy))
-                .foregroundStyle(.white)
-                .opacity(isOn ? 1 : 0)
-                .scaleEffect(isOn ? 1 : 0.4)
-                .frame(width: 30, height: 30)
-                .background {
-                    Circle()
-                        .fill(accent.gradient)
-                        .opacity(isOn ? 1 : 0)
-                }
-                .glassEffect(.control(tint: isOn ? accent.color.opacity(0.4) : nil), in: .circle)
-                .overlay {
-                    Circle()
-                        .strokeBorder(accent.color.opacity(isOn ? 0 : 0.7), lineWidth: 1.5)
-                }
-                .frame(width: 44, height: 44) // HIG minimum hit target
-                .contentShape(.circle)
+    private var meta: [MetaLine.Part] {
+        var parts: [MetaLine.Part] = []
+        if let due = task.dueDate, !(Calendar.current.isDateInToday(due) && !task.hasTime) {
+            parts.append(.init(text: due.relativeDayText(includingTime: task.hasTime),
+                               color: task.isOverdue ? Accent.ember.color : .inkSecondary))
         }
-        .buttonStyle(.plain)
-        .animation(.bouncy(duration: 0.35), value: isOn)
-        .accessibilityLabel(isOn ? "Completed" : "Not completed")
+        if showGoal, let goal = task.goal {
+            parts.append(.init(text: goal.title, color: goal.accent.color))
+        }
+        if !task.notes.isEmpty && parts.isEmpty {
+            parts.append(.init(text: task.notes))
+        }
+        return parts
     }
 }

@@ -3,6 +3,10 @@ import SwiftData
 
 @main
 struct SovaApp: App {
+    init() {
+        NavigationBarStyle.apply()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

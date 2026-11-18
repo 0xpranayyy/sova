@@ -1,86 +1,116 @@
 import Foundation
 import SwiftData
 
-/// A friendly first-launch dataset so the app never opens to a blank screen.
+/// Rituals offered during onboarding, and how they become routines.
+struct RitualOption: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let symbol: String
+    let accent: Accent
+    let period: DayPeriod
+    var weekdays: [Int] = Array(1...7)
+
+    static let all: [RitualOption] = [
+        RitualOption(id: "pages", title: "Morning pages", symbol: "pencil.and.scribble", accent: .plum, period: .morning),
+        RitualOption(id: "meditate", title: "Meditate", symbol: "wind", accent: .lagoon, period: .morning),
+        RitualOption(id: "move", title: "Move your body", symbol: "figure.walk", accent: .ember, period: .morning),
+        RitualOption(id: "water", title: "Drink water", symbol: "drop", accent: .tide, period: .anytime),
+        RitualOption(id: "deep", title: "Deep work", symbol: "scope", accent: .graphite, period: .afternoon,
+                     weekdays: [2, 3, 4, 5, 6]),
+        RitualOption(id: "read", title: "Read", symbol: "book.closed", accent: .marigold, period: .evening),
+        RitualOption(id: "plan", title: "Plan tomorrow", symbol: "checklist", accent: .clay, period: .evening),
+        RitualOption(id: "unplug", title: "Screens off by ten", symbol: "moon", accent: .moss, period: .evening),
+    ]
+}
+
+enum StarterContent {
+    /// Called when onboarding finishes. Adds the chosen rituals (skipping
+    /// any that already exist) and two gentle first tasks.
+    @MainActor
+    static func install(rituals: [RitualOption], theme: SovaTheme, in context: ModelContext) {
+        let existingRoutines = (try? context.fetch(FetchDescriptor<Routine>())) ?? []
+        let existingTitles = Set(existingRoutines.map(\.title))
+        var order = (existingRoutines.map(\.order).max() ?? -1) + 1
+        for ritual in rituals where !existingTitles.contains(ritual.title) {
+            context.insert(Routine(title: ritual.title, symbol: ritual.symbol, accent: ritual.accent,
+                                   period: ritual.period, weekdays: ritual.weekdays, order: order))
+            order += 1
+        }
+
+        let taskCount = (try? context.fetchCount(FetchDescriptor<TaskItem>())) ?? 0
+        guard taskCount == 0 else { return }
+        let today = Date.now.startOfDay
+        context.insert(TaskItem(title: "Tick this off, it feels good", dueDate: today, accent: theme.accent))
+        context.insert(TaskItem(title: "Set your first goal", notes: "Something you'd be proud of in three months.",
+                                dueDate: today, priority: .medium, accent: theme.accent))
+    }
+}
+
+/// A lived-in dataset for SwiftUI previews.
 enum SampleData {
     @MainActor
-    static func seedIfEmpty(_ context: ModelContext) {
-        let existing = (try? context.fetchCount(FetchDescriptor<TaskItem>())) ?? 0
-        let existingRoutines = (try? context.fetchCount(FetchDescriptor<Routine>())) ?? 0
-        guard existing == 0, existingRoutines == 0 else { return }
-
+    static func seed(_ context: ModelContext) {
         let today = Date.now.startOfDay
         let cal = Calendar.current
         func at(_ hour: Int, _ minute: Int = 0, dayOffset: Int = 0) -> Date {
             cal.date(bySettingHour: hour, minute: minute, second: 0, of: today.adding(days: dayOffset)) ?? today
         }
 
-        // Goals
-        let marathon = Goal(title: "Run a half marathon", emoji: "🏃", deadline: today.adding(days: 74), accent: .coral)
-        let reading = Goal(title: "Read 24 books this year", emoji: "📚", deadline: today.adding(days: 43), accent: .iris)
+        let marathon = Goal(title: "Run a half marathon", symbol: "figure.run", deadline: today.adding(days: 74), accent: .ember)
+        let reading = Goal(title: "Read 24 books this year", symbol: "book.closed", deadline: today.adding(days: 43), accent: .marigold)
         reading.manualProgress = 0.71
-        let launch = Goal(title: "Launch my side project", emoji: "🚀", deadline: today.adding(days: 21), accent: .lagoon)
+        let launch = Goal(title: "Launch the side project", symbol: "paperplane", deadline: today.adding(days: 21), accent: .tide)
         for goal in [marathon, reading, launch] { context.insert(goal) }
 
-        for (i, item) in [("Run 5K without stopping", true), ("10K under 60 minutes", true),
-                          ("Long run: 15K", false), ("Race day", false)].enumerated() {
+        for (i, item) in [("Run 5K without stopping", true), ("10K under an hour", true),
+                          ("Long run, 15K", false), ("Race day", false)].enumerated() {
             marathon.milestones.append(Milestone(title: item.0, order: i, isDone: item.1))
         }
-        for (i, item) in [("Validate the idea with 10 people", true), ("Design the landing page", true),
-                          ("Build the MVP", false), ("Private beta", false), ("Public launch", false)].enumerated() {
+        for (i, item) in [("Talk to ten potential users", true), ("Landing page", true),
+                          ("Build the MVP", false), ("Private beta", false)].enumerated() {
             launch.milestones.append(Milestone(title: item.0, order: i, isDone: item.1))
         }
 
-        // Tasks
         let tasks: [TaskItem] = [
-            TaskItem(title: "Plan the week ahead", dueDate: today, priority: .high, accent: .iris),
+            TaskItem(title: "Plan the week", dueDate: today, priority: .high, accent: .ember),
             TaskItem(title: "Call Mom", dueDate: at(18, 30), hasTime: true, accent: .rose),
-            TaskItem(title: "Pick up groceries", notes: "Oat milk, berries, coffee beans", dueDate: today, accent: .mint),
-            TaskItem(title: "Write landing page copy", dueDate: today.adding(days: 1), priority: .medium, accent: .lagoon, goal: launch),
-            TaskItem(title: "Book a dentist appointment", dueDate: today.adding(days: 3), accent: .sky),
-            TaskItem(title: "Buy new running shoes", dueDate: today.adding(days: 5), accent: .coral, goal: marathon),
+            TaskItem(title: "Groceries", notes: "Oat milk, berries, coffee", dueDate: today, accent: .moss),
+            TaskItem(title: "Write landing page copy", dueDate: today.adding(days: 1), priority: .medium, accent: .tide, goal: launch),
+            TaskItem(title: "Book the dentist", dueDate: today.adding(days: 3), accent: .lagoon),
         ]
         for task in tasks { context.insert(task) }
 
-        // A few completed tasks spread over the past week, for Insights.
-        let doneCounts = [2, 4, 1, 3, 5, 2, 1]
-        let doneTitles = ["Inbox zero", "Pay rent", "Laundry", "Reply to Sam", "Water the plants",
-                          "Update résumé", "Team sync notes", "Renew library card"]
-        var titleIndex = 0
-        for (offset, count) in doneCounts.enumerated() {
+        let doneTitles = ["Inbox zero", "Pay rent", "Laundry", "Reply to Sam", "Water the plants", "Update résumé"]
+        for (offset, count) in [2, 4, 1, 3, 5, 2, 1].enumerated() {
             for n in 0..<count {
-                let title = doneTitles[titleIndex % doneTitles.count]
-                titleIndex += 1
-                let t = TaskItem(title: title, dueDate: today.adding(days: offset - 6), accent: Accent.allCases[titleIndex % Accent.allCases.count])
+                let t = TaskItem(title: doneTitles[(offset + n) % doneTitles.count], dueDate: today.adding(days: offset - 6))
                 t.isDone = true
                 t.completedAt = at(9 + n, dayOffset: offset - 6)
                 context.insert(t)
             }
         }
 
-        // Routines with some history
         let created = today.adding(days: -30)
-        let routines: [Routine] = [
-            Routine(title: "Meditate", symbol: "leaf.fill", accent: .mint, period: .morning, order: 0, createdAt: created),
-            Routine(title: "Stretch", symbol: "figure.flexibility", accent: .lagoon, period: .morning, order: 1, createdAt: created),
-            Routine(title: "Deep work", symbol: "brain.head.profile", accent: .iris, period: .afternoon,
-                    weekdays: [2, 3, 4, 5, 6], order: 2, createdAt: created),
-            Routine(title: "Drink water", symbol: "drop.fill", accent: .sky, period: .anytime, order: 3, createdAt: created),
-            Routine(title: "Journal", symbol: "book.closed.fill", accent: .orchid, period: .evening, order: 4, createdAt: created),
-            Routine(title: "Read 20 pages", symbol: "books.vertical.fill", accent: .peach, period: .evening, order: 5, createdAt: created),
-        ]
-        for (index, routine) in routines.enumerated() {
+        for (index, ritual) in RitualOption.all.prefix(6).enumerated() {
+            let routine = Routine(title: ritual.title, symbol: ritual.symbol, accent: ritual.accent,
+                                  period: ritual.period, weekdays: ritual.weekdays, order: index, createdAt: created)
             for offset in 1...30 {
                 let day = today.adding(days: -offset)
-                // Deterministic "mostly consistent" pattern, recent days always kept.
                 let skip = offset > 4 && (offset * 7 + index * 3) % 5 == 0
-                if routine.isScheduled(on: day) && !skip {
-                    routine.completions.append(day.addingTimeInterval(9 * 3600))
-                }
+                if routine.isScheduled(on: day) && !skip { routine.completions.append(day.addingTimeInterval(9 * 3600)) }
             }
+            if index < 2 { routine.completions.append(at(7, 30)) }
             context.insert(routine)
         }
-        routines[0].completions.append(at(7, 15))
-        routines[3].completions.append(at(10))
     }
+
+    @MainActor
+    static var previewContainer: ModelContainer = {
+        let container = try! ModelContainer(
+            for: TaskItem.self, Goal.self, Milestone.self, Routine.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        seed(container.mainContext)
+        return container
+    }()
 }

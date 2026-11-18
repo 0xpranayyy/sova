@@ -4,10 +4,10 @@ import SwiftData
 @Model
 final class Goal {
     var title: String = ""
-    var emoji: String = "🎯"
+    var symbol: String = "flag.checkered"
     var notes: String = ""
     var deadline: Date?
-    var accentRaw: String = Accent.iris.rawValue
+    var accentRaw: String = Accent.tide.rawValue
     /// Used when the goal has no milestones.
     var manualProgress: Double = 0
     var isArchived: Bool = false
@@ -19,9 +19,9 @@ final class Goal {
     @Relationship(deleteRule: .nullify, inverse: \TaskItem.goal)
     var tasks: [TaskItem] = []
 
-    init(title: String, emoji: String = "🎯", notes: String = "", deadline: Date? = nil, accent: Accent = .iris) {
+    init(title: String, symbol: String = "flag.checkered", notes: String = "", deadline: Date? = nil, accent: Accent = .tide) {
         self.title = title
-        self.emoji = emoji
+        self.symbol = symbol
         self.notes = notes
         self.deadline = deadline
         self.accentRaw = accent.rawValue
@@ -29,7 +29,7 @@ final class Goal {
     }
 
     var accent: Accent {
-        get { Accent(rawValue: accentRaw) ?? .iris }
+        get { Accent(rawValue: accentRaw) ?? .tide }
         set { accentRaw = newValue.rawValue }
     }
 

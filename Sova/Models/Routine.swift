@@ -20,7 +20,7 @@ enum DayPeriod: String, CaseIterable, Identifiable {
         case .morning: "sunrise.fill"
         case .afternoon: "sun.max.fill"
         case .evening: "moon.stars.fill"
-        case .anytime: "sparkles"
+        case .anytime: "clock"
         }
     }
 }
@@ -28,7 +28,7 @@ enum DayPeriod: String, CaseIterable, Identifiable {
 @Model
 final class Routine {
     var title: String = ""
-    var symbol: String = "sparkles"
+    var symbol: String = "sun.max"
     var accentRaw: String = Accent.lagoon.rawValue
     var periodRaw: String = DayPeriod.morning.rawValue
     /// Calendar weekday numbers, 1 = Sunday … 7 = Saturday.
