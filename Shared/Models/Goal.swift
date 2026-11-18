@@ -13,11 +13,21 @@ final class Goal {
     var isArchived: Bool = false
     var createdAt: Date = Date.now
 
+    // Optional so the store can sync with CloudKit; use `steps` and
+    // `linkedTasks` for the non-optional view.
     @Relationship(deleteRule: .cascade, inverse: \Milestone.goal)
-    var milestones: [Milestone] = []
+    var milestones: [Milestone]? = []
 
     @Relationship(deleteRule: .nullify, inverse: \TaskItem.goal)
-    var tasks: [TaskItem] = []
+    var tasks: [TaskItem]? = []
+
+    var steps: [Milestone] { milestones ?? [] }
+    var linkedTasks: [TaskItem] { tasks ?? [] }
+
+    func addStep(_ milestone: Milestone) {
+        if milestones == nil { milestones = [] }
+        milestones?.append(milestone)
+    }
 
     init(title: String, symbol: String = "flag.checkered", notes: String = "", deadline: Date? = nil, accent: Accent = .tide) {
         self.title = title
@@ -34,14 +44,14 @@ final class Goal {
     }
 
     var sortedMilestones: [Milestone] {
-        milestones.sorted { $0.order < $1.order }
+        steps.sorted { $0.order < $1.order }
     }
 
-    var completedMilestones: Int { milestones.filter(\.isDone).count }
+    var completedMilestones: Int { steps.filter(\.isDone).count }
 
     var progress: Double {
-        guard !milestones.isEmpty else { return min(max(manualProgress, 0), 1) }
-        return Double(completedMilestones) / Double(milestones.count)
+        guard !steps.isEmpty else { return min(max(manualProgress, 0), 1) }
+        return Double(completedMilestones) / Double(steps.count)
     }
 
     var daysLeft: Int? {

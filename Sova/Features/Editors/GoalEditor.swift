@@ -116,9 +116,9 @@ struct GoalEditor: View {
         var pending = newMilestones
         let draft = milestoneDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         if !draft.isEmpty { pending.append(draft) }
-        let start = (target.milestones.map(\.order).max() ?? -1) + 1
+        let start = (target.steps.map(\.order).max() ?? -1) + 1
         for (i, title) in pending.enumerated() {
-            target.milestones.append(Milestone(title: title, order: start + i))
+            target.addStep(Milestone(title: title, order: start + i))
         }
         dismiss()
     }

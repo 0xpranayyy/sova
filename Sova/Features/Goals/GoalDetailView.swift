@@ -15,7 +15,7 @@ struct GoalDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
                 hero
-                if goal.milestones.isEmpty { manualProgress }
+                if goal.steps.isEmpty { manualProgress }
                 milestones
                 tasks
                 if !goal.notes.isEmpty {
@@ -110,7 +110,7 @@ struct GoalDetailView: View {
     private var milestones: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionLabel(String(localized: "Steps"),
-                         trailing: goal.milestones.isEmpty ? nil : "\(goal.completedMilestones) of \(goal.milestones.count)")
+                         trailing: goal.steps.isEmpty ? nil : "\(goal.completedMilestones) of \(goal.steps.count)")
             VStack(spacing: 0) {
                 ForEach(goal.sortedMilestones) { milestone in
                     HStack(spacing: 4) {
@@ -127,7 +127,7 @@ struct GoalDetailView: View {
                     .contextMenu {
                         Button("Delete", systemImage: "trash", role: .destructive) {
                             withAnimation {
-                                goal.milestones.removeAll { $0 == milestone }
+                                goal.milestones?.removeAll { $0 == milestone }
                                 context.delete(milestone)
                             }
                         }
@@ -155,7 +155,7 @@ struct GoalDetailView: View {
     private var tasks: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionLabel(String(localized: "Tasks"))
-            let linked = goal.tasks.sorted { a, b in
+            let linked = goal.linkedTasks.sorted { a, b in
                 a.isDone != b.isDone ? !a.isDone : TaskItem.ordering(a, b)
             }
             if !linked.isEmpty {
@@ -175,9 +175,9 @@ struct GoalDetailView: View {
     private func addMilestone() {
         let title = newMilestone.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else { return }
-        let next = (goal.milestones.map(\.order).max() ?? -1) + 1
+        let next = (goal.steps.map(\.order).max() ?? -1) + 1
         withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-            goal.milestones.append(Milestone(title: title, order: next))
+            goal.addStep(Milestone(title: title, order: next))
         }
         newMilestone = ""
         addFieldFocused = true

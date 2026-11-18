@@ -68,7 +68,7 @@ struct GoalCard: View {
                             in: .rect(cornerRadius: 18, style: .continuous))
                 .padding(.top, 14)
             } else {
-                Text(goal.milestones.isEmpty ? String(localized: "Progress set by hand")
+                Text(goal.steps.isEmpty ? String(localized: "Progress set by hand")
                      : String(localized: "Every step done 🎉"))
                     .font(.allo(.subheadline, .heavy))
                     .opacity(0.75)
@@ -91,8 +91,8 @@ struct GoalCard: View {
 
     private var label: String {
         var parts: [String] = [goal.deadlineText ?? String(localized: "No deadline")]
-        if !goal.milestones.isEmpty {
-            parts.append(String(localized: "\(goal.completedMilestones) of \(goal.milestones.count) steps"))
+        if !goal.steps.isEmpty {
+            parts.append(String(localized: "\(goal.completedMilestones) of \(goal.steps.count) steps"))
         }
         return parts.joined(separator: " · ")
     }

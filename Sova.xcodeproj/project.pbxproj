@@ -16,6 +16,11 @@
 			path = Sova;
 			sourceTree = "<group>";
 		};
+		5A0000000000000000000010 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +38,7 @@
 			isa = PBXGroup;
 			children = (
 				5A0000000000000000000002 /* Sova */,
+				5A0000000000000000000010 /* Shared */,
 				5A0000000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +68,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				5A0000000000000000000002 /* Sova */,
+				5A0000000000000000000010 /* Shared */,
 			);
 			name = Sova;
 			packageProductDependencies = (

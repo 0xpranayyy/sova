@@ -3,6 +3,8 @@ import SwiftData
 
 @main
 struct SovaApp: App {
+    private let container = SovaStore.makeContainer()
+
     init() {
         Allo.register()
         Allo.applyToUIKit()
@@ -13,6 +15,6 @@ struct SovaApp: App {
         WindowGroup {
             RootView()
         }
-        .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self])
+        .modelContainer(container)
     }
 }

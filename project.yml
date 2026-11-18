@@ -8,7 +8,7 @@ targets:
   Sova:
     type: application
     platform: iOS
-    sources: [Sova]
+    sources: [Sova, Shared]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.sova.Sova
