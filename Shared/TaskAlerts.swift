@@ -44,7 +44,7 @@ enum TaskAlerts {
         let pending = await center.pendingNotificationRequests()
         center.removePendingNotificationRequests(withIdentifiers: pending.map(\.identifier).filter { $0.hasPrefix("sova.task.") })
         let now = Date.now
-        let descriptor = FetchDescriptor<TaskItem>(predicate: #Predicate { !$0.isDone && $0.hasTime })
+        let descriptor = FetchDescriptor<TaskItem>(predicate: #Predicate<TaskItem> { !$0.isDone && $0.hasTime })
         let tasks = ((try? context.fetch(descriptor)) ?? [])
             .filter { ($0.dueDate ?? .distantPast) > now }
             .sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }
@@ -62,7 +62,7 @@ enum SovaRefresh {
     static func updateBadge(_ context: ModelContext?) {
         var count = 0
         if SovaSettings.badgeOverdue, let context {
-            let descriptor = FetchDescriptor<TaskItem>(predicate: #Predicate { !$0.isDone && $0.dueDate != nil })
+            let descriptor = FetchDescriptor<TaskItem>(predicate: #Predicate<TaskItem> { !$0.isDone && $0.dueDate != nil })
             count = ((try? context.fetch(descriptor)) ?? []).filter(\.isOverdue).count
         }
         UNUserNotificationCenter.current().setBadgeCount(count)
