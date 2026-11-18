@@ -167,3 +167,45 @@ struct StickerChip: View {
             .rotationEffect(.degrees(-4))
     }
 }
+
+/// A tilted pill sticker, as floats around the owl.
+struct TiltPill: View {
+    let text: String
+    let tone: StickerTone
+    var tilt: Double = 0
+    var size: CGFloat = 15
+
+    var body: some View {
+        Text(text)
+            .font(.allo(size: size, weight: .heavy, relativeTo: .subheadline))
+            .tracking(-0.3)
+            .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+            .padding(.horizontal, size * 0.95)
+            .padding(.vertical, size * 0.6)
+            .background(tone.fill, in: .capsule)
+            .rotationEffect(.degrees(tilt))
+            .fixedSize()
+    }
+}
+
+/// A sparkle at a spot, in a color.
+struct SparkleDot: View {
+    let color: Color
+    var size: CGFloat = 24
+    @State private var twinkle = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        Sparkle()
+            .fill(color)
+            .frame(width: size, height: size)
+            .scaleEffect(twinkle ? 1 : 0.7)
+            .onAppear {
+                guard !reduceMotion else { twinkle = true; return }
+                withAnimation(.easeInOut(duration: Double.random(in: 1.2...2.0)).repeatForever(autoreverses: true)) {
+                    twinkle = true
+                }
+            }
+    }
+}
+

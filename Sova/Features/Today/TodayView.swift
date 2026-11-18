@@ -36,9 +36,14 @@ struct TodayView: View {
         let entries = TimelineEntry.build(tasks: tasks, routines: routines)
         let done = entries.filter(\.isDone)
         let upNext = next(in: entries)
-        let open = entries.filter { !$0.isDone && $0.id != upNext?.id }
-        let overdue = open.filter { $0.section == .overdue }
-        let later = open.filter { $0.section != .overdue }
+        let todaysRituals = routines.filter { $0.isScheduled(on: .now) }
+        let ritualsDone = todaysRituals.filter { $0.isDone(on: .now) }.count
+        let taskEntries = entries.filter { !$0.isRoutine }
+        let openTasks = taskEntries.filter { !$0.isDone && $0.id != upNext?.id }
+        let overdue = openTasks.filter { $0.section == .overdue }
+        let later = openTasks.filter { $0.section != .overdue }
+        let doneTasks = taskEntries.filter(\.isDone)
+        let streak = routines.map(\.streak).max() ?? 0
 
         NavigationStack {
             List {
@@ -48,7 +53,7 @@ struct TodayView: View {
                 }
                 .cardRow(top: 4, bottom: 14)
 
-                ProgressBlock(greeting: greeting, done: done.count, total: entries.count, overdue: overdue.count)
+                DayStage(greeting: greeting, done: done.count, total: entries.count, streak: streak)
                     .cardRow(bottom: 10)
 
                 TipView(captureTip).cardRow(bottom: 8)
@@ -63,7 +68,40 @@ struct TodayView: View {
 
                 if let upNext {
                     UpNextCard(entry: upNext) { open(upNext) }
-                        .cardRow(bottom: 6)
+                        .cardRow(top: 44, bottom: 6)
+                }
+
+                if !todaysRituals.isEmpty {
+                    HStack {
+                        SectionLabel(String(localized: "Rituals · \(ritualsDone) of \(todaysRituals.count)"))
+                        if streak > 1 {
+                            Text(String(localized: "\(streak)-day streak"))
+                                .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
+                                .tracking(1.2)
+                                .textCase(.uppercase)
+                                .foregroundStyle(StickerTone.mint.deep)
+                                .padding(.horizontal, 9)
+                                .padding(.vertical, 5)
+                                .background(StickerTone.mint.fill.opacity(0.45), in: .rect(cornerRadius: 9, style: .continuous))
+                        }
+                    }
+                    .cardRow(top: 18, bottom: 10)
+
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 10) {
+                            ForEach(Array(todaysRituals.enumerated()), id: \.element.id) { index, ritual in
+                                RitualCard(routine: ritual, tilt: index.isMultiple(of: 2) ? -2 : 2) {
+                                    router.sheet = .routine(ritual)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                    }
+                    .scrollIndicators(.hidden)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
 
                 if !overdue.isEmpty {
@@ -73,17 +111,17 @@ struct TodayView: View {
                 }
 
                 if !later.isEmpty {
-                    SectionLabel(String(localized: "Later today"), trailing: "\(later.count)")
+                    SectionLabel(String(localized: "Tasks"), trailing: "\(later.count)")
                         .cardRow(top: 18, bottom: 10)
                     ForEach(later) { row($0) }
                 }
 
-                if !done.isEmpty {
+                if !doneTasks.isEmpty {
                     Button {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { showDone.toggle() }
                     } label: {
                         HStack(spacing: 6) {
-                            SectionLabel(String(localized: "Done today"), trailing: "\(done.count)")
+                            SectionLabel(String(localized: "Done today"), trailing: "\(doneTasks.count)")
                             Image(systemName: "chevron.right")
                                 .font(.caption.weight(.heavy))
                                 .foregroundStyle(Color.inkTertiary)
@@ -93,7 +131,7 @@ struct TodayView: View {
                     }
                     .buttonStyle(.plain)
                     .cardRow(top: 18, bottom: 10)
-                    if showDone { ForEach(done) { row($0) } }
+                    if showDone { ForEach(doneTasks) { row($0) } }
                 }
 
                 Color.clear.frame(height: 80).cardRow()
@@ -117,19 +155,10 @@ struct TodayView: View {
     private func row(_ entry: TimelineEntry) -> some View {
         let base = DayRow(entry: entry) { open(entry) }
             .cardRow(top: 4, bottom: 4)
-        switch entry.source {
-        case .task(let task):
+        if case .task(let task) = entry.source {
             base.taskSwipeActions(task)
-        case .routine(let routine):
-            base.swipeActions(edge: .leading, allowsFullSwipe: true) {
-                Button {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { routine.toggle(on: .now) }
-                } label: {
-                    Label(routine.isDone(on: .now) ? "Not Done" : "Done",
-                          systemImage: routine.isDone(on: .now) ? "arrow.uturn.backward" : "checkmark")
-                }
-                .tint(StickerTone.mint.deep)
-            }
+        } else {
+            base
         }
     }
 
@@ -151,94 +180,100 @@ extension View {
     }
 }
 
-/// The day at a glance: a big yellow block with the count and chunky ticks.
-struct ProgressBlock: View {
+/// The day on an indigo stage: the owl inside a ring that fills as you
+/// finish things, with today's numbers floating as stickers.
+struct DayStage: View {
     let greeting: String
     let done: Int
     let total: Int
-    let overdue: Int
+    let streak: Int
 
-    private let tone = StickerTone.yellow
+    private var progress: Double { total == 0 ? 0 : Double(done) / Double(total) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top) {
-                MonoCaps(greeting, color: tone.deep)
-                Spacer()
-                OwlMark(size: 36, happy: total > 0 && done == total, blinks: true,
-                        bodyColor: tone.deep, eyeColor: tone.fill)
-                    .rotationEffect(.degrees(-10))
-                    .offset(y: -4)
-            }
-            HStack(alignment: .bottom) {
-                HStack(spacing: 0) {
-                    Text("\(done)")
-                    Text("/\(total)").opacity(0.35)
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            ZStack {
+                StickerTone.indigo.fill
+
+                // Progress ring around the owl.
+                ZStack {
+                    Circle().stroke(Color.white.opacity(0.12), lineWidth: 15)
+                    Circle()
+                        .trim(from: 0, to: max(0.001, progress))
+                        .stroke(StickerTone.yellow.fill, style: StrokeStyle(lineWidth: 15, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .opacity(progress > 0 ? 1 : 0)
                 }
-                .font(.hero(76, weight: .heavy))
-                .tracking(-3.4)
-                .contentTransition(.numericText(value: Double(done)))
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(status).font(.allo(size: 17, weight: .heavy, relativeTo: .headline))
-                    Text(detail).font(.allo(.footnote, .bold)).opacity(0.7)
+                .frame(width: 172, height: 172)
+                .position(x: w / 2, y: h * 0.56)
+                .animation(.spring(response: 0.8, dampingFraction: 0.8), value: progress)
+
+                OwlMark(size: 84, happy: total > 0 && done == total,
+                        bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8))
+                    .position(x: w / 2, y: h * 0.57)
+
+                MonoCaps(greeting, color: StickerTone.indigo.deep)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .position(x: w / 2, y: 26)
+
+                TiltPill(text: total == 0 ? String(localized: "A clear day")
+                         : String(localized: "\(done) of \(total) done"), tone: .yellow, tilt: -6)
+                    .contentTransition(.numericText(value: Double(done)))
+                    .position(x: w * 0.2, y: h * 0.66)
+                if streak > 1 {
+                    TiltPill(text: String(localized: "\(streak)-day streak"), tone: .mint, tilt: 6)
+                        .position(x: w * 0.8, y: h * 0.44)
                 }
-                .padding(.bottom, 10)
+
+                SparkleDot(color: StickerTone.pink.fill, size: 18).position(x: w * 0.9, y: h * 0.82)
+                SparkleDot(color: StickerTone.mint.fill, size: 15).position(x: w * 0.14, y: h * 0.36)
+                SparkleDot(color: StickerTone.yellow.fill, size: 12).position(x: w * 0.84, y: h * 0.16)
             }
-            .padding(.top, -4)
-            DaySegments(done: done, total: max(total, 1), color: tone.deep)
-                .padding(.top, 12)
         }
-        .block(tone)
-        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: done)
-        .accessibilityElement(children: .combine)
-    }
-
-    private var status: String {
-        if total == 0 { return String(localized: "Clear day") }
-        if done == total { return String(localized: "All done") }
-        return String(localized: "\(total - done) to go")
-    }
-
-    private var detail: String {
-        if total == 0 { return String(localized: "nothing planned") }
-        if done == total { return String(localized: "nice work") }
-        return overdue > 0 ? String(localized: "\(overdue) overdue") : String(localized: "on track")
+        .frame(height: 250)
+        .clipShape(.rect(cornerRadius: 36, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(greeting)
+        .accessibilityValue(String(localized: "\(done) of \(total) done"))
     }
 }
 
-/// The one thing to do next: an indigo block with big buttons.
+/// The one thing to do next: a yellow block with big buttons, and the owl
+/// perched on top pointing it out.
 struct UpNextCard: View {
     let entry: TimelineEntry
     var onOpen: () -> Void
 
     @Environment(AppRouter.self) private var router
+    private let tone = StickerTone.yellow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            MonoCaps(label, color: StickerTone.indigo.deep)
+            MonoCaps(label, color: tone.deep)
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 if case .task(let t) = entry.source, !t.priority.marks.isEmpty {
-                    Text(t.priority.marks).foregroundStyle(StickerTone.pink.fill)
+                    Text(t.priority.marks).foregroundStyle(Color.ember)
                 }
-                Text(title)
+                Text(title).foregroundStyle(StickerTone.indigo.fill)
             }
             .font(.allo(size: 26, weight: .heavy, relativeTo: .title2))
             .tracking(-0.8)
             .padding(.top, 8)
             if let meta {
                 Text(meta)
-                    .font(.allo(.subheadline, .bold))
-                    .opacity(0.6)
+                    .font(.allo(.subheadline, .heavy))
+                    .opacity(0.7)
                     .padding(.top, 4)
             }
             HStack(spacing: 8) {
                 Button(action: complete) {
                     Label("Done", systemImage: "checkmark")
                 }
-                .buttonStyle(.big(.yellow, height: 50))
+                .buttonStyle(.big(.indigo, height: 50))
                 .layoutPriority(1)
                 if case .task(let t) = entry.source {
                     Button {
@@ -246,16 +281,35 @@ struct UpNextCard: View {
                     } label: {
                         Text("Tomorrow")
                             .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
-                            .foregroundStyle(Color.white)
+                            .foregroundStyle(tone.deep)
                             .frame(maxWidth: .infinity, minHeight: 50)
-                            .background(Color.white.opacity(0.12), in: .capsule)
+                            .background(tone.deep.opacity(0.12), in: .capsule)
                     }
                     .buttonStyle(.pressable)
                 }
             }
             .padding(.top, 16)
         }
-        .block(.indigo)
+        .block(tone, cornerRadius: 32)
+        .overlay(alignment: .topTrailing) {
+            HStack(alignment: .top, spacing: 6) {
+                Text("This one's next!")
+                    .font(.allo(size: 14, weight: .heavy, relativeTo: .subheadline))
+                    .tracking(-0.3)
+                    .foregroundStyle(StickerTone.lilac.deep)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(StickerTone.lilac.fill,
+                                in: UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18,
+                                                           bottomTrailingRadius: 6, topTrailingRadius: 18,
+                                                           style: .continuous))
+                    .padding(.top, 14)
+                OwlMark(size: 50)
+                    .rotationEffect(.degrees(6))
+            }
+            .offset(x: -12, y: -58)
+            .allowsHitTesting(false)
+        }
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)
     }
@@ -295,7 +349,51 @@ struct UpNextCard: View {
     }
 }
 
-/// A ritual as a block in its color; a task as a white card.
+/// A ritual as a square, slightly tilted tile in its color.
+struct RitualCard: View {
+    let routine: Routine
+    var tilt: Double = 0
+    var onOpen: () -> Void
+
+    var body: some View {
+        let tone = StickerTone(routine.accent)
+        let ink = tone == .indigo ? Color.white : tone.deep
+        let done = routine.isDone(on: .now)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top) {
+                Image(systemName: routine.symbol)
+                    .font(.system(size: 24, weight: .semibold))
+                Spacer()
+                CheckButton(isOn: done, color: tone.deep, round: true, size: 30, checkColor: tone.fill,
+                            label: routine.title) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.toggle(on: .now) }
+                }
+                .padding(-7)
+            }
+            Spacer(minLength: 8)
+            Text(routine.title)
+                .font(.allo(size: 17, weight: .heavy, relativeTo: .headline))
+                .tracking(-0.4)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+        }
+        .foregroundStyle(ink)
+        .padding(14)
+        .frame(width: 132, height: 132, alignment: .topLeading)
+        .background(tone.fill, in: .rect(cornerRadius: 30, style: .continuous))
+        .opacity(done ? 0.6 : 1)
+        .rotationEffect(.degrees(tilt))
+        .contentShape(.rect)
+        .onTapGesture(perform: onOpen)
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: done)
+        .accessibilityElement(children: .combine)
+        .accessibilityAction(named: done ? "Mark as not done" : "Mark as done") {
+            withAnimation { routine.toggle(on: .now) }
+        }
+    }
+}
+
+/// A task as a white card.
 struct DayRow: View {
     let entry: TimelineEntry
     var onOpen: () -> Void
@@ -303,90 +401,45 @@ struct DayRow: View {
     @Environment(AppRouter.self) private var router
 
     var body: some View {
-        switch entry.source {
-        case .routine(let r): ritualRow(r)
-        case .task(let t): taskRow(t)
-        }
-    }
-
-    private func ritualRow(_ r: Routine) -> some View {
-        let tone = StickerTone(r.accent)
-        let ink = tone == .indigo ? Color.white : tone.deep
-        return HStack(spacing: 12) {
-            Image(systemName: r.symbol)
-                .font(.system(size: 21, weight: .semibold))
-                .foregroundStyle(ink)
-                .frame(width: 26)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(r.title)
+        if case .task(let t) = entry.source {
+            HStack(spacing: 10) {
+                CheckButton(isOn: entry.isDone, color: Color.ink, round: false, size: 30, label: t.title, action: toggle)
+                    .padding(.leading, -6)
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
+                        if !t.priority.marks.isEmpty && !t.isDone {
+                            Text(t.priority.marks).foregroundStyle(Color.ember)
+                        }
+                        Text(t.title).foregroundStyle(t.isDone ? Color.inkTertiary : Color.ink)
+                    }
                     .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
                     .tracking(-0.4)
-                Text(r.period == .anytime ? String(localized: "Anytime") : r.period.name)
-                    .font(.allo(.footnote, .bold))
-                    .opacity(0.7)
-            }
-            .foregroundStyle(ink)
-            Spacer(minLength: 6)
-            if r.streak > 1 {
-                Text(String(localized: "\(r.streak) days"))
-                    .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
-                    .tracking(1.2)
-                    .textCase(.uppercase)
-                    .foregroundStyle(ink)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(Color.white.opacity(0.45), in: .rect(cornerRadius: 9, style: .continuous))
-            }
-            CheckButton(isOn: entry.isDone, color: tone == .indigo ? tone.deep : tone.deep,
-                        round: true, size: 30, checkColor: tone.fill, label: r.title, action: toggle)
-                .padding(.trailing, -6)
-        }
-        .padding(.leading, 16)
-        .padding(.trailing, 10)
-        .padding(.vertical, 8)
-        .background(tone.fill, in: .rect(cornerRadius: 24, style: .continuous))
-        .opacity(entry.isDone ? 0.55 : 1)
-        .contentShape(.rect)
-        .onTapGesture(perform: onOpen)
-        .accessibilityElement(children: .combine)
-        .accessibilityAction(named: entry.isDone ? "Mark as not done" : "Mark as done", toggle)
-    }
-
-    private func taskRow(_ t: TaskItem) -> some View {
-        HStack(spacing: 10) {
-            CheckButton(isOn: entry.isDone, color: Color.ink, round: false, size: 28, label: t.title, action: toggle)
-                .padding(.leading, -6)
-            VStack(alignment: .leading, spacing: 1) {
-                HStack(alignment: .firstTextBaseline, spacing: 5) {
-                    if !t.priority.marks.isEmpty && !t.isDone {
-                        Text(t.priority.marks).foregroundStyle(Color.ember)
-                    }
-                    Text(t.title).foregroundStyle(t.isDone ? Color.inkTertiary : Color.ink)
+                    .lineLimit(2)
+                    Text(meta(t))
+                        .font(.allo(.footnote, .bold))
+                        .foregroundStyle(entry.section == .overdue && !t.isDone ? Color.ember : Color.inkSecondary)
+                        .lineLimit(1)
                 }
-                .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
-                .tracking(-0.4)
-                .lineLimit(2)
-                Text(meta(t))
-                    .font(.allo(.footnote, .bold))
-                    .foregroundStyle(entry.section == .overdue && !t.isDone ? Color.ember : Color.inkSecondary)
-                    .lineLimit(1)
+                Spacer(minLength: 6)
+                if let time = time(t) {
+                    Text(time)
+                        .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline).monospacedDigit())
+                        .foregroundStyle(Color.ink)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color(hex: 0xF3F1EA), in: .rect(cornerRadius: 12, style: .continuous))
+                }
             }
-            Spacer(minLength: 6)
-            if let time = time(t) {
-                Text(time)
-                    .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline).monospacedDigit())
-                    .foregroundStyle(Color.ink)
-            }
+            .padding(.leading, 14)
+            .padding(.trailing, 14)
+            .padding(.vertical, 9)
+            .background(Color.white, in: .rect(cornerRadius: 26, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
+            .contentShape(.rect)
+            .onTapGesture(perform: onOpen)
+            .accessibilityElement(children: .combine)
+            .accessibilityAction(named: entry.isDone ? "Mark as not done" : "Mark as done", toggle)
         }
-        .padding(.leading, 14)
-        .padding(.trailing, 16)
-        .padding(.vertical, 8)
-        .background(Color.white, in: .rect(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
-        .contentShape(.rect)
-        .onTapGesture(perform: onOpen)
-        .accessibilityElement(children: .combine)
-        .accessibilityAction(named: entry.isDone ? "Mark as not done" : "Mark as done", toggle)
     }
 
     private func meta(_ t: TaskItem) -> String {
@@ -403,11 +456,7 @@ struct DayRow: View {
     }
 
     private func toggle() {
-        switch entry.source {
-        case .task(let t): TaskActions.toggle(t, router: router)
-        case .routine(let r):
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { r.toggle(on: .now) }
-        }
+        if case .task(let t) = entry.source { TaskActions.toggle(t, router: router) }
     }
 }
 

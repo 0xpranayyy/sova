@@ -9,7 +9,7 @@ Bold, modern and colorful, built on the palette and type of [Allo](https://allo.
 - **Allo's palette as flat blocks.** Sunny yellow, mint, lilac, hot pink, orange, cyan, lime and deep indigo on a near-white page. Text on each block is a deep shade of the same color, so every block reads as one piece.
 - **Allo, set big.** Huge heavy titles that end with a period ("Today.", "Goals.", "Sova."), small uppercase labels with open tracking ("UP NEXT · IN 48 MIN"), and big heavy numbers.
 - **Big, pretty buttons.** 60pt rounded buttons with heavy text, like indigo with yellow text. Checkboxes take the color of their ritual.
-- **Today.** A yellow progress block (3/8 with chunky ticks and the owl), an indigo **Up next** block with **Done** and **Tomorrow**, then rituals as blocks in their own color and tasks as white cards, all with swipe actions.
+- **Today.** A huge "Today." title, then an indigo stage where the owl sits inside a yellow ring that fills as you finish things, with "3 of 8 done" and streak stickers and twinkling sparkles. Below it, a yellow **Up next** block with big **Done** and **Tomorrow** buttons and the owl perched on top saying "This one's next!", a swipeable row of tilted ritual tiles, and tasks as white cards with swipe actions.
 - **Goals, Rituals, Insights.** Every goal and ritual has its own color. Insights shows the 30-day number on indigo with fat week bars, big stat blocks and a mint heatmap.
 - **The owl** has a belly, wings, orange feet and pink cheeks. It blinks, follows your finger on the welcome screen and smiles when your day is done. The app icon is the owl as a tilted sticker on Allo yellow, with two sparkles.
 
