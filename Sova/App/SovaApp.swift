@@ -4,6 +4,7 @@ import SwiftData
 @main
 struct SovaApp: App {
     private let container = SovaStore.makeContainer()
+    @State private var store = PlusStore()
 
     init() {
         Allo.register()
@@ -14,6 +15,7 @@ struct SovaApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(store)
         }
         .modelContainer(container)
     }

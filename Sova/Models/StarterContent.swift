@@ -49,7 +49,9 @@ enum StarterContent {
         let existingRoutines = (try? context.fetch(FetchDescriptor<Routine>())) ?? []
         let existingTitles = Set(existingRoutines.map(\.title))
         var order = (existingRoutines.map(\.order).max() ?? -1) + 1
-        for ritual in rituals where !existingTitles.contains(ritual.title) {
+        var total = existingRoutines.count
+        for ritual in rituals where !existingTitles.contains(ritual.title) && PlusGate.canAddRitual(existing: total) {
+            total += 1
             context.insert(Routine(title: ritual.title, symbol: ritual.symbol, accent: ritual.accent,
                                    period: ritual.period, weekdays: ritual.weekdays, order: order))
             order += 1

@@ -29,6 +29,8 @@ struct MainTabView: View {
     @State private var router = AppRouter()
     @Environment(\.modelContext) private var context
     @Environment(\.scenePhase) private var scenePhase
+    @Query private var allRoutines: [Routine]
+    @Query(filter: #Predicate<Goal> { !$0.isArchived }) private var activeGoals: [Goal]
     /// Bumps at midnight so day-based screens don't keep showing yesterday.
     @State private var today = Date.now.startOfDay
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
@@ -57,6 +59,8 @@ struct MainTabView: View {
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
             today = Date.now.startOfDay
         }
+        .onChange(of: allRoutines.count, initial: true) { _, n in router.routineCount = n }
+        .onChange(of: activeGoals.count, initial: true) { _, n in router.activeGoalCount = n }
         .task {
             await TaskAlerts.resync(in: context)
             SovaRefresh.changed(context)
@@ -93,6 +97,7 @@ struct MainTabView: View {
         case .goal(let goal): GoalEditor(goal: goal)
         case .newRoutine: RoutineEditor(routine: nil)
         case .routine(let routine): RoutineEditor(routine: routine)
+        case .plus(let reason): PlusView(reason: reason)
         }
     }
 }

@@ -21,7 +21,7 @@ struct GoalsView: View {
                     ScreenTitle(title: String(localized: "Goals"),
                                 subtitle: active.isEmpty ? String(localized: "Nothing in progress")
                                     : String(localized: "\(active.count) in progress")) {
-                        CircleAction(symbol: "plus", label: String(localized: "New goal")) { router.sheet = .newGoal }
+                        CircleAction(symbol: "plus", label: String(localized: "New goal")) { router.sheet = router.newGoalSheet }
                     }
                     .padding(.top, 4)
                     .padding(.bottom, 4)
@@ -29,7 +29,7 @@ struct GoalsView: View {
                     if active.isEmpty {
                         EmptyState(title: String(localized: "No goals yet"),
                                    message: String(localized: "Add a goal and break it into steps you can check off."),
-                                   actionTitle: String(localized: "Set a goal")) { router.sheet = .newGoal }
+                                   actionTitle: String(localized: "Set a goal")) { router.sheet = router.newGoalSheet }
                     } else {
                         GoalsStage(average: average, count: active.count,
                                    achieved: allGoals.filter { $0.progress >= 1 }.count)

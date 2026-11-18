@@ -15,14 +15,14 @@ struct RoutinesView: View {
                     ScreenTitle(title: String(localized: "Rituals"),
                                 subtitle: routines.isEmpty ? String(localized: "Little things, every day")
                                     : String(localized: "\(doneToday) of \(dueToday.count) today")) {
-                        CircleAction(symbol: "plus", label: String(localized: "New ritual")) { router.sheet = .newRoutine }
+                        CircleAction(symbol: "plus", label: String(localized: "New ritual")) { router.sheet = router.newRoutineSheet }
                     }
                     .padding(.top, 4)
 
                     if routines.isEmpty {
                         EmptyState(title: String(localized: "No rituals yet"),
                                    message: String(localized: "Rituals are things you do on a schedule, like reading or a morning walk."),
-                                   actionTitle: String(localized: "Add a ritual")) { router.sheet = .newRoutine }
+                                   actionTitle: String(localized: "Add a ritual")) { router.sheet = router.newRoutineSheet }
                     } else {
                         WeekStage(routines: routines, done: doneToday, total: dueToday.count)
 

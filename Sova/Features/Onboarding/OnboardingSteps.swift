@@ -368,6 +368,9 @@ struct NameStep: View {
 struct RitualsStep: View {
     @Binding var selection: Set<String>
     @State private var cheers = 0
+    @State private var limitNudge = 0
+
+    private var atLimit: Bool { !SovaSettings.isPlus && selection.count >= PlusGate.freeRituals }
 
     var body: some View {
         ScrollView {
@@ -391,6 +394,7 @@ struct RitualsStep: View {
                         RitualTile(ritual: ritual, selected: selection.contains(ritual.id), tilt: index.isMultiple(of: 2) ? -1.5 : 1.5) {
                             withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
                                 if selection.contains(ritual.id) { selection.remove(ritual.id) }
+                                else if atLimit { limitNudge += 1; Haptics.warning() }
                                 else { selection.insert(ritual.id) }
                             }
                         }
@@ -398,6 +402,21 @@ struct RitualsStep: View {
                     }
                 }
                 .padding(.top, 20)
+
+                Text("Start with up to \(PlusGate.freeRituals). You can add more anytime.")
+                    .font(.allo(.footnote, .bold))
+                    .foregroundStyle(atLimit ? Color.ink : Color.inkSecondary)
+                    .padding(.top, 14)
+                    .keyframeAnimator(initialValue: 0.0, trigger: limitNudge) { view, x in
+                        view.offset(x: x)
+                    } keyframes: { _ in
+                        KeyframeTrack {
+                            SpringKeyframe(-8, duration: 0.07)
+                            SpringKeyframe(7, duration: 0.07)
+                            SpringKeyframe(-4, duration: 0.07)
+                            SpringKeyframe(0, duration: 0.2)
+                        }
+                    }
             }
             .padding(.horizontal, 20)
             .padding(.top, 8)

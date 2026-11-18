@@ -18,6 +18,7 @@ enum EditorSheet: Identifiable {
     case task(TaskItem)
     case goal(Goal)
     case routine(Routine)
+    case plus(PlusReason)
 
     var id: String {
         switch self {
@@ -28,6 +29,7 @@ enum EditorSheet: Identifiable {
         case .task(let t): "task-\(ObjectIdentifier(t).hashValue)"
         case .goal(let g): "goal-\(ObjectIdentifier(g).hashValue)"
         case .routine(let r): "routine-\(ObjectIdentifier(r).hashValue)"
+        case .plus(let reason): "plus-\(reason.rawValue)"
         }
     }
 }
@@ -51,20 +53,30 @@ struct Toast: Identifiable, Equatable {
 final class AppRouter {
     var tab: AppTab = .today
     var sheet: EditorSheet?
+    /// Kept current by the tab view, for the free-plan limits.
+    var routineCount = 0
+    var activeGoalCount = 0
+
+    var newRoutineSheet: EditorSheet {
+        PlusGate.canAddRitual(existing: routineCount) ? .newRoutine : .plus(.rituals)
+    }
+    var newGoalSheet: EditorSheet {
+        PlusGate.canAddGoal(existing: activeGoalCount) ? .newGoal : .plus(.goals)
+    }
     private(set) var toast: Toast?
 
     func createAction(from tab: AppTab) -> EditorSheet {
         switch tab {
-        case .goals: .newGoal
-        case .routines: .newRoutine
+        case .goals: newGoalSheet
+        case .routines: newRoutineSheet
         default: .quickTask
         }
     }
 
     var primaryCreateAction: EditorSheet {
         switch tab {
-        case .goals: .newGoal
-        case .routines: .newRoutine
+        case .goals: newGoalSheet
+        case .routines: newRoutineSheet
         default: .quickTask
         }
     }
