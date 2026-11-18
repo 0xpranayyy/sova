@@ -110,7 +110,7 @@ Shared/         used by the app and the widgets: models, store, settings,
                 palette, fonts, quick parse, task alerts, App Intents
 SovaWidgets/    WidgetKit extension: Today, Rituals, Lock Screen
 Config/         entitlements and the app's extra Info.plist keys
-docs/           privacy policy (GitHub Pages)
+docs/           the Sova website, support and privacy pages (GitHub Pages)
 marketing/      launch film, App Store screenshots, banner and listing copy
 ```
 

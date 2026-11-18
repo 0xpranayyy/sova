@@ -66,7 +66,7 @@ For each product:
 - **Age rating:** answer "None" to everything → **4+**.
 - **Privacy Policy URL:** https://0xpranayyy.github.io/sova/privacy.html
 - **Support URL:** https://0xpranayyy.github.io/sova/support.html
-- **Marketing URL:** optional, leave blank.
+- **Marketing URL:** https://0xpranayyy.github.io/sova/ (the Sova website in `docs/index.html`)
 - **License agreement:** keep Apple's standard EULA.
 - **Copyright:** © 2026 0xpranayyy
 
@@ -105,3 +105,4 @@ Siri: "Add a task in Sova".
 
 ## After approval
 - Put the numeric **Apple ID** of the app (App Information page) into `Links.appStoreID` so "Rate Sova" opens the review page directly.
+- Put the App Store link into `APP_STORE_URL` near the bottom of `docs/index.html`, so every "Download" button on the website goes to the App Store.
