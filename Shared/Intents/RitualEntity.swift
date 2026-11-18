@@ -14,6 +14,12 @@ struct RitualEntity: AppEntity {
         DisplayRepresentation(title: "\(title)", image: .init(systemName: symbol))
     }
 
+    init(id: String, title: String, symbol: String) {
+        self.id = id
+        self.title = title
+        self.symbol = symbol
+    }
+
     init(_ routine: Routine) {
         id = routine.entityID
         title = routine.title

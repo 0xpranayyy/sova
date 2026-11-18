@@ -36,6 +36,7 @@ struct MainTabView: View {
     /// Bumps at midnight so day-based screens don't keep showing yesterday.
     @State private var today = Date.now.startOfDay
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @AppStorage("userName") private var userName = ""
 
     private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
 
@@ -60,6 +61,12 @@ struct MainTabView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
             today = Date.now.startOfDay
+        }
+        .onChange(of: userName, initial: true) { _, name in
+            // The widgets greet you by name too.
+            guard SovaSettings.shared.string(forKey: SovaSettings.Key.userName) != name else { return }
+            SovaSettings.shared.set(name, forKey: SovaSettings.Key.userName)
+            SovaRefresh.changed(context)
         }
         .onChange(of: allRoutines.count, initial: true) { _, n in router.routineCount = n }
         .onChange(of: activeGoals.count, initial: true) { _, n in router.activeGoalCount = n }

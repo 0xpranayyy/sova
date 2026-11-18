@@ -71,7 +71,7 @@ Onboarding creates only what you choose; there is no sample or placeholder data.
 | **Goals** | Goal cards with steps, progress and a deadline; linked tasks; archiving |
 | **Rituals** | Habits grouped by time of day with weekday schedules, streaks 🔥 and a week view on an indigo stage |
 | **Insights** | This week's bars, stats, a 17-week activity calendar and 30-day ritual consistency |
-| **Widgets** | Today (owl and progress ring, Up Next), interactive Rituals (tick right from the Home Screen) and Lock Screen widgets |
+| **Widgets** | Today (owl and progress ring, Up Next), **My Day** (large: the owl, your week, tasks and rituals you can tick right there), interactive Rituals sticker tiles, and Lock Screen widgets. All of them read well tinted, clear and on StandBy |
 | **Siri & Shortcuts** | "Add a task in Sova", "Tick off a ritual in Sova", "Show my day in Sova" |
 | **Sova Plus** | Unlimited rituals and goals (free: 3 rituals, 1 active goal), iCloud sync, extra app icons. Monthly, yearly (7-day trial) or lifetime, using StoreKit 2 |
 | **Settings** | Appearance, theme, app icon, sounds, haptics, week start, alert timing, overdue badge, reminders, iCloud sync, help and legal links |
@@ -109,7 +109,7 @@ Follow `marketing/app-store/PUBLISHING.md`, a step-by-step checklist covering:
 Sova/           the app: App, Features, Components, Theme, Support, Intents
 Shared/         used by the app and the widgets: models, store, settings,
                 palette, fonts, quick parse, task alerts, App Intents
-SovaWidgets/    WidgetKit extension: Today, Rituals, Lock Screen
+SovaWidgets/    WidgetKit extension: Today, My Day, Rituals, Lock Screen
 Config/         entitlements and the app's extra Info.plist keys
 docs/           the Sova website (GitHub Pages): home, support, privacy, terms,
                 press kit, acknowledgments, 404, sitemap.xml and robots.txt

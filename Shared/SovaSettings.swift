@@ -17,6 +17,7 @@ enum SovaSettings {
         static let lastReviewPrompt = "lastReviewPrompt"
         static let activeDays = "activeDays"
         static let dayCompleteShown = "dayCompleteShown"
+        static let userName = "userName"           // mirrored to the App Group for widgets
     }
 
     /// Defaults the widget and intents can read too.

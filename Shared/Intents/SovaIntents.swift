@@ -28,6 +28,31 @@ struct ToggleRitualIntent: AppIntent {
     }
 }
 
+/// Ticks (or unticks) a task from the widget's check button.
+struct ToggleTaskIntent: AppIntent {
+    static let title: LocalizedStringResource = "Tick Off a Task"
+    static let isDiscoverable = false
+
+    @Parameter(title: "Task")
+    var taskID: String
+
+    init() {}
+    init(taskID: String) { self.taskID = taskID }
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        let context = SovaStore.shared.mainContext
+        let tasks = (try? context.fetch(FetchDescriptor<TaskItem>())) ?? []
+        guard let task = tasks.first(where: { $0.alertID == taskID }) else { return .result() }
+        task.toggle()
+        if task.isDone { task.spawnNextOccurrence() }
+        TaskAlerts.schedule(task)
+        try? context.save()
+        SovaRefresh.changed(context)
+        return .result()
+    }
+}
+
 /// "Add buy milk tomorrow 6pm to Sova": parsed the same way as quick capture.
 struct AddTaskIntent: AppIntent {
     static let title: LocalizedStringResource = "Add a Task"

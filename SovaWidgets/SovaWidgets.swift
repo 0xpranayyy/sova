@@ -7,11 +7,12 @@ struct SovaWidgetsBundle: WidgetBundle {
 
     var body: some Widget {
         TodayWidget()
+        DayWidget()
         RitualsWidget()
     }
 }
 
-// MARK: - Today
+// MARK: - Today (small, medium, Lock Screen)
 
 struct TodayWidget: Widget {
     var body: some WidgetConfiguration {
@@ -30,128 +31,300 @@ struct TodayWidgetView: View {
 
     var body: some View {
         switch family {
-        case .accessoryCircular:
-            Gauge(value: entry.progress) {
-                Image(systemName: "checkmark")
-            } currentValueLabel: {
-                Text("\(entry.done)")
-            }
-            .gaugeStyle(.accessoryCircularCapacity)
-            .containerBackground(for: .widget) { AccessoryWidgetBackground() }
-        case .accessoryRectangular:
-            VStack(alignment: .leading, spacing: 1) {
-                Text(entry.allDone ? "ALL DONE" : "UP NEXT")
-                    .font(.allo(size: 11, weight: .heavy))
-                    .tracking(1.2)
-                    .widgetAccentable()
-                Text(entry.allDone ? String(localized: "Whole day, done! 🦉") : (entry.next?.title ?? String(localized: "A clear day")))
-                    .font(.allo(size: 15, weight: .heavy))
-                    .lineLimit(1)
-                Text(subtitle)
-                    .font(.allo(size: 12, weight: .semibold))
-                    .opacity(0.75)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .containerBackground(for: .widget) { Color.clear }
+        case .accessoryCircular: circular
+        case .accessoryRectangular: rectangular
         case .accessoryInline:
-            Text("\(entry.done) of \(entry.total) done today")
+            Label(entry.allDone ? String(localized: "Whole day done")
+                                : String(localized: "\(entry.done) of \(entry.total) done today"),
+                  systemImage: entry.allDone ? "checkmark.seal.fill" : "circle.dashed")
                 .containerBackground(for: .widget) { Color.clear }
-        case .systemMedium:
-            medium
-        default:
-            small
+        case .systemMedium: medium
+        default: small
         }
     }
 
-    private var subtitle: String {
-        if let time = entry.next?.time, !entry.allDone { return time.formatted(date: .omitted, time: .shortened) }
-        return String(localized: "\(entry.done) of \(entry.total) done")
+    private var countText: String {
+        entry.total == 0 ? String(localized: "A clear day")
+                         : String(localized: "\(entry.done) of \(entry.total)")
     }
+
+    private var dayText: String {
+        entry.date.formatted(.dateTime.weekday(.abbreviated).day())
+    }
+
+    // MARK: Small: the owl on its stage
 
     private var small: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("TODAY")
-                .font(.allo(size: 11, weight: .heavy))
-                .tracking(1.4)
-                .foregroundStyle(StickerTone.yellow.fill)
+            HStack(alignment: .firstTextBaseline) {
+                WidgetCaps(String(localized: "Today"))
+                Spacer(minLength: 4)
+                WidgetCaps(dayText, color: .white.opacity(0.55), size: 10)
+            }
             Spacer(minLength: 0)
             HStack {
                 Spacer()
-                OwlRing(progress: entry.progress, happy: entry.allDone, size: 96)
+                OwlRing(progress: entry.progress, happy: entry.allDone, size: 86)
                 Spacer()
             }
             Spacer(minLength: 0)
-            DonePill(text: entry.total == 0 ? String(localized: "A clear day") : String(localized: "\(entry.done) of \(entry.total) done"))
+            HStack(alignment: .center, spacing: 4) {
+                StickerPill(text: entry.allDone ? String(localized: "All done!") : countText,
+                            tone: entry.allDone ? .mint : .yellow, tilt: -4, size: 12)
+                Spacer(minLength: 0)
+                if entry.streak > 1 {
+                    StickerPill(text: "\(entry.streak)", tone: .pink, symbol: "flame.fill", tilt: 5, size: 11)
+                }
+            }
         }
-        .containerBackground(for: .widget) { StickerTone.indigo.fill }
+        .containerBackground(for: .widget) {
+            ZStack {
+                StageBackground()
+                GeometryReader { geo in
+                    WidgetSparkle(tone: .pink, size: 13).position(x: geo.size.width - 24, y: geo.size.height * 0.36)
+                    WidgetSparkle(tone: .mint, size: 10).position(x: 24, y: geo.size.height * 0.46)
+                    WidgetSparkle(tone: .yellow, size: 8).position(x: geo.size.width * 0.72, y: geo.size.height * 0.2)
+                }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Today: \(entry.done) of \(entry.total) done"))
     }
+
+    // MARK: Medium: the owl and what's next
 
     private var medium: some View {
         HStack(spacing: 16) {
-            OwlRing(progress: entry.progress, happy: entry.allDone, size: 118)
-            VStack(alignment: .leading, spacing: 6) {
-                Text(entry.allDone ? "ALL DONE" : "UP NEXT")
-                    .font(.allo(size: 11, weight: .heavy))
-                    .tracking(1.4)
-                    .foregroundStyle(StickerTone.yellow.fill)
-                Text(entry.allDone ? String(localized: "Whole day, done! 🎉") : (entry.next?.title ?? String(localized: "A clear day")))
+            ZStack(alignment: .bottomTrailing) {
+                OwlRing(progress: entry.progress, happy: entry.allDone, size: 118)
+                if entry.streak > 1 {
+                    StickerPill(text: "\(entry.streak)", tone: .pink, symbol: "flame.fill", tilt: 8, size: 11)
+                        .offset(x: 6, y: 2)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .firstTextBaseline) {
+                    WidgetCaps(entry.allDone ? String(localized: "All done") : String(localized: "Up next"))
+                    Spacer(minLength: 4)
+                    WidgetCaps(dayText, color: .white.opacity(0.55), size: 10)
+                }
+                Spacer(minLength: 6)
+                Text(headline)
                     .font(.allo(size: 20, weight: .heavy))
-                    .tracking(-0.5)
+                    .tracking(-0.6)
                     .foregroundStyle(.white)
                     .lineLimit(2)
+                    .minimumScaleFactor(0.8)
                 if let time = entry.next?.time, !entry.allDone {
-                    Text(time.formatted(date: .omitted, time: .shortened))
-                        .font(.allo(size: 13, weight: .heavy).monospacedDigit())
-                        .foregroundStyle(StickerTone.indigo.fill)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 4)
-                        .background(StickerTone.yellow.fill, in: .rect(cornerRadius: 9, style: .continuous))
+                    StickerPill(text: time.formatted(date: .omitted, time: .shortened),
+                                tone: .yellow, symbol: "clock.fill", tilt: -3, size: 12)
+                        .padding(.top, 7)
                 }
-                Spacer(minLength: 0)
-                DonePill(text: String(localized: "\(entry.done) of \(entry.total) done"))
+                Spacer(minLength: 8)
+                ProgressSegments(done: entry.done, total: entry.total)
+                Text(entry.total == 0 ? String(localized: "Nothing planned yet")
+                                      : String(localized: "\(entry.done) of \(entry.total) done"))
+                    .font(.allo(size: 11, weight: .heavy).monospacedDigit())
+                    .foregroundStyle(.white.opacity(0.6))
+                    .padding(.top, 5)
+            }
+        }
+        .containerBackground(for: .widget) {
+            ZStack {
+                StageBackground()
+                GeometryReader { geo in
+                    WidgetSparkle(tone: .yellow, size: 9).position(x: geo.size.width * 0.37, y: 18)
+                    WidgetSparkle(tone: .mint, size: 11).position(x: 18, y: geo.size.height - 22)
+                }
+            }
+        }
+    }
+
+    private var headline: String {
+        if entry.allDone { return String(localized: "Whole day, done!") }
+        return entry.next?.title ?? String(localized: "A clear day")
+    }
+
+    // MARK: Lock Screen
+
+    private var circular: some View {
+        Gauge(value: entry.progress) {
+            Image(systemName: "checkmark")
+        } currentValueLabel: {
+            Text(entry.allDone ? "✓" : "\(entry.done)")
+                .font(.allo(size: 16, weight: .heavy))
+        }
+        .gaugeStyle(.accessoryCircularCapacity)
+        .widgetAccentable()
+        .containerBackground(for: .widget) { AccessoryWidgetBackground() }
+    }
+
+    private var rectangular: some View {
+        HStack(spacing: 8) {
+            Gauge(value: entry.progress) { EmptyView() }
+                .gaugeStyle(.accessoryCircularCapacity)
+                .scaleEffect(0.72)
+                .frame(width: 40, height: 40)
+                .widgetAccentable()
+            VStack(alignment: .leading, spacing: 0) {
+                Text(entry.allDone ? String(localized: "ALL DONE") : String(localized: "UP NEXT"))
+                    .font(.allo(size: 10, weight: .heavy))
+                    .tracking(1.2)
+                    .widgetAccentable()
+                Text(entry.allDone ? String(localized: "Whole day, done!") : (entry.next?.title ?? String(localized: "A clear day")))
+                    .font(.allo(size: 15, weight: .heavy))
+                    .lineLimit(1)
+                Text(lockSubtitle)
+                    .font(.allo(size: 12, weight: .semibold).monospacedDigit())
+                    .opacity(0.75)
+                    .lineLimit(1)
             }
             Spacer(minLength: 0)
         }
-        .containerBackground(for: .widget) { StickerTone.indigo.fill }
+        .containerBackground(for: .widget) { Color.clear }
     }
-}
 
-/// The yellow owl inside a ring that fills as the day gets done.
-struct OwlRing: View {
-    let progress: Double
-    let happy: Bool
-    let size: CGFloat
-
-    var body: some View {
-        ZStack {
-            Circle().stroke(.white.opacity(0.14), lineWidth: size * 0.1)
-            Circle()
-                .trim(from: 0, to: max(0.001, progress))
-                .stroke(StickerTone.yellow.fill, style: StrokeStyle(lineWidth: size * 0.1, lineCap: .round))
-                .rotationEffect(.degrees(-90))
-                .opacity(progress > 0 ? 1 : 0)
-                .widgetAccentable()
-            Image(happy ? "OwlHappy" : "Owl")
-                .resizable()
-                .scaledToFit()
-                .frame(width: size * 0.52)
+    private var lockSubtitle: String {
+        if let time = entry.next?.time, !entry.allDone {
+            return time.formatted(date: .omitted, time: .shortened) + " · " + String(localized: "\(entry.done) of \(entry.total)")
         }
-        .frame(width: size, height: size)
+        return String(localized: "\(entry.done) of \(entry.total) done")
     }
 }
 
-struct DonePill: View {
-    let text: String
+// MARK: - My Day (large): the whole day on one widget
+
+struct DayWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "SovaDay", provider: DayProvider()) { entry in
+            DayWidgetView(entry: entry)
+        }
+        .configurationDisplayName("My Day")
+        .description("Your whole day: the owl, your week, what's next and your rituals. Tick things off right here.")
+        .supportedFamilies([.systemLarge])
+        .contentMarginsDisabled()
+    }
+}
+
+struct DayWidgetView: View {
+    let entry: DayEntry
+    @Environment(\.widgetIsFullColor) private var fullColor
+
+    private var maxRows: Int { entry.rituals.isEmpty ? 4 : 3 }
 
     var body: some View {
-        Text(text)
-            .font(.allo(size: 13, weight: .heavy))
-            .foregroundStyle(StickerTone.yellow.deep)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(StickerTone.yellow.fill, in: .capsule)
-            .rotationEffect(.degrees(-4))
-            .lineLimit(1)
+        VStack(spacing: 0) {
+            stage
+            list
+        }
+        .containerBackground(for: .widget) { Color.canvas }
+    }
+
+    // The indigo stage up top, with soft round bottom corners like a sticker.
+    private var stage: some View {
+        HStack(alignment: .center, spacing: 16) {
+            OwlRing(progress: entry.progress, happy: entry.allDone, size: 108)
+
+            VStack(alignment: .leading, spacing: 0) {
+                WidgetCaps(entry.date.formatted(.dateTime.weekday(.wide).day().month(.abbreviated)), size: 10)
+                Text(entry.allDone ? String(localized: "Day done!") : entry.greeting)
+                    .font(.allo(size: 22, weight: .heavy))
+                    .tracking(-0.7)
+                    .foregroundStyle(entry.allDone ? StickerTone.yellow.fill : .white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
+                    .padding(.top, 4)
+                HStack(spacing: 6) {
+                    StickerPill(text: entry.total == 0 ? String(localized: "A clear day")
+                                                       : String(localized: "\(entry.done) of \(entry.total) done"),
+                                tone: entry.allDone ? .mint : .yellow, tilt: -3, size: 12)
+                    if entry.streak > 1 {
+                        StickerPill(text: String(localized: "\(entry.streak) days"), tone: .pink,
+                                    symbol: "flame.fill", tilt: 4, size: 11)
+                    }
+                }
+                .padding(.top, 9)
+                Spacer(minLength: 8)
+                WeekBars(week: entry.week, today: entry.progress, height: 22)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 18)
+        .padding(.top, 18)
+        .padding(.bottom, 16)
+        .frame(maxWidth: .infinity)
+        .frame(height: 164)
+        .background {
+            UnevenRoundedRectangle(bottomLeadingRadius: 26, bottomTrailingRadius: 26, style: .continuous)
+                .fill(fullColor ? AnyShapeStyle(StickerTone.indigo.fill) : AnyShapeStyle(Color.primary.opacity(0.1)))
+                .overlay {
+                    if fullColor {
+                        UnevenRoundedRectangle(bottomLeadingRadius: 26, bottomTrailingRadius: 26, style: .continuous)
+                            .fill(RadialGradient(colors: [Color.white.opacity(0.14), .clear],
+                                                 center: UnitPoint(x: 0.15, y: -0.2), startRadius: 0, endRadius: 240))
+                    }
+                }
+                .overlay {
+                    GeometryReader { geo in
+                        WidgetSparkle(tone: .pink, size: 13).position(x: geo.size.width - 22, y: 26)
+                        WidgetSparkle(tone: .yellow, size: 9).position(x: geo.size.width - 46, y: 56)
+                        WidgetSparkle(tone: .mint, size: 10).position(x: 128, y: geo.size.height - 14)
+                    }
+                }
+        }
+    }
+
+    private var list: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .firstTextBaseline) {
+                WidgetCaps(String(localized: "Up next"), color: Color.inkSecondary, size: 10)
+                Spacer()
+                if entry.openTasks > 0 {
+                    WidgetCaps(String(localized: "\(entry.openTasks) left"), color: Color.inkTertiary, size: 10)
+                }
+            }
+            .padding(.bottom, 4)
+
+            if entry.tasks.isEmpty {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(StickerTone.orange.fill)
+                        .widgetAccentable()
+                    Text(entry.allDone ? String(localized: "Everything's done. Go enjoy your evening.")
+                                       : String(localized: "No tasks today. Add one in Sova."))
+                        .font(.allo(size: 14, weight: .bold))
+                        .foregroundStyle(Color.inkSecondary)
+                        .lineLimit(2)
+                }
+                .frame(height: 34)
+            } else {
+                ForEach(entry.tasks.prefix(maxRows)) { task in
+                    TaskLine(task: task)
+                }
+            }
+
+            Spacer(minLength: 6)
+
+            if !entry.rituals.isEmpty {
+                HStack(alignment: .center, spacing: 9) {
+                    ForEach(entry.rituals.prefix(6)) { item in
+                        RitualDot(item: item, size: 36)
+                    }
+                    Spacer(minLength: 4)
+                    VStack(alignment: .trailing, spacing: 1) {
+                        WidgetCaps(String(localized: "Rituals"), color: Color.inkTertiary, size: 9)
+                        Text("\(entry.ritualsDone)/\(entry.rituals.count)")
+                            .font(.allo(size: 15, weight: .heavy).monospacedDigit())
+                            .foregroundStyle(Color.ink)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 16)
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 
@@ -172,76 +345,120 @@ struct RitualsWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: DayEntry
 
+    private var isLarge: Bool { family == .systemLarge }
+
     var body: some View {
-        let items = Array(entry.rituals.prefix(family == .systemLarge ? 10 : 4))
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("RITUALS")
-                        .font(.allo(size: 11, weight: .heavy))
-                        .tracking(1.4)
-                        .foregroundStyle(Color.inkSecondary)
+        let items = Array(entry.rituals.prefix(isLarge ? 9 : 4))
+        let allDone = !entry.rituals.isEmpty && entry.ritualsDone == entry.rituals.count
+        VStack(alignment: .leading, spacing: isLarge ? 14 : 10) {
+            HStack(alignment: .center, spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    WidgetCaps(String(localized: "Rituals"), color: Color.inkSecondary, size: 10)
                     Text(items.isEmpty ? String(localized: "Nothing today")
-                         : String(localized: "\(entry.ritualsDone) of \(entry.rituals.count) done"))
-                        .font(.allo(size: 18, weight: .heavy))
-                        .tracking(-0.4)
+                         : allDone ? String(localized: "All kept today!")
+                         : String(localized: "\(entry.ritualsDone) of \(entry.rituals.count) kept"))
+                        .font(.allo(size: isLarge ? 21 : 18, weight: .heavy))
+                        .tracking(-0.5)
                         .foregroundStyle(Color.ink)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
-                Spacer()
-                Image(entry.ritualsDone == entry.rituals.count && !items.isEmpty ? "OwlHappy" : "Owl")
+                Spacer(minLength: 6)
+                if entry.streak > 1 {
+                    StickerPill(text: "\(entry.streak)", tone: .pink, symbol: "flame.fill", tilt: 4, size: 11)
+                }
+                Image(allDone ? "OwlHappy" : "Owl")
                     .resizable()
+                    .widgetAccentedRenderingMode(.accentedDesaturated)
                     .scaledToFit()
-                    .frame(height: 40)
+                    .frame(height: isLarge ? 46 : 36)
                     .rotationEffect(.degrees(6))
+                    .accessibilityHidden(true)
             }
+
             if items.isEmpty {
-                Text("A rest day. The owl approves. 🦉")
-                    .font(.allo(size: 14, weight: .bold))
-                    .foregroundStyle(Color.inkSecondary)
-            } else {
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
-                    ForEach(items) { item in
-                        Button(intent: ToggleRitualIntent(ritual: item.entity)) {
-                            RitualPill(item: item)
+                VStack(spacing: 6) {
+                    Spacer(minLength: 0)
+                    Text("A rest day. The owl approves.")
+                        .font(.allo(size: 15, weight: .heavy))
+                        .foregroundStyle(Color.inkSecondary)
+                    Text("Add rituals in Sova to tick them off here.")
+                        .font(.allo(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.inkTertiary)
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity)
+            } else if isLarge {
+                Grid(horizontalSpacing: 9, verticalSpacing: 9) {
+                    ForEach(0..<3, id: \.self) { row in
+                        GridRow {
+                            ForEach(0..<3, id: \.self) { column in
+                                let index = row * 3 + column
+                                if index < items.count {
+                                    RitualTile(item: items[index], tilt: tilt(index), titleSize: 13)
+                                } else {
+                                    Color.clear
+                                }
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
                 }
+                .frame(maxHeight: .infinity)
+                ProgressSegments(done: entry.ritualsDone, total: entry.rituals.count,
+                                 fill: StickerTone.mint.fill, track: Color.ink.opacity(0.07), height: 6)
+            } else {
+                HStack(spacing: 8) {
+                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                        RitualTile(item: item, tilt: tilt(index), titleSize: 12)
+                    }
+                    ForEach(items.count..<4, id: \.self) { _ in Color.clear }
+                }
+                .frame(maxHeight: .infinity)
             }
-            Spacer(minLength: 0)
         }
         .containerBackground(for: .widget) { Color.canvas }
     }
+
+    /// Stickers sit a little crooked, alternating.
+    private func tilt(_ index: Int) -> Double {
+        [-2, 1.5, -1, 2][index % 4]
+    }
 }
 
-struct RitualPill: View {
-    let item: RitualItem
+// MARK: - Previews
 
-    var body: some View {
-        let ink = item.tone == .indigo ? Color.white : item.tone.deep
-        HStack(spacing: 7) {
-            Image(systemName: item.symbol)
-                .font(.system(size: 13, weight: .bold))
-            Text(item.title)
-                .font(.allo(size: 13, weight: .heavy))
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            Spacer(minLength: 0)
-            ZStack {
-                Circle().strokeBorder(ink, lineWidth: 2)
-                if item.done {
-                    Circle().fill(ink)
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 9, weight: .black))
-                        .foregroundStyle(item.tone.fill)
-                }
-            }
-            .frame(width: 20, height: 20)
-        }
-        .foregroundStyle(ink)
-        .padding(.horizontal, 10)
-        .frame(height: 40)
-        .background(item.tone.fill, in: .rect(cornerRadius: 14, style: .continuous))
-        .opacity(item.done ? 0.75 : 1)
-    }
+#Preview("Today small", as: .systemSmall) {
+    TodayWidget()
+} timeline: {
+    DayEntry.placeholder
+}
+
+#Preview("Today medium", as: .systemMedium) {
+    TodayWidget()
+} timeline: {
+    DayEntry.placeholder
+}
+
+#Preview("My Day", as: .systemLarge) {
+    DayWidget()
+} timeline: {
+    DayEntry.placeholder
+}
+
+#Preview("Rituals medium", as: .systemMedium) {
+    RitualsWidget()
+} timeline: {
+    DayEntry.placeholder
+}
+
+#Preview("Rituals large", as: .systemLarge) {
+    RitualsWidget()
+} timeline: {
+    DayEntry.placeholder
+}
+
+#Preview("Lock Screen", as: .accessoryRectangular) {
+    TodayWidget()
+} timeline: {
+    DayEntry.placeholder
 }

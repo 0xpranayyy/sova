@@ -63,18 +63,8 @@ enum TaskActions {
         })
     }
 
-    /// Creates the next occurrence of a repeating task that was just finished.
     private static func spawnNext(after task: TaskItem) -> TaskItem? {
-        let rule = task.repeatRule
-        guard rule != .none, let due = task.dueDate, let nextDue = rule.next(after: due),
-              let context = task.modelContext else { return nil }
-        let next = TaskItem(title: task.title, notes: task.notes, dueDate: nextDue, hasTime: task.hasTime,
-                            priority: task.priority, accent: task.accent, goal: task.goal)
-        next.repeatRaw = task.repeatRaw
-        task.repeatRaw = RepeatRule.none.rawValue
-        context.insert(next)
-        TaskAlerts.schedule(next)
-        return next
+        task.spawnNextOccurrence()
     }
 
     static func delete(_ task: TaskItem, context: ModelContext, router: AppRouter?) {
