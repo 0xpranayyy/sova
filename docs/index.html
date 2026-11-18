@@ -90,6 +90,7 @@ a{color:inherit;text-decoration:none}
 
 /* ---------- hero ---------- */
 .hero{margin-top:16px;background:var(--yellow);color:#2B1677;padding:clamp(48px,7vw,96px) clamp(24px,5vw,72px) 0}
+.hero-grid>div:first-child{position:relative;z-index:3}
 .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:end}
 .hero .label{background:#2B1677;color:var(--yellow)}
 .hero h1{margin:26px 0 22px}
@@ -278,15 +279,122 @@ footer .brand{color:var(--ink)}
 footer nav{display:flex;gap:22px;margin-left:auto}
 footer a:hover{color:var(--ink)}
 
+/* ===================== v2: premium layer ===================== */
+body{padding-top:84px;overflow-x:clip}
+html{overflow-x:clip}
+.nav{position:fixed;left:50%;top:14px;transform:translateX(-50%);width:min(1120px,calc(100% - 24px));border-radius:999px;border:1px solid var(--hair);box-shadow:0 10px 40px -18px rgba(20,10,60,.35);padding:8px 8px 8px 16px;transition:top .35s var(--ease),padding .35s,box-shadow .35s}
+.nav .wrap{width:100%}
+.nav.scrolled{top:8px;box-shadow:0 14px 50px -16px rgba(20,10,60,.45)}
+.nav .btn-dark{padding:11px 18px}
+
+/* metal phone */
+.phone{padding:9px;background:linear-gradient(150deg,#5b5674 0%,#1a1630 22%,#0b0918 55%,#2d2846 100%);border-radius:58px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.14),inset 0 0 0 5px #0b0918,0 70px 110px -40px rgba(20,10,60,.55),0 30px 50px -28px rgba(20,10,60,.35)}
+.phone::before,.phone::after{content:"";position:absolute;width:4px;border-radius:3px;background:linear-gradient(#4a4466,#1a1630)}
+.phone::before{left:-3px;top:22%;height:9%;box-shadow:0 70px 0 #2a2540}
+.phone::after{right:-3px;top:28%;height:14%}
+.phone .glare{position:absolute;inset:9px;border-radius:48px;background:linear-gradient(118deg,rgba(255,255,255,.22) 0%,rgba(255,255,255,0) 32%);pointer-events:none;mix-blend-mode:screen}
+.phone img{border-radius:48px}
+
+/* hero v2 */
+.hero{overflow:clip;isolation:isolate}
+.hero-rays{position:absolute;inset:0;overflow:hidden;border-radius:var(--r-xl);z-index:-1}
+.hero-rays svg{position:absolute;width:1700px;height:1700px;right:-560px;top:-520px;animation:spin 120s linear infinite;opacity:.9}
+.word{display:inline-block;opacity:0;transform:translateY(.45em) rotate(4deg);animation:rise .9s cubic-bezier(.2,.9,.2,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.fan{position:relative;width:min(100%,560px);height:640px;justify-self:center;align-self:end;transform:translate3d(calc(var(--mx,0)*-10px),calc(var(--my,0)*-8px),0)}
+.fan .phone{position:absolute;bottom:-46px;left:50%;width:min(300px,62vw)}
+.fan .p-left{transform:translateX(-86%) rotate(-9deg) scale(.76);transform-origin:bottom center;filter:saturate(.95)}
+.fan .p-right{transform:translateX(-14%) rotate(9deg) scale(.76);transform-origin:bottom center}
+.fan .p-center{transform:translateX(-50%) translateY(calc(var(--my,0)*6px)) rotate(calc(var(--mx,0)*2deg));z-index:2}
+.fan .hero-owl{position:absolute;left:50%;bottom:560px;margin-left:-150px;z-index:3;top:auto}
+.fan .bubble{left:auto;right:12%;top:auto;bottom:618px;z-index:4}
+.fan .stk{z-index:5;transform:translate3d(calc(var(--mx,0)*14px),calc(var(--my,0)*12px),0)}
+@media (max-width:960px){
+  .fan{height:560px;margin-top:10px}
+  .fan .p-left{transform:translateX(-94%) rotate(-10deg) scale(.74)}
+  .fan .p-right{transform:translateX(-6%) rotate(10deg) scale(.74)}
+  .fan .hero-owl{bottom:485px;margin-left:-125px}
+  .fan .bubble{bottom:540px}
+}
+@media (max-width:600px){
+  .fan{height:470px}
+  .fan .phone{width:230px}
+  .fan .hero-owl{bottom:405px;margin-left:-104px}
+  .fan .hero-owl svg{width:92px;height:auto}
+  .fan .bubble{bottom:452px;right:4%}
+  .fan .stk.mint{right:2%!important;top:150px!important}
+}
+
+/* story (sticky phone) */
+.story{overflow:clip;margin-top:24px;transition:background-color .8s ease,color .8s ease;background:var(--s-bg);color:var(--s-ink)}
+.story[data-theme=mint]{--s-bg:#4DF2B0;--s-ink:#0B5A3C;--s-chip:#0B5A3C;--s-chip-ink:#4DF2B0}
+.story[data-theme=yellow]{--s-bg:#FFE94D;--s-ink:#2B1677;--s-chip:#2B1677;--s-chip-ink:#FFE94D}
+.story[data-theme=lilac]{--s-bg:#D9CEFF;--s-ink:#2B1677;--s-chip:#4423B8;--s-chip-ink:#fff}
+.story[data-theme=pink]{--s-bg:#FF5C93;--s-ink:#fff;--s-chip:#15102E;--s-chip-ink:#FF5C93}
+.story-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:0 clamp(24px,5vw,72px)}
+.step{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:60px 0;opacity:.28;transition:opacity .6s}
+.step.active{opacity:1}
+.step .label{background:var(--s-chip);color:var(--s-chip-ink);align-self:flex-start;transition:background .8s,color .8s}
+.step h2{margin:22px 0 18px}
+.step .lead{max-width:470px;opacity:.9}
+.step .num{font-weight:900;font-size:15px;letter-spacing:.14em;opacity:.55;margin-bottom:10px}
+.story-phone{position:relative}
+.story-phone .sticky{position:sticky;top:calc(50vh - 330px);height:680px;display:grid;place-items:center}
+.story-phone .phone{width:310px}
+.story-phone .screen{position:absolute;inset:9px;border-radius:48px;width:calc(100% - 18px);opacity:0;transform:scale(1.03);transition:opacity .6s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
+.story-phone .screen.on{opacity:1;transform:none}
+.story-phone .base{visibility:hidden}
+.story .points li{font-size:17px}
+.story .dot{background:var(--s-chip);color:var(--s-chip-ink);transition:background .8s,color .8s}
+.inline-phone{display:none}
+@media (max-width:900px){
+  .story-grid{grid-template-columns:1fr}
+  .story-phone{display:none}
+  .step{min-height:auto;opacity:1;padding:56px 0}
+  .inline-phone{display:block;margin:34px auto 0}
+}
+.ring-demo{display:flex;align-items:center;gap:18px;margin-top:28px}
+.ring-demo .ring{width:96px;height:96px;position:relative;flex:none}
+.ring-demo svg.r{position:absolute;inset:0;transform:rotate(-90deg)}
+.ring-demo .ring .owl{position:absolute;inset:22px}
+.ring-demo .r-fill{stroke-dasharray:264;stroke-dashoffset:264;transition:stroke-dashoffset 1.6s cubic-bezier(.2,.8,.2,1) .2s}
+.step.active .r-fill{stroke-dashoffset:66}
+.ring-demo b{display:block;font-weight:900;font-size:30px;letter-spacing:-.03em;line-height:1}
+.ring-demo span{font-weight:700;opacity:.75}
+.step .bars .bar{background:rgba(255,255,255,.2)}
+.step.active .bar i span.on::after{transform:scaleX(1)}
+
+/* pricing toggle */
+.toggle{display:inline-flex;background:var(--well);border:1.5px solid var(--hair);border-radius:999px;padding:5px;margin:0 auto 26px;gap:4px}
+.toggle button{font:inherit;font-weight:900;font-size:15px;border:0;background:transparent;color:var(--ink2);padding:10px 18px;border-radius:999px;cursor:pointer;transition:background .3s,color .3s}
+.toggle button.on{background:var(--ink);color:var(--canvas)}
+.toggle .save{background:var(--mint);color:var(--mD);font-size:12px;padding:3px 8px;border-radius:999px;margin-left:6px}
+.toggle-wrap{display:flex;justify-content:center}
+.price .amt{display:inline-block;transition:transform .35s var(--ease),opacity .2s}
+.price.swap .amt{transform:translateY(-8px);opacity:0}
+
+/* cards hover */
+.card{transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s}
+.card:hover{transform:translateY(-6px) rotate(-.4deg);box-shadow:0 30px 60px -30px rgba(20,10,60,.45)}
+
+/* giant footer */
+.giant{position:relative;margin-top:clamp(60px,8vw,110px);overflow:hidden;padding-top:70px}
+.giant h2{font-weight:900;font-size:clamp(120px,27vw,400px);letter-spacing:-.07em;line-height:.78;text-align:center;color:var(--lilac);user-select:none}
+@media (prefers-color-scheme:dark){.giant h2{color:#2B1677}}
+.giant .owl{position:absolute;left:50%;top:0;margin-left:clamp(40px,10vw,150px);width:clamp(90px,12vw,150px);height:auto;animation:peek 4s ease-in-out infinite}
+@keyframes peek{0%,100%{transform:translateY(16px) rotate(6deg)}50%{transform:translateY(0) rotate(-4deg)}}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
+  .word{opacity:1;transform:none}
+  .step{opacity:1}
 }
 </style>
 </head>
 <body>
 
-<header class="nav">
+<header class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="#top"><img src="assets/icon.png" alt="" width="38" height="38">Sova</a>
     <nav class="nav-links" aria-label="Sections">
@@ -303,13 +411,14 @@ footer a:hover{color:var(--ink)}
   <!-- HERO -->
   <section class="wrap">
     <div class="panel hero">
+      <div class="hero-rays" aria-hidden="true"><svg viewBox="0 0 2000 2000"><path d="M2000.00 1000.00 L1593.89 1085.39 L1959.49 1281.73 L1545.78 1249.25 L1841.25 1540.64 L1453.45 1392.92 L1654.86 1755.75 L1324.38 1504.75 L1415.42 1909.63 L1169.04 1575.70 L1142.31 1989.82 L1000.00 1600.00 L857.69 1989.82 L830.96 1575.70 L584.58 1909.63 L675.62 1504.75 L345.14 1755.75 L546.55 1392.92 L158.75 1540.64 L454.22 1249.25 L40.51 1281.73 L406.11 1085.39 L0.00 1000.00 L406.11 914.61 L40.51 718.27 L454.22 750.75 L158.75 459.36 L546.55 607.08 L345.14 244.25 L675.62 495.25 L584.58 90.37 L830.96 424.30 L857.69 10.18 L1000.00 400.00 L1142.31 10.18 L1169.04 424.30 L1415.42 90.37 L1324.38 495.25 L1654.86 244.25 L1453.45 607.08 L1841.25 459.36 L1545.78 750.75 L1959.49 718.27 L1593.89 914.61Z" fill="#FFF2A0"/></svg></div>
       <svg class="spark" style="top:70px;right:46%" width="40" height="40" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FF5C93"/></svg>
-      <svg class="spark" style="top:40%;right:6%" width="30" height="30" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FFFFFF"/></svg>
-      <svg class="spark" style="bottom:30%;left:46%" width="18" height="18" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#2B1677"/></svg>
+      <svg class="spark" style="top:40%;right:4%" width="30" height="30" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FFFFFF"/></svg>
+      <svg class="spark" style="bottom:34%;left:46%" width="18" height="18" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#2B1677"/></svg>
       <div class="hero-grid">
         <div>
           <span class="label"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg>New · for iPhone</span>
-          <h1 class="h-xl">Your day, beautifully done.</h1>
+          <h1 class="h-xl" aria-label="Your day, beautifully done."><span class="word" style="animation-delay:.05s">Your</span> <span class="word" style="animation-delay:.14s">day,</span> <span class="word" style="animation-delay:.23s">beautifully</span> <span class="word" style="animation-delay:.32s">done.</span></h1>
           <p class="lead">Tasks, daily habits and big goals in one happy app, with a little owl cheering you on every step of the way.</p>
           <div class="hero-cta">
             <a class="btn btn-big js-store" href="#get"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>Download on the App Store</a>
@@ -321,8 +430,11 @@ footer a:hover{color:var(--ink)}
             <span><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>Private by design</span>
           </div>
         </div>
-        <div class="hero-stage">
-          <div class="hero-owl"><svg class="owl" viewBox="-14 -6 128 136" width="120" height="128" aria-hidden="true">
+        <div class="fan" id="fan">
+          <div class="phone p-left"><img src="assets/screens/rituals.webp" alt="Rituals screen" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
+          <div class="phone p-right"><img src="assets/screens/goals.webp" alt="Goals screen" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
+          <div class="phone p-center"><img src="assets/screens/today.webp" alt="Sova's Today screen with the owl in a progress ring" fetchpriority="high" width="760" height="1670"><span class="glare"></span></div>
+          <div class="hero-owl"><svg class="owl track" viewBox="-14 -6 128 136" width="120" height="128" aria-hidden="true">
 <ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
 <path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
 <path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
@@ -333,9 +445,8 @@ footer a:hover{color:var(--ink)}
 <circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
 <path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg></div>
           <div class="bubble">Morning, Alex! ☀️</div>
-          <div class="phone "><img src="assets/screens/today.webp" alt="Sova's Today screen with the owl in a progress ring" fetchpriority="high" width="760" height="1670"></div>
-          <span class="stk mint" style="top:300px;right:-34px;rotate:8deg">🔥 12-day streak</span>
-          <span class="stk pink" style="bottom:120px;left:-48px;rotate:-7deg;animation-delay:-2s">3 of 4 done</span>
+          <span class="stk mint" style="top:190px;right:6%;rotate:8deg">🔥 12-day streak</span>
+          <span class="stk pink" style="bottom:200px;left:-10px;rotate:-7deg;animation-delay:-2s">3 of 4 done</span>
         </div>
       </div>
     </div>
@@ -353,69 +464,83 @@ footer a:hover{color:var(--ink)}
     </div>
   </div>
 
-  <!-- CAPTURE -->
+  <!-- STORY -->
   <section class="wrap" id="features">
-    <div class="panel feature f-mint reveal">
-      <svg class="spark" style="top:60px;right:8%" width="34" height="34" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FFFFFF"/></svg>
-      <div class="feature-grid">
-        <div class="feature-copy">
-          <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg>Quick capture</span>
-          <h2 class="h-lg">Just type it. Sova gets it.</h2>
-          <p class="lead">Write the way you talk. Sova picks out the day, the time, repeats and priority, and sets everything up for you.</p>
-          <div class="capture" aria-label="Example: Call Mom tomorrow 6pm, high priority">
-            <small>NEW TASK</small>
-            <div class="line"><span id="typed"></span><span class="caret"></span></div>
-            <div class="chips" id="chips"></div>
+    <div class="panel story" id="story" data-theme="mint">
+      <svg class="spark" style="top:60px;right:6%" width="30" height="30" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FFFFFF"/></svg>
+      <div class="story-grid">
+        <div class="story-steps">
+          <article class="step" data-screen="capture" data-theme="mint">
+            <div class="num">01</div>
+            <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></svg>Quick capture</span>
+            <h2 class="h-lg">Just type it. Sova gets it.</h2>
+            <p class="lead">Write the way you talk. Sova picks out the day, the time, repeats and priority, and sets everything up for you.</p>
+            <div class="capture" aria-label="Example: Call Mom tomorrow 6pm, high priority">
+              <small>NEW TASK</small>
+              <div class="line"><span id="typed"></span><span class="caret"></span></div>
+              <div class="chips" id="chips"></div>
+            </div>
+            <div class="phone inline-phone"><img src="assets/screens/capture.webp" alt="Quick capture highlighting tomorrow 6pm" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
+          </article>
+          <article class="step" data-screen="today" data-theme="yellow">
+            <div class="num">02</div>
+            <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg>Today</span>
+            <h2 class="h-lg">Your whole day, in one ring.</h2>
+            <p class="lead">Only what matters today. Up Next tells you the one thing to do now, and the ring fills as you go.</p>
+            <div class="ring-demo" aria-hidden="true">
+              <div class="ring">
+                <svg class="r" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" stroke="rgba(43,22,119,.14)" stroke-width="12" fill="none"/><circle class="r-fill" cx="50" cy="50" r="42" stroke="#2B1677" stroke-width="12" fill="none" stroke-linecap="round"/></svg>
+                <svg class="owl" viewBox="-14 -6 128 136" width="52" height="55" aria-hidden="true">
+<ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
+<path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" />
+<path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#2B1677" />
+<path d="M10 0 Q30 21.6 50 18.36 Q70 21.6 90 0 C110 45.36 104 116 50 116 C-4 116 -10 45.36 10 0Z" fill="#2B1677" />
+<ellipse cx="50" cy="90" rx="25" ry="22" fill="#4A34A8"/>
+<path d="M40 84 q5 4 10 0 q5 4 10 0 M43 95 q4 3.5 7 0 q3.5 3.5 7 0" stroke="#2B1677" stroke-opacity=".35" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+<g class="eyes"><circle cx="30" cy="47" r="17" fill="#FFE94D"/><path d="M21 51 Q30 39 39 51" stroke="#2B1677" stroke-width="5.5" fill="none" stroke-linecap="round"/><circle cx="70" cy="47" r="17" fill="#FFE94D"/><path d="M61 51 Q70 39 79 51" stroke="#2B1677" stroke-width="5.5" fill="none" stroke-linecap="round"/></g>
+<circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
+<path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg>
+              </div>
+              <div><b>3 of 4 done</b><span>Swipe the rest to tomorrow</span></div>
+            </div>
+            <div class="phone inline-phone"><img src="assets/screens/today.webp" alt="Today screen" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
+          </article>
+          <article class="step" data-screen="rituals" data-theme="lilac">
+            <div class="num">03</div>
+            <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>Rituals</span>
+            <h2 class="h-lg">Rituals that actually stick.</h2>
+            <p class="lead">Morning walks, reading, water. Pick the days, tick them off, and watch your week fill up with sunshine.</p>
+            <ul class="points">
+              <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg></span>Streaks that make you want to keep going</li>
+              <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg></span>Grouped by morning, afternoon and evening</li>
+              <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>A happy little wiggle every time you tick</li>
+            </ul>
+            <div class="phone inline-phone"><img src="assets/screens/rituals.webp" alt="Rituals with a 12 day streak" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
+          </article>
+          <article class="step" data-screen="goals" data-theme="pink">
+            <div class="num">04</div>
+            <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>Goals</span>
+            <h2 class="h-lg">Big goals, small steps.</h2>
+            <p class="lead">Break a big dream into steps you can tick off. Every step fills the bar, and the owl is proud of you.</p>
+            <div class="bars">
+              <div class="bar"><div><span>Run a half marathon</span><span>80%</span></div><i><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></i></div>
+              <div class="bar"><div><span>Launch my side project</span><span>40%</span></div><i><span class="on"></span><span class="on"></span><span></span><span></span><span></span></i></div>
+              <div class="bar"><div><span>Read 24 books</span><span>60%</span></div><i><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></i></div>
+            </div>
+            <div class="phone inline-phone"><img src="assets/screens/goals.webp" alt="Goals with progress" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
+          </article>
+        </div>
+        <div class="story-phone" aria-hidden="true">
+          <div class="sticky">
+            <div class="phone">
+              <img class="base" src="assets/screens/today.webp" alt="" width="760" height="1670">
+              <img class="screen on" data-screen="capture" src="assets/screens/capture.webp" alt="" width="760" height="1670">
+              <img class="screen" data-screen="today" src="assets/screens/today.webp" alt="" width="760" height="1670">
+              <img class="screen" data-screen="rituals" src="assets/screens/rituals.webp" alt="" width="760" height="1670">
+              <img class="screen" data-screen="goals" src="assets/screens/goals.webp" alt="" width="760" height="1670">
+              <span class="glare"></span>
+            </div>
           </div>
-        </div>
-        <div class="stage"><div class="phone "><img src="assets/screens/capture.webp" alt="Quick capture highlighting tomorrow 6pm" loading="lazy" width="760" height="1670"></div>
-          <span class="stk yellow" style="top:46%;right:-40px;rotate:7deg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4" /><path d="M16 2v4" /><rect width="18" height="18" x="3" y="4" rx="2" /><path d="M3 10h18" /></svg>Thu, 6:00 PM</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- RITUALS -->
-  <section class="wrap">
-    <div class="panel feature f-lilac flip reveal">
-      <div class="feature-grid">
-        <div class="stage"><div class="phone "><img src="assets/screens/rituals.webp" alt="Rituals with a week view and a 12 day streak" loading="lazy" width="760" height="1670"></div>
-          <div class="burst" style="top:-40px;right:-60px">
-            <svg viewBox="0 0 180 180"><path d="M180.00 90.00 L165.83 103.37 L174.57 120.78 L156.68 128.50 L158.94 147.85 L139.49 148.99 L135.00 167.94 L116.34 162.36 L105.63 178.63 L90.00 167.00 L74.37 178.63 L63.66 162.36 L45.00 167.94 L40.51 148.99 L21.06 147.85 L23.32 128.50 L5.43 120.78 L14.17 103.37 L0.00 90.00 L14.17 76.63 L5.43 59.22 L23.32 51.50 L21.06 32.15 L40.51 31.01 L45.00 12.06 L63.66 17.64 L74.37 1.37 L90.00 13.00 L105.63 1.37 L116.34 17.64 L135.00 12.06 L139.49 31.01 L158.94 32.15 L156.68 51.50 L174.57 59.22 L165.83 76.63Z" fill="#4DF2B0" stroke="#0B5A3C" stroke-width="5" stroke-linejoin="round"/></svg>
-            <b>12<small>DAY STREAK</small></b>
-          </div>
-        </div>
-        <div class="feature-copy">
-          <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></svg>Rituals</span>
-          <h2 class="h-lg">Rituals that actually stick.</h2>
-          <p class="lead">Morning walks, reading, water. Pick the days, tick them off, and watch your week fill up with sunshine.</p>
-          <ul class="points">
-            <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg></span>Streaks that make you want to keep going</li>
-            <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg></span>Grouped by morning, afternoon and evening</li>
-            <li><span class="dot"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>A happy little wiggle every time you tick</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- GOALS -->
-  <section class="wrap">
-    <div class="panel feature f-pink reveal">
-      <svg class="spark" style="top:70px;right:44%" width="30" height="30" viewBox="-50 -50 100 100" aria-hidden="true"><path d="M0 -50 C6 -14 14 -6 50 0 C14 6 6 14 0 50 C-6 14 -14 6 -50 0 C-14 -6 -6 -14 0 -50Z" fill="#FFE94D"/></svg>
-      <div class="feature-grid">
-        <div class="feature-copy">
-          <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>Goals</span>
-          <h2 class="h-lg">Big goals, small steps.</h2>
-          <p class="lead">Break a big dream into steps you can tick off. Every step fills the bar, and the owl is proud of you.</p>
-          <div class="bars">
-            <div class="bar"><div><span>Run a half marathon</span><span>80%</span></div><i><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></i></div>
-            <div class="bar"><div><span>Launch my side project</span><span>40%</span></div><i><span class="on"></span><span class="on"></span><span></span><span></span><span></span></i></div>
-            <div class="bar"><div><span>Read 24 books</span><span>60%</span></div><i><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></i></div>
-          </div>
-        </div>
-        <div class="stage"><div class="phone "><img src="assets/screens/goals.webp" alt="Goals with progress and next steps" loading="lazy" width="760" height="1670"></div>
-          <span class="stk lime" style="bottom:46px;left:-50px;rotate:-8deg"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>Step done</span>
         </div>
       </div>
     </div>
@@ -431,7 +556,7 @@ footer a:hover{color:var(--ink)}
       </div>
       <svg class="moon" style="position:absolute;top:44px;right:56px" width="90" height="90" viewBox="0 0 100 100" aria-hidden="true"><path d="M70 10 A42 42 0 1 0 90 72 A34 34 0 1 1 70 10Z" fill="#FFE94D"/></svg>
       <div class="feature-grid">
-        <div class="stage"><div class="phone "><img src="assets/screens/dark.webp" alt="Sova in dark mode with a yellow night owl" loading="lazy" width="760" height="1670"></div></div>
+        <div class="stage"><div class="phone "><img src="assets/screens/dark.webp" alt="Sova in dark mode with a yellow night owl" loading="lazy" width="760" height="1670"><span class="glare"></span></div></div>
         <div class="feature-copy">
           <span class="label"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>Dark mode</span>
           <h2 class="h-lg">Gorgeous, day and night.</h2>
@@ -532,6 +657,10 @@ footer a:hover{color:var(--ink)}
       <h2 class="h-lg">Free to start. Plus when you're ready.</h2>
       <p class="lead">Everything you need every day is free. Sova Plus unlocks the rest.</p>
     </div>
+    <div class="toggle-wrap reveal"><div class="toggle" role="group" aria-label="Billing period">
+      <button type="button" data-plan="monthly">Monthly</button>
+      <button type="button" data-plan="yearly" class="on">Yearly<span class="save">Save 48%</span></button>
+    </div></div>
     <div class="plans">
       <div class="plan free reveal">
         <h3>Sova</h3>
@@ -558,8 +687,8 @@ footer a:hover{color:var(--ink)}
 <circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
 <path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg></div>
         <h3>Sova <span class="tag">Plus</span></h3>
-        <div class="price">$3.99<small> / month</small></div>
-        <div class="note">or $24.99 / year with a 7-day free trial</div>
+        <div class="price" id="price"><span class="amt" id="amt">$24.99</span><small id="per"> / year</small></div>
+        <div class="note" id="pnote">7-day free trial, then $24.99 a year. That's about $2.08 a month.</div>
         <ul>
           <li><span class="ck"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>Everything in Free</li>
           <li><span class="ck"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span>Unlimited rituals and goals</li>
@@ -576,7 +705,7 @@ footer a:hover{color:var(--ink)}
   <!-- FAQ -->
   <section class="wrap" id="faq">
     <div class="section-head reveal">
-      <div style="display:flex;justify-content:center"><svg class="owl" viewBox="-14 -6 128 136" width="84" height="89" aria-hidden="true">
+      <div style="display:flex;justify-content:center"><svg class="owl track" viewBox="-14 -6 128 136" width="84" height="89" aria-hidden="true">
 <ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
 <path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
 <path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
@@ -624,6 +753,16 @@ footer a:hover{color:var(--ink)}
   </section>
 </main>
 
+<div class="giant" aria-hidden="true"><svg class="owl track" viewBox="-14 -6 128 136" width="150" height="159" aria-hidden="true">
+<ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
+<path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
+<path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
+<path d="M10 0 Q30 21.6 50 18.36 Q70 21.6 90 0 C110 45.36 104 116 50 116 C-4 116 -10 45.36 10 0Z" fill="#2B1677" stroke="#1A0B4F" stroke-width="5" stroke-linejoin="round"/>
+<ellipse cx="50" cy="90" rx="25" ry="22" fill="#4A34A8"/>
+<path d="M40 84 q5 4 10 0 q5 4 10 0 M43 95 q4 3.5 7 0 q3.5 3.5 7 0" stroke="#2B1677" stroke-opacity=".35" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+<g class="eyes"><circle cx="30" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="31.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="34.5" cy="45.5" r="2.8" fill="#FFE94D"/></g><circle cx="70" cy="47" r="17" fill="#FFE94D"/><g class="pupil"><circle cx="71.5" cy="49" r="8.5" fill="#2B1677"/><circle cx="74.5" cy="45.5" r="2.8" fill="#FFE94D"/></g></g>
+<circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
+<path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg><h2>Sova.</h2></div>
 <footer>
   <div class="wrap">
     <a class="brand" href="#top"><img src="assets/icon.png" alt="" width="30" height="30" style="width:30px;height:30px;border-radius:8px">Sova</a>
@@ -680,6 +819,49 @@ else {
 const video = document.getElementById("filmVideo"), wrap = document.getElementById("video");
 document.getElementById("play").addEventListener("click", () => { video.controls = true; video.play(); wrap.classList.add("playing"); });
 video.addEventListener("ended", () => wrap.classList.remove("playing"));
+
+// Floating nav
+const nav = document.getElementById("nav");
+addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 30), { passive: true });
+
+// Hero parallax + owl eyes follow the cursor
+const fan = document.getElementById("fan");
+const pupils = [...document.querySelectorAll(".track .pupil")];
+if (!reduce) addEventListener("pointermove", e => {
+  const mx = e.clientX / innerWidth - .5, my = e.clientY / innerHeight - .5;
+  fan.style.setProperty("--mx", mx.toFixed(3)); fan.style.setProperty("--my", my.toFixed(3));
+  pupils.forEach(p => {
+    const r = p.ownerSVGElement.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height * .38);
+    const d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 300);
+    p.setAttribute("transform", `translate(${(dx / d * 4 * k).toFixed(2)} ${(dy / d * 4 * k).toFixed(2)})`);
+  });
+}, { passive: true });
+
+// Scroll story: the phone screen and colors follow the active step
+const story = document.getElementById("story");
+const steps = [...document.querySelectorAll(".step")];
+const screens = [...document.querySelectorAll(".story-phone .screen")];
+const so = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  steps.forEach(s => s.classList.toggle("active", s === e.target));
+  story.dataset.theme = e.target.dataset.theme;
+  screens.forEach(sc => sc.classList.toggle("on", sc.dataset.screen === e.target.dataset.screen));
+}), { rootMargin: "-45% 0px -45% 0px" });
+steps.forEach(s => so.observe(s));
+steps[0].classList.add("active");
+
+// Pricing toggle
+const priceEl = document.getElementById("price"), amt = document.getElementById("amt"), per = document.getElementById("per"), pnote = document.getElementById("pnote");
+const PLANS = {
+  monthly: ["$3.99", " / month", "Billed monthly. Cancel anytime."],
+  yearly: ["$24.99", " / year", "7-day free trial, then $24.99 a year. That's about $2.08 a month."]
+};
+document.querySelectorAll(".toggle button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".toggle button").forEach(x => x.classList.toggle("on", x === b));
+  priceEl.classList.add("swap");
+  setTimeout(() => { const [a, p, n] = PLANS[b.dataset.plan]; amt.textContent = a; per.textContent = p; pnote.textContent = n; priceEl.classList.remove("swap"); }, 180);
+}));
 </script>
 </body>
 </html>
