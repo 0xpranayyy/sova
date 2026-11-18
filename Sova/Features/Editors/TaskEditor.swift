@@ -90,7 +90,7 @@ struct TaskEditor: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(Color.canvas)
+            .background { CanvasBackground() }
             .navigationTitle(task == nil ? "New Task" : "Edit Task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -1,19 +1,20 @@
 import SwiftUI
 
-// Each step is left-aligned and editorial: a large serif headline, one
-// supporting line, and a single interactive idea.
+
+
 
 private struct StepHeadline: View {
     let text: String
     var index = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 40
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 34
 
     var body: some View {
-        Text(text)
-            .font(.system(size: size, weight: .regular, design: .serif))
-            .tracking(-0.6)
+        Text(text.replacingOccurrences(of: "\n", with: " "))
+            .font(.system(size: size, weight: .bold))
             .foregroundStyle(Color.ink)
+            .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
             .reveal(index)
     }
 }
@@ -26,7 +27,9 @@ private struct StepBody: View {
         Text(text)
             .font(.body)
             .foregroundStyle(Color.inkSecondary)
+            .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
             .reveal(index)
     }
 }
@@ -35,36 +38,62 @@ private struct StepBody: View {
 
 struct HelloStep: View {
     var look: CGSize
-    @ScaledMetric(relativeTo: .largeTitle) private var helloSize: CGFloat = 68
-    @ScaledMetric(relativeTo: .title) private var taglineSize: CGFloat = 32
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 40
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Spacer(minLength: 12)
-            OwlMark(size: 104, look: look)
-                .reveal(0)
-            Spacer().frame(height: 44)
-            Text("Hello.")
-                .font(.system(size: helloSize, weight: .regular, design: .serif))
-                .italic()
-                .tracking(-1.8)
-                .foregroundStyle(Color.ink)
+        ScrollView {
+            VStack(spacing: 0) {
+                OwlMark(size: 96, look: look)
+                    .padding(26)
+                    .glassEffect(.regular, in: .circle)
+                    .padding(.top, 24)
+                    .reveal(0)
+
+                VStack(spacing: 6) {
+                    Text("Welcome to")
+                        .font(.system(size: titleSize, weight: .bold))
+                        .foregroundStyle(Color.ink)
+                    Text("Sova")
+                        .font(.system(size: titleSize, weight: .heavy))
+                        .foregroundStyle(SovaTheme.ember.swatch)
+                }
+                .padding(.top, 28)
                 .reveal(1)
-            Text("A calmer way to\nrun your days.")
-                .font(.system(size: taglineSize, weight: .regular, design: .serif))
-                .tracking(-0.4)
-                .foregroundStyle(Color.inkSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .reveal(2)
-            Text("Tasks, routines and goals, kept in one quiet place.")
-                .font(.body)
-                .foregroundStyle(Color.inkSecondary)
-                .padding(.top, 18)
-                .reveal(3)
-            Spacer(minLength: 24)
+
+                VStack(alignment: .leading, spacing: 22) {
+                    feature("checklist", .ember, "Tasks for today",
+                            "Capture anything in plain words. Swipe it done.")
+                        .reveal(2)
+                    feature("repeat", .lagoon, "Routines for always",
+                            "Small rituals, with streaks that keep you going.")
+                        .reveal(3)
+                    feature("flag.checkered", .plum, "Goals for someday",
+                            "Big ambitions, broken into finishable steps.")
+                        .reveal(4)
+                }
+                .padding(.top, 40)
+                .padding(.horizontal, 8)
+            }
+            .padding(.horizontal, 28)
+            .padding(.bottom, 24)
         }
-        .padding(.horizontal, 28)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollIndicators(.hidden)
+    }
+
+    private func feature(_ symbol: String, _ accent: Accent, _ title: String, _ detail: String) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: symbol)
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(accent.gradient)
+                .frame(width: 40)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.headline).foregroundStyle(Color.ink)
+                Text(detail).font(.subheadline).foregroundStyle(Color.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -193,14 +222,12 @@ private struct PillarCard<Content: View>: View {
             HStack(spacing: 6) {
                 Circle().fill(accent.color).frame(width: 7, height: 7)
                 Text(label)
-                    .font(.caption.weight(.semibold))
-                    .textCase(.uppercase)
-                    .tracking(1.1)
+                    .font(.subheadline.weight(.bold))
                     .foregroundStyle(accent.color)
             }
             content
         }
-        .surface(cornerRadius: 22, padding: 18)
+        .surface(cornerRadius: 24, padding: 18, tint: accent.color)
         .rotationEffect(.degrees(settled ? rotation : 0))
         .offset(x: settled ? offsetX : 0)
     }
@@ -208,22 +235,22 @@ private struct PillarCard<Content: View>: View {
 
 // MARK: - 3. Name
 
-/// A large serif text field with an underline that draws in on focus.
-struct SerifField: View {
+/// A large text field on a Liquid Glass capsule that lights up on focus.
+struct GlassField: View {
     let placeholder: String
     @Binding var text: String
     var contentType: UITextContentType? = nil
     var autofocus = true
     var onSubmit: () -> Void
     @FocusState private var focused: Bool
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 36
+    @ScaledMetric(relativeTo: .title) private var size: CGFloat = 24
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(spacing: 0) {
             TextField("", text: $text, prompt: Text(placeholder).foregroundStyle(Color.inkTertiary), axis: .vertical)
-                .font(.system(size: size, weight: .regular, design: .serif))
-                .italic()
+                .font(.system(size: size, weight: .semibold))
                 .foregroundStyle(Color.ink)
+                .multilineTextAlignment(.center)
                 .lineLimit(1...3)
                 .textContentType(contentType)
                 .textInputAutocapitalization(.sentences)
@@ -237,15 +264,12 @@ struct SerifField: View {
                     }
                 }
 
-            ZStack(alignment: .leading) {
-                Rectangle().fill(Color.hairline)
-                Rectangle()
-                    .fill(Color.accentColor)
-                    .scaleEffect(x: focused ? 1 : 0, anchor: .leading)
-            }
-            .frame(height: 2)
-            .animation(.spring(response: 0.5, dampingFraction: 0.85), value: focused)
         }
+        .padding(.horizontal, 20)
+        .frame(minHeight: 64)
+        .glassEffect(Glass.card(tint: focused ? Color.accentColor : nil, interactive: true),
+                     in: .rect(cornerRadius: 22, style: .continuous))
+        .animation(.smooth(duration: 0.3), value: focused)
         .task {
             guard autofocus else { return }
             try? await Task.sleep(for: .milliseconds(550))
@@ -273,7 +297,7 @@ struct NameStep: View {
             StepHeadline(text: String(localized: "What should\nwe call you?"))
                 .padding(.top, 8)
 
-            SerifField(placeholder: String(localized: "Your name"), text: $name,
+            GlassField(placeholder: String(localized: "Your name"), text: $name,
                        contentType: .givenName, onSubmit: onSubmit)
                 .reveal(1)
 
@@ -284,8 +308,10 @@ struct NameStep: View {
                     Text("\(greeting), \(Text(trimmed).foregroundStyle(Color.ink)).")
                 }
             }
-            .font(.display(.title3))
+            .font(.title3.weight(.semibold))
             .foregroundStyle(Color.inkSecondary)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
             .contentTransition(.opacity)
             .animation(.smooth(duration: 0.3), value: trimmed.isEmpty)
             .reveal(2)
@@ -372,16 +398,12 @@ private struct RitualTile: View {
             .padding(14)
             .frame(maxWidth: .infinity, minHeight: 116, alignment: .topLeading)
             .background {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(selected ? ritual.accent.color : Color.surface)
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(ritual.accent.gradient)
+                    .opacity(selected ? 1 : 0)
             }
-            .overlay {
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .strokeBorder(Color.hairline, lineWidth: 1)
-                    .opacity(selected ? 0 : 1)
-            }
-            .shadow(color: (selected ? ritual.accent.color : Color.black).opacity(selected ? 0.28 : 0.04),
-                    radius: selected ? 14 : 8, y: selected ? 8 : 4)
+            .glassEffect(Glass.card(tint: selected ? ritual.accent.color : nil, interactive: true),
+                         in: .rect(cornerRadius: 22, style: .continuous))
         }
         .buttonStyle(.pressable)
         .accessibilityLabel(ritual.title)
@@ -405,7 +427,7 @@ struct GoalStep: View {
                 }
                 .padding(.top, 8)
 
-                SerifField(placeholder: String(localized: "My goal is to…"), text: $title,
+                GlassField(placeholder: String(localized: "My goal is to…"), text: $title,
                            autofocus: false, onSubmit: onSubmit)
                     .reveal(2)
 
@@ -427,8 +449,9 @@ struct GoalStep: View {
                             }
                             .padding(.horizontal, 14)
                             .frame(height: 40)
-                            .background(selected ? suggestion.accent.color : Color.surface, in: .capsule)
-                            .overlay(Capsule().strokeBorder(Color.hairline).opacity(selected ? 0 : 1))
+                            .background { Capsule().fill(suggestion.accent.gradient).opacity(selected ? 1 : 0) }
+                            .glassEffect(Glass.card(tint: selected ? suggestion.accent.color : nil, interactive: true),
+                                         in: .capsule)
                         }
                         .buttonStyle(.pressable)
                         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -695,12 +718,14 @@ struct FinishStep: View {
     var remindersOn: Bool
     var theme: SovaTheme
     @State private var hop = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 46
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 36
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 0) {
             Spacer(minLength: 12)
-            OwlMark(size: 104, happy: true, blinks: false)
+            OwlMark(size: 96, happy: true, blinks: false)
+                .padding(26)
+                .glassEffect(Glass.card(tint: theme.accent.color), in: .circle)
                 .keyframeAnimator(initialValue: 0.0, trigger: hop) { view, y in
                     view.offset(y: y)
                 } keyframes: { _ in
@@ -712,15 +737,16 @@ struct FinishStep: View {
                 .reveal(0)
             Spacer().frame(height: 44)
             Text(name.isEmpty ? String(localized: "You’re all set.") : String(localized: "You’re all set,\n\(name)."))
-                .font(.system(size: size, weight: .regular, design: .serif))
-                .tracking(-0.8)
+                .font(.system(size: size, weight: .bold))
                 .foregroundStyle(Color.ink)
+                .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .reveal(1)
             Text("Here’s to good days, and the small things that make them.")
                 .font(.body)
                 .foregroundStyle(Color.inkSecondary)
-                .padding(.top, 16)
+                .padding(.top, 14)
+                .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .reveal(2)
 
@@ -743,7 +769,7 @@ struct FinishStep: View {
             Spacer(minLength: 24)
         }
         .padding(.horizontal, 28)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
         .sensoryFeedback(.success, trigger: hop)
         .task {
             try? await Task.sleep(for: .milliseconds(450))
@@ -758,7 +784,6 @@ struct FinishStep: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Color.surface, in: .capsule)
-        .overlay(Capsule().strokeBorder(Color.hairline))
+        .glassEffect(.regular, in: .capsule)
     }
 }

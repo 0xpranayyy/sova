@@ -86,7 +86,7 @@ struct GoalEditor: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(Color.canvas)
+            .background { CanvasBackground() }
             .navigationTitle(goal == nil ? "New Goal" : "Edit Goal")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

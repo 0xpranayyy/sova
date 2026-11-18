@@ -4,7 +4,6 @@ import SwiftData
 @main
 struct SovaApp: App {
     init() {
-        NavigationBarStyle.apply()
         SovaTips.configure()
     }
 

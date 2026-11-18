@@ -22,7 +22,7 @@ struct GoalDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         SectionLabel(String(localized: "Why it matters"))
                         Text(goal.notes)
-                            .font(.display(.body))
+                            .font(.body)
                             .foregroundStyle(Color.ink)
                             .surface(cornerRadius: 22, padding: 18)
                     }
@@ -64,18 +64,18 @@ struct GoalDetailView: View {
         VStack(alignment: .leading, spacing: 18) {
             IconTile(symbol: goal.symbol, accent: goal.accent, size: 52, filled: true)
             Text(goal.title)
-                .font(.display(.largeTitle))
-                .tracking(-0.5)
+                .font(.largeTitle.weight(.bold))
                 .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(Int((goal.progress * 100).rounded()), format: .number)
-                    .font(.system(size: percentSize, weight: .light, design: .serif))
+                    .font(.system(size: percentSize, weight: .bold, design: .rounded))
+                    .foregroundStyle(goal.accent.gradient)
                     .monospacedDigit()
                     .contentTransition(.numericText(value: goal.progress))
                 Text("%")
-                    .font(.display(.title2))
+                    .font(.title2.weight(.bold))
                     .foregroundStyle(Color.inkSecondary)
                 Spacer()
                 if let text = goal.deadlineText {
@@ -86,10 +86,10 @@ struct GoalDetailView: View {
             }
             .foregroundStyle(Color.ink)
 
-            ProgressLine(progress: goal.progress, color: goal.accent.color, height: 6)
+            ProgressLine(progress: goal.progress, color: goal.accent.color, height: 10)
         }
+        .surface(cornerRadius: 32, padding: 22, tint: goal.accent.color)
         .padding(.top, 8)
-        .padding(.horizontal, 4)
         .accessibilityElement(children: .combine)
     }
 

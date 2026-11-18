@@ -4,20 +4,17 @@ A native iOS app for **daily tasks, goals and routines**, built with SwiftUI and
 
 ## Design
 
-Sova draws on Apple's restraint and the warmth of the Browser Company. There are no gradient blobs on every card, no emoji icons and no sparkles.
-
-- **Paper and ink.** A warm off-white canvas (deep warm black in Dark Mode), ink that's never pure black, a hairline-edged surface for content, and a whisper of film grain.
-- **Editorial type.** New York serif for display text and screen titles; SF Pro for everything you tap.
-- **One accent at a time.** Nine flat accents, each tuned separately for Dark Mode. Five themes (Ember, Tide, Moss, Plum, Ink) set the mood with a soft wash of light at the top of the canvas.
-- **Crafted components.** A checkbox that draws its own tick, Things-style grouped lists, a day shown as segments, `!!` / `!!!` priorities, ink-capsule primary buttons, springy pressable tiles, and haptics on every meaningful change.
-- **Liquid Glass where the HIG puts it:** the tab bar (it shrinks as you scroll), toolbars, the "New …" accessory above the tabs, sheets and floating back buttons. Content stays on quiet, solid surfaces.
-- **A mascot.** "Sova" means owl. The owl blinks, follows your finger on the welcome screen and smiles when you're done.
+- **Vivid color blends.** Every screen sits on a slowly drifting `MeshGradient`. There are five themes (Sunset, Ocean, Meadow, Aurora, Midnight); each is bright pastel in Light Mode and deep and glowing in Dark Mode.
+- **Liquid Glass throughout.** Cards, task rows, routine buttons, tiles, chips, text fields and buttons all use `glassEffect`, tinted with their accent and interactive where you can tap. The tab bar shrinks as you scroll, and the "New …" accessory floats above it.
+- **Native type.** SF Pro with bold, Apple-style headlines and rounded numerals for stats.
+- **Nine vivid accents**, each paired with a neighbor for two-tone gradients on icons, progress and selections.
+- **Crafted details:** a checkbox that draws its own tick, a glowing two-tone progress ring for the day, springy pressable tiles, haptics on every meaningful change, and an owl mascot that blinks, follows your finger and smiles when you're done.
 
 ## Onboarding
 
 Eight short steps. Each has one idea, a staggered blur-in reveal, and drifting washes of color that change mood per step. Swipe right to go back.
 
-1. **Hello.** An italic serif greeting; the owl's eyes follow your touch.
+1. **Welcome.** The classic Apple layout: the owl in a glass bubble (its eyes follow your touch), "Welcome to Sova" and three feature rows.
 2. **Three kinds of intention.** Fanned cards explain Today, Always and Someday. The example task is live, so tick it.
 3. **Your name**, with a live preview of your greeting.
 4. **Rituals.** Tactile tiles; each one you pick becomes a real routine.

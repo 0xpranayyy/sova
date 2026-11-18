@@ -10,23 +10,18 @@ struct RoutineDial: View {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { routine.toggle(on: .now) }
         } label: {
             VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(done ? routine.accent.color : Color.surface)
-                    Circle()
-                        .strokeBorder(Color.hairline, lineWidth: 1)
-                        .opacity(done ? 0 : 1)
-                    Image(systemName: done ? "checkmark" : routine.symbol)
-                        .font(.system(size: 20, weight: done ? .bold : .medium))
-                        .foregroundStyle(done ? Color.white : routine.accent.color)
-                        .contentTransition(.symbolEffect(.replace.downUp))
-                }
-                .frame(width: 60, height: 60)
-                .shadow(color: done ? routine.accent.color.opacity(0.35) : .black.opacity(0.05),
-                        radius: done ? 10 : 6, y: done ? 6 : 3)
+                Image(systemName: done ? "checkmark" : routine.symbol)
+                    .font(.system(size: 22, weight: done ? .bold : .semibold))
+                    .foregroundStyle(done ? Color.white : routine.accent.color)
+                    .contentTransition(.symbolEffect(.replace.downUp))
+                    .frame(width: 64, height: 64)
+                    .background {
+                        Circle().fill(routine.accent.gradient).opacity(done ? 1 : 0)
+                    }
+                    .glassEffect(Glass.card(tint: done ? routine.accent.color : nil, interactive: true), in: .circle)
 
                 Text(routine.title)
-                    .font(.caption)
+                    .font(.caption.weight(.medium))
                     .foregroundStyle(done ? Color.inkSecondary : Color.ink)
                     .lineLimit(1)
                     .frame(width: 76)

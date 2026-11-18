@@ -6,10 +6,10 @@ struct GoalCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .top, spacing: 14) {
-                IconTile(symbol: goal.symbol, accent: goal.accent, size: 42)
+                IconTile(symbol: goal.symbol, accent: goal.accent, size: 46, filled: true)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(goal.title)
-                        .font(.display(.title3))
+                        .font(.headline)
                         .foregroundStyle(Color.ink)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
@@ -19,15 +19,15 @@ struct GoalCard: View {
             }
 
             HStack(spacing: 12) {
-                ProgressLine(progress: goal.progress, color: goal.accent.color, height: 4)
+                ProgressLine(progress: goal.progress, color: goal.accent.color, height: 8)
                 Text(goal.progress, format: .percent.precision(.fractionLength(0)))
-                    .font(.footnote.weight(.medium).monospacedDigit())
-                    .foregroundStyle(Color.ink)
+                    .font(.subheadline.weight(.bold).monospacedDigit())
+                    .foregroundStyle(goal.accent.color)
                     .contentTransition(.numericText(value: goal.progress))
                     .frame(minWidth: 36, alignment: .trailing)
             }
         }
-        .surface(cornerRadius: 24, padding: 18)
+        .surface(cornerRadius: 26, padding: 18, tint: goal.accent.color, interactive: true)
         .accessibilityElement(children: .combine)
     }
 

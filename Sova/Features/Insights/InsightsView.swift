@@ -66,7 +66,7 @@ struct InsightsView: View {
                                 Text("\(Text("\(weekTotal)").foregroundStyle(theme.accent.color)) things done this week.")
                             }
                         }
-                        .font(.display(.title))
+                        .font(.title.weight(.bold))
                         .foregroundStyle(Color.ink)
                         Text(weekTotal == 0 ? "Finish a task or check in on a routine, and your progress shows up here."
                                             : "Tasks and routines, the last seven days.")
@@ -165,7 +165,7 @@ private struct StatTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(value)
-                .font(.display(.largeTitle))
+                .font(.system(.largeTitle, design: .rounded, weight: .bold))
                 .monospacedDigit()
                 .foregroundStyle(Color.ink)
                 .contentTransition(.numericText())

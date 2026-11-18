@@ -82,7 +82,7 @@ struct RoutineEditor: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(Color.canvas)
+            .background { CanvasBackground() }
             .navigationTitle(routine == nil ? "New Routine" : "Edit Routine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -246,68 +246,26 @@ struct StepIndicator: View {
     }
 }
 
-/// Soft, drifting washes of color that change mood with each step.
+/// A vivid color blend that shifts mood with each step.
 struct OnboardingBackdrop: View {
     var step: OnboardingStep
     var theme: SovaTheme
 
-    @Environment(\.colorScheme) private var scheme
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private var colors: [Accent] {
+    private var mood: SovaTheme {
         switch step {
-        case .hello: [.marigold, .ember, .rose]
-        case .pillars: [.tide, .lagoon, .plum]
-        case .name: [.rose, .plum, .marigold]
-        case .rituals: [.moss, .marigold, .lagoon]
-        case .goal: [.plum, .tide, .ember]
-        case .rhythm: [.marigold, .plum, .tide]
-        case .theme, .finish: [theme.accent, theme.companion, theme.accent]
-        }
-    }
-
-    private var anchors: [UnitPoint] {
-        switch step {
-        case .hello: [UnitPoint(x: 0.1, y: 0.08), UnitPoint(x: 0.95, y: 0.3), UnitPoint(x: 0.45, y: 1.0)]
-        case .pillars: [UnitPoint(x: 0.9, y: 0.05), UnitPoint(x: 0.05, y: 0.5), UnitPoint(x: 0.75, y: 1.0)]
-        case .name: [UnitPoint(x: 0.15, y: 0.15), UnitPoint(x: 0.95, y: 0.55), UnitPoint(x: 0.25, y: 1.05)]
-        case .rituals: [UnitPoint(x: 0.95, y: 0.0), UnitPoint(x: 0.0, y: 0.38), UnitPoint(x: 0.8, y: 0.95)]
-        case .goal: [UnitPoint(x: 0.85, y: 0.12), UnitPoint(x: 0.1, y: 0.6), UnitPoint(x: 0.9, y: 1.0)]
-        case .rhythm: [UnitPoint(x: 0.05, y: 0.05), UnitPoint(x: 0.95, y: 0.9), UnitPoint(x: 0.5, y: 0.5)]
-        case .theme: [UnitPoint(x: 0.05, y: 0.08), UnitPoint(x: 0.95, y: 0.42), UnitPoint(x: 0.4, y: 1.0)]
-        case .finish: [UnitPoint(x: 0.3, y: 0.15), UnitPoint(x: 0.95, y: 0.7), UnitPoint(x: 0.05, y: 0.95)]
+        case .hello: .plum
+        case .pillars: .tide
+        case .name: .ember
+        case .rituals: .moss
+        case .goal: .plum
+        case .rhythm: .ember
+        case .theme, .finish: theme
         }
     }
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: reduceMotion)) { context in
-            let t = reduceMotion ? 0 : context.date.timeIntervalSinceReferenceDate
-            GeometryReader { geo in
-                let size = geo.size
-                ZStack {
-                    Color.canvas
-                    ForEach(0..<3, id: \.self) { index in
-                        let anchor = anchors[index]
-                        let phase = Double(index) * 2.1
-                        Circle()
-                            .fill(colors[index].color)
-                            .frame(width: size.width * [1.15, 0.95, 1.05][index],
-                                   height: size.width * [1.15, 0.95, 1.05][index])
-                            .position(
-                                x: anchor.x * size.width + sin(t * 0.32 + phase) * 26,
-                                y: anchor.y * size.height + cos(t * 0.27 + phase) * 34
-                            )
-                            .opacity(scheme == .dark ? 0.42 : 0.5)
-                            .blur(radius: 70)
-                    }
-                }
-            }
-        }
-        .overlay(GrainOverlay(intensity: 1.5))
-        .ignoresSafeArea()
-        .animation(.smooth(duration: 1.2), value: step)
-        .animation(.smooth(duration: 0.9), value: theme)
-        .accessibilityHidden(true)
+        MeshBackdrop(colors: mood)
+            .animation(.smooth(duration: 1.0), value: mood)
     }
 }
 

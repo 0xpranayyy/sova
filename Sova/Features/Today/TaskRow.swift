@@ -121,19 +121,19 @@ struct TaskSwipeActions: ViewModifier {
 extension View {
     func taskSwipeActions(_ task: TaskItem) -> some View { modifier(TaskSwipeActions(task: task)) }
 
-    /// A row that reads as part of a single grouped surface.
-    func surfaceListRow(separatorInset: CGFloat = 52) -> some View {
+    /// A row shown as its own Liquid Glass card in a plain List.
+    func glassListRow(tint: Color? = nil) -> some View {
         self
-            .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.surface)
-            .listRowSeparatorTint(Color.hairline)
-            .alignmentGuide(.listRowSeparatorLeading) { _ in separatorInset }
+            .surface(cornerRadius: 22, padding: 0, tint: tint, interactive: true)
+            .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
     }
 
-    /// A row with no chrome, for headers, cards and scrollers inside a List.
-    func bareListRow() -> some View {
+    /// A row with no chrome, for headings, cards and scrollers inside a List.
+    func bareListRow(top: CGFloat = 0, bottom: CGFloat = 0) -> some View {
         self
-            .listRowInsets(EdgeInsets())
+            .listRowInsets(EdgeInsets(top: top, leading: 16, bottom: bottom, trailing: 16))
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
     }

@@ -12,8 +12,11 @@ struct IconTile: View {
             .font(.system(size: size * 0.42, weight: .semibold))
             .foregroundStyle(filled ? Color.white : accent.color)
             .frame(width: size, height: size)
-            .background(filled ? accent.color : accent.soft,
-                        in: .rect(cornerRadius: size * 0.3, style: .continuous))
+            .background {
+                RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
+                    .fill(filled ? AnyShapeStyle(accent.gradient) : AnyShapeStyle(accent.soft))
+            }
+            .shadow(color: filled ? accent.color.opacity(0.35) : .clear, radius: 8, y: 4)
             .accessibilityHidden(true)
     }
 }
@@ -59,7 +62,7 @@ struct GroupedList<Item: Identifiable, Row: View>: View {
                 }
             }
         }
-        .surface(cornerRadius: 22, padding: 0)
+        .surface(cornerRadius: 24, padding: 0)
     }
 }
 
@@ -74,7 +77,7 @@ struct EmptyState: View {
             OwlMark(size: 56)
                 .padding(.bottom, 4)
             Text(title)
-                .font(.display(.title2))
+                .font(.title2.weight(.bold))
                 .foregroundStyle(Color.ink)
             Text(message)
                 .font(.subheadline)
@@ -90,7 +93,7 @@ struct EmptyState: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 36)
         .padding(.horizontal, 20)
-        .surface(cornerRadius: 26, padding: 0)
+        .surface(cornerRadius: 28, padding: 0)
     }
 }
 
@@ -108,8 +111,9 @@ struct ThemeSwatches: View {
                 } label: {
                     VStack(spacing: 10) {
                         Circle()
-                            .fill(option.accent.color)
-                            .frame(width: 36, height: 36)
+                            .fill(option.swatch)
+                            .frame(width: 40, height: 40)
+                            .shadow(color: option.accent.color.opacity(0.4), radius: 6, y: 3)
                             .overlay {
                                 Circle()
                                     .strokeBorder(Color.ink, lineWidth: 2)
