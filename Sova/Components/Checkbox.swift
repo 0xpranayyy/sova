@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The completion mark. Square for tasks, round for rituals. Done reads as
-/// a soft accent tile with a check that draws itself.
+/// The completion mark. Square for tasks, round for rituals. Done fills
+/// solid and the check draws itself in.
 struct Checkbox: View {
     var isOn: Bool
     var color: Color = SovaTheme.current.accent.color
@@ -14,16 +14,17 @@ struct Checkbox: View {
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         ZStack {
             shape
-                .fill(Color.canvas)
+                .fill(Color.white)
             shape
-                .strokeBorder(emphasized ? color : Color.white.opacity(0.28), lineWidth: 1.6)
+                .strokeBorder(emphasized ? color : Color.black.opacity(0.25), lineWidth: 1.5)
                 .opacity(isOn ? 0 : 1)
             shape
-                .fill(color.opacity(0.16))
+                .fill(color)
+                .scaleEffect(isOn ? 1 : 0.5)
                 .opacity(isOn ? 1 : 0)
             CheckmarkShape()
                 .trim(from: 0, to: isOn ? 1 : 0)
-                .stroke(color, style: StrokeStyle(lineWidth: size * 0.11, lineCap: .round, lineJoin: .round))
+                .stroke(Color.inkInverse, style: StrokeStyle(lineWidth: size * 0.11, lineCap: .round, lineJoin: .round))
                 .padding(size * 0.28)
         }
         .frame(width: size, height: size)

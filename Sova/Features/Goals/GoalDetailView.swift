@@ -68,7 +68,7 @@ struct GoalDetailView: View {
                          color: (goal.daysLeft ?? 1) < 0 ? Color.danger : .inkTertiary)
             }
             Text(goal.title)
-                .font(.hero(34, weight: .bold))
+                .font(.hero(32, weight: .medium))
                 .tracking(-1.2)
                 .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
@@ -76,7 +76,7 @@ struct GoalDetailView: View {
 
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(Int((goal.progress * 100).rounded()), format: .number)
-                    .font(.hero(percentSize))
+                    .font(.hero(percentSize, weight: .bold))
                     .tracking(-4)
                     .contentTransition(.numericText(value: goal.progress))
                 Text("%")
@@ -86,7 +86,7 @@ struct GoalDetailView: View {
             .foregroundStyle(Color.ink)
             .padding(.top, 18)
 
-            ProgressLine(progress: goal.progress, color: SovaTheme.current.accent.color, height: 4,
+            ProgressLine(progress: goal.progress, color: .black, height: 4,
                          milestones: goal.sortedMilestones.map(\.isDone))
                 .padding(.top, 14)
         }

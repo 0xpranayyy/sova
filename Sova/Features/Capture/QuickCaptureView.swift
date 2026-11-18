@@ -7,7 +7,7 @@ import TipKit
 struct QuickCaptureView: View {
     @Environment(\.modelContext) private var context
     @Environment(AppRouter.self) private var router
-    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
 
     @State private var text = ""
     @State private var day: DayChoice = .today
@@ -34,23 +34,22 @@ struct QuickCaptureView: View {
         }
     }
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .lime }
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ink }
     private var accent: Color { theme.accent.color }
     private var parsed: ParsedTask { QuickParse.parse(text) }
     private var canSave: Bool { !parsed.title.isEmpty }
-    private let fieldFont = Font.allo(size: 24, weight: .semibold)
+    private let fieldFont = Font.allo(size: 25, weight: .medium, relativeTo: .title2)
 
     /// The typed text with what the parser understood highlighted.
     private var highlighted: AttributedString {
         var attributed = AttributedString(text)
         attributed.foregroundColor = Color.ink
         if let range = parsed.dateRange, let r = Range(range, in: attributed) {
-            attributed[r].foregroundColor = accent
-            attributed[r].backgroundColor = accent.opacity(0.15)
+            attributed[r].backgroundColor = Color.sunSoft
         }
         if let range = parsed.priorityRange, let r = Range(range, in: attributed) {
             attributed[r].foregroundColor = Color.danger
-            attributed[r].backgroundColor = Color.danger.opacity(0.16)
+            attributed[r].backgroundColor = Color(hex: 0xF9D6D1)
         }
         return attributed
     }
@@ -59,7 +58,7 @@ struct QuickCaptureView: View {
         VStack(alignment: .leading, spacing: 0) {
             MonoCaps(added == 0 ? String(localized: "New task")
                      : String(localized: "\(added) added · keep going"),
-                     color: added == 0 ? .inkTertiary : accent, size: 10.5)
+                     color: added == 0 ? .black.opacity(0.45) : .ink)
                 .contentTransition(.numericText())
 
             ZStack(alignment: .topLeading) {
@@ -74,7 +73,7 @@ struct QuickCaptureView: View {
                     .font(fieldFont)
                     .tracking(-0.4)
                     .foregroundStyle(Color.clear)
-                    .tint(accent)
+                    .tint(.black)
                     .lineLimit(1...4)
                     .focused($focused)
                     .submitLabel(.done)
@@ -120,7 +119,7 @@ struct QuickCaptureView: View {
                         .font(.allo(.body, .bold))
                         .foregroundStyle(Color.inkInverse)
                         .frame(width: 40, height: 40)
-                        .background(accent, in: .circle)
+                        .background(Color.black, in: .circle)
                 }
                 .buttonStyle(.pressable)
                 .disabled(!canSave)
@@ -135,7 +134,7 @@ struct QuickCaptureView: View {
         .padding(.bottom, 12)
         .presentationDetents([.height(200)])
         .presentationDragIndicator(.visible)
-        .presentationBackground(.regularMaterial)
+        .presentationBackground(Color.canvas)
         .sensoryFeedback(.success, trigger: added)
         .task { focused = true }
     }
@@ -183,12 +182,12 @@ private struct Token: View {
     var body: some View {
         HStack(spacing: 6) {
             if let symbol { Image(systemName: symbol).font(.allo(.caption2, .semibold)) }
-            Text(text).font(.mono(11.5))
+            Text(text).font(.allo(.subheadline, .medium))
         }
-        .foregroundStyle(selected ? Color.inkSecondary : Color.inkTertiary)
-        .padding(.horizontal, 10)
-        .frame(height: 30)
-        .background(selected ? Color.surfaceRaised : Color.clear, in: .rect(cornerRadius: 8, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(Color.white.opacity(selected ? 0.1 : 0.06)))
+        .foregroundStyle(selected ? Color.ink : Color.inkSecondary)
+        .padding(.horizontal, 12)
+        .frame(height: 32)
+        .background(selected ? Color.white : Color.clear, in: .capsule)
+        .overlay(Capsule().strokeBorder(Color.black.opacity(selected ? 0.12 : 0.06)))
     }
 }

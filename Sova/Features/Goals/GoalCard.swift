@@ -2,63 +2,59 @@ import SwiftUI
 
 struct GoalCard: View {
     let goal: Goal
-
-    private var accent: Color { SovaTheme.current.accent.color }
+    var number: Int? = nil
 
     private var nextStep: String? {
         goal.sortedMilestones.first(where: { !$0.isDone })?.title
     }
 
+    private var label: String {
+        var parts: [String] = []
+        if let number { parts.append(String(format: "%02d", number)) }
+        if let deadline = goal.deadlineText { parts.append(deadline) }
+        return parts.joined(separator: " · ")
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top, spacing: 12) {
-                IconTile(symbol: goal.symbol, size: 38)
+            HStack {
+                MonoCaps(label, color: (goal.daysLeft ?? 1) < 0 ? .danger : .black.opacity(0.45))
+                Spacer()
+                MonoCaps(goal.milestones.isEmpty ? String(localized: "No steps")
+                         : String(localized: "\(goal.completedMilestones)/\(goal.milestones.count) steps"))
+            }
+
+            HStack(alignment: .bottom, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(goal.title)
-                        .font(.allo(.body, .semibold))
+                        .font(.allo(size: 20, weight: .medium, relativeTo: .title3))
+                        .tracking(-0.6)
                         .foregroundStyle(Color.ink)
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
-                    Group {
-                        if let nextStep {
-                            Text("Next: \(Text(nextStep).foregroundStyle(Color.inkSecondary))")
-                        } else if goal.milestones.isEmpty {
-                            Text("No steps")
-                        } else {
-                            Text("Every step done")
-                        }
-                    }
-                    .font(.allo(.footnote))
-                    .foregroundStyle(Color.inkTertiary)
-                    .lineLimit(1)
+                    Text(nextStep.map { String(localized: "Next: \($0)") }
+                         ?? (goal.milestones.isEmpty ? String(localized: "Progress set by hand") : String(localized: "Every step done")))
+                        .font(.allo(.subheadline))
+                        .foregroundStyle(Color.inkSecondary)
+                        .lineLimit(1)
                 }
                 Spacer(minLength: 8)
                 HStack(alignment: .firstTextBaseline, spacing: 1) {
                     Text(Int((goal.progress * 100).rounded()), format: .number)
-                        .font(.hero(34))
-                        .tracking(-1.4)
+                        .font(.hero(40, weight: .medium))
+                        .tracking(-2)
                         .contentTransition(.numericText(value: goal.progress))
-                    Text("%").font(.allo(.callout, .medium)).foregroundStyle(Color.inkTertiary)
+                    Text("%").font(.allo(.title3)).foregroundStyle(Color.inkTertiary)
                 }
                 .foregroundStyle(Color.ink)
             }
+            .padding(.top, 12)
 
-            ProgressLine(progress: goal.progress, color: accent, height: 4,
+            ProgressLine(progress: goal.progress, color: .black, height: 3,
                          milestones: goal.sortedMilestones.map(\.isDone))
-                .padding(.top, 22)
-
-            HStack {
-                Text(goal.milestones.isEmpty
-                     ? String(localized: "No steps")
-                     : String(localized: "\(goal.completedMilestones)/\(goal.milestones.count) steps"))
-                Spacer()
-                if let text = goal.deadlineText { Text(text) }
-            }
-            .font(.allo(.footnote))
-            .foregroundStyle((goal.daysLeft ?? 1) < 0 ? Color.danger : Color.inkTertiary)
-            .padding(.top, 14)
+                .padding(.top, 18)
         }
-        .surface(cornerRadius: 24, padding: 20)
+        .surface(cornerRadius: 16, padding: 18)
         .accessibilityElement(children: .combine)
     }
 }

@@ -5,10 +5,10 @@ struct InsightsView: View {
     @Query private var tasks: [TaskItem]
     @Query(sort: \Routine.order) private var routines: [Routine]
     @Query(filter: #Predicate<Goal> { !$0.isArchived }) private var goals: [Goal]
-    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
 
     private static let weeks = 17
-    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color }
+    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ink).accent.color }
 
     // MARK: Data
 
@@ -68,50 +68,55 @@ struct InsightsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    MonoCaps(String(localized: "Last \(Self.weeks) weeks"))
+                    Text(hasHistory ? String(localized: "Last 30 days") : String(localized: "Insights"))
+                        .font(.allo(.subheadline, .medium))
+                        .foregroundStyle(Color.inkSecondary)
 
                     if hasHistory {
                         HStack(alignment: .bottom, spacing: 12) {
                             HStack(alignment: .firstTextBaseline, spacing: 2) {
                                 Text(Int((current * 100).rounded()), format: .number)
-                                    .font(.hero(96))
-                                    .tracking(-4.5)
+                                    .font(.hero(96, weight: .bold))
+                                    .tracking(-5)
                                     .contentTransition(.numericText(value: current))
-                                Text("%").font(.hero(42)).foregroundStyle(Color.inkTertiary)
+                                Text("%").font(.hero(40, weight: .medium)).foregroundStyle(Color.inkTertiary)
                             }
                             .foregroundStyle(Color.ink)
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("consistency").font(.allo(.subheadline, .semibold)).foregroundStyle(Color.ink)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("of rituals kept").font(.allo(.body, .medium)).foregroundStyle(Color.ink)
                                 if routines.contains(where: { $0.createdAt < Date.now.adding(days: -30) }) {
-                                    Text(delta >= 0 ? "↑ \(delta)% vs last month" : "↓ \(-delta)% vs last month")
-                                        .font(.allo(.footnote))
-                                        .foregroundStyle(delta >= 0 ? accent : Color.danger)
-                                } else {
-                                    Text("of rituals done, last 30 days").font(.allo(.footnote)).foregroundStyle(Color.inkTertiary)
+                                    Text(delta >= 0 ? String(localized: "up \(delta)% from last month")
+                                                    : String(localized: "down \(-delta)% from last month"))
+                                        .font(.allo(.subheadline))
+                                        .foregroundStyle(Color.inkSecondary)
                                 }
                             }
                             .padding(.bottom, 14)
                         }
-                        .padding(.top, 20)
                     } else {
-                        Text("Your story starts here.")
-                            .font(.hero(34, weight: .bold))
+                        Text("No history yet.")
+                            .font(.hero(34, weight: .medium))
                             .tracking(-1.2)
                             .foregroundStyle(Color.ink)
-                            .padding(.top, 20)
+                            .padding(.top, 6)
                         Text("Finish tasks and check off rituals, and your activity shows up here.")
                             .font(.allo(.subheadline))
                             .foregroundStyle(Color.inkSecondary)
-                            .padding(.top, 8)
+                            .padding(.top, 6)
                     }
 
+                    WeekBars(values: weekCounts)
+                        .surface(cornerRadius: 16, padding: 18)
+                        .padding(.top, 22)
+
                     heatmap
-                        .padding(.top, 26)
+                        .surface(cornerRadius: 16, padding: 16)
+                        .padding(.top, 10)
 
                     Grid(horizontalSpacing: 10, verticalSpacing: 10) {
                         GridRow {
                             StatTile(value: "\(tasksDone)", label: String(localized: "Tasks done"))
-                            StatTile(value: String(localized: "\(bestStreak)d"), label: String(localized: "Best streak"))
+                            StatTile(value: String(localized: "\(bestStreak) days"), label: String(localized: "Best streak"))
                         }
                         GridRow {
                             StatTile(value: perDay.formatted(.number.precision(.fractionLength(1))),
@@ -120,15 +125,28 @@ struct InsightsView: View {
                                      label: String(localized: "Goal progress"))
                         }
                     }
-                    .padding(.top, 28)
+                    .padding(.top, 10)
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 8)
+                .padding(.horizontal, 20)
+                .padding(.top, 14)
                 .padding(.bottom, 40)
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .toolbarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                SovaNavPill { EmptyView() }
+                    .padding(.top, 4)
+            }
+            .toolbarVisibility(.hidden, for: .navigationBar)
+        }
+    }
+
+    /// Things finished on each of the last seven days, oldest first.
+    private var weekCounts: [(Date, Int)] {
+        let today = Date.now.startOfDay
+        return (0..<7).map { offset in
+            let day = today.adding(days: offset - 6)
+            return (day, activity(on: day))
         }
     }
 
@@ -170,18 +188,28 @@ struct InsightsView: View {
         .accessibilityLabel("Activity over the last \(Self.weeks) weeks")
     }
 
+    /// Four steps of sunlight, from pale to deep gold.
+    static func sunScale(_ level: Double) -> Color {
+        switch level {
+        case ..<0.3: Color(hex: 0xFBE7A6)
+        case ..<0.55: Color(hex: 0xF6D261)
+        case ..<0.8: Color(hex: 0xEDB821)
+        default: Color(hex: 0xC9940A)
+        }
+    }
+
     @ViewBuilder
     private func cell(for day: Date?, peak: Int) -> some View {
         if let day {
             let count = activity(on: day)
             let level = count == 0 ? 0 : Double(count) / Double(peak)
             RoundedRectangle(cornerRadius: 3.5, style: .continuous)
-                .fill(count == 0 ? Color.well : accent.opacity(0.25 + 0.75 * level))
+                .fill(count == 0 ? Color.well : Self.sunScale(level))
                 .frame(width: 15, height: 15)
                 .overlay {
                     if day.isSameDay(as: .now) {
                         RoundedRectangle(cornerRadius: 3.5, style: .continuous)
-                            .strokeBorder(Color.ink.opacity(0.7), lineWidth: 1)
+                            .strokeBorder(Color.black, lineWidth: 1.2)
                     }
                 }
         } else {
@@ -195,15 +223,52 @@ private struct StatTile: View {
     let label: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
+            MonoCaps(label)
             Text(value)
-                .font(.hero(32))
+                .font(.hero(30, weight: .medium))
                 .tracking(-1.2)
                 .foregroundStyle(Color.ink)
                 .contentTransition(.numericText())
-            MonoCaps(label, size: 10)
         }
-        .surface(cornerRadius: 20, padding: 16)
+        .surface(cornerRadius: 16, padding: 16)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Seven fat capsules, one per day. Today is drawn in sunlight.
+private struct WeekBars: View {
+    let values: [(Date, Int)]
+
+    var body: some View {
+        let peak = max(values.map(\.1).max() ?? 1, 1)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                MonoCaps(String(localized: "This week"))
+                Spacer()
+                MonoCaps(String(localized: "\(values.map(\.1).reduce(0, +)) done"))
+            }
+            HStack(alignment: .bottom, spacing: 8) {
+                ForEach(Array(values.enumerated()), id: \.offset) { _, item in
+                    let day = item.0
+                    let count = item.1
+                    let isToday = day.isSameDay(as: .now)
+                    VStack(spacing: 8) {
+                        Capsule()
+                            .fill(isToday ? Color.sun : (count == 0 ? Color.well : Color.black))
+                            .frame(height: max(14, 120 * Double(count) / Double(peak)))
+                            .frame(maxWidth: .infinity)
+                        Text(Weekdays.letter(day.weekday))
+                            .font(.allo(.caption, isToday ? .bold : .medium))
+                            .foregroundStyle(isToday ? Color.ink : Color.inkTertiary)
+                    }
+                }
+            }
+            .frame(height: 146, alignment: .bottom)
+            .animation(.spring(response: 0.6, dampingFraction: 0.8), value: values.map(\.1))
+        }
+        .accessibilityElement()
+        .accessibilityLabel("This week")
+        .accessibilityValue(values.map { "\($0.1)" }.joined(separator: ", "))
     }
 }

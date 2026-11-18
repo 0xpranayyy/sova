@@ -19,15 +19,15 @@ struct RootView: View {
         }
         .animation(.smooth(duration: 0.6), value: hasOnboarded)
         .font(.allo(.body))
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
     }
 }
 
 struct MainTabView: View {
     @State private var router = AppRouter()
-    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
 
-    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color }
+    private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ink).accent.color }
 
     var body: some View {
         TabView(selection: $router.tab) {
@@ -120,12 +120,12 @@ struct ToastBar: View {
 
 #Preview("App") {
     MainTabView()
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }
 
 #Preview("Onboarding") {
     OnboardingView()
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }

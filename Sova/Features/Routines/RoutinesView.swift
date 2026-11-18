@@ -4,28 +4,30 @@ import SwiftData
 struct RoutinesView: View {
     @Environment(AppRouter.self) private var router
     @Query(sort: \Routine.order) private var routines: [Routine]
-    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
-                    VStack(alignment: .leading, spacing: 18) {
-                        MonoCaps(String(localized: "\(routines.filter { $0.isDone(on: .now) }.count) of \(routines.filter { $0.isScheduled(on: .now) }.count) today"))
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("Rituals")
-                            .font(.hero(44, weight: .bold))
+                            .font(.hero(40, weight: .medium))
                             .tracking(-1.8)
                             .foregroundStyle(Color.ink)
+                        Text(String(localized: "\(routines.filter { $0.isDone(on: .now) }.count) of \(routines.filter { $0.isScheduled(on: .now) }.count) done today."))
+                            .font(.allo(.subheadline))
+                            .foregroundStyle(Color.inkSecondary)
                     }
                     .padding(.horizontal, 4)
+                    .padding(.top, 12)
 
                     if routines.isEmpty {
                         EmptyState(title: String(localized: "No rituals yet"),
                                    message: String(localized: "Rituals are things you do on a schedule, like reading or a morning walk."),
                                    actionTitle: String(localized: "Add a routine")) { router.sheet = .newRoutine }
                     } else {
-                        WeekStrip(routines: routines,
-                                  color: (SovaTheme(rawValue: themeRaw) ?? .lime).accent.color)
+                        WeekStrip(routines: routines, color: .black)
                             .padding(.bottom, 4)
                         ForEach(DayPeriod.allCases) { period in
                             let items = routines.filter { $0.period == period }
@@ -49,12 +51,17 @@ struct RoutinesView: View {
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .toolbarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("New Routine", systemImage: "plus") { router.sheet = .newRoutine }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                SovaNavPill {
+                    Button { router.sheet = .newRoutine } label: {
+                        Image(systemName: "plus").font(.system(size: 18)).frame(width: 36, height: 36)
+                    }
+                    .buttonStyle(.pressable)
+                    .accessibilityLabel("New ritual")
                 }
+                .padding(.top, 4)
             }
+            .toolbarVisibility(.hidden, for: .navigationBar)
         }
     }
 }
@@ -83,7 +90,7 @@ struct WeekStrip: View {
                 let isFuture = day > Date.now
                 VStack(spacing: 8) {
                     Text(Weekdays.letter(day.weekday))
-                        .font(.mono(10.5))
+                        .font(.allo(.caption, .medium))
                         .foregroundStyle(isToday ? Color.ink : Color.inkTertiary)
                     ZStack {
                         MiniRing(progress: isFuture ? 0 : fraction(for: day), color: color, lineWidth: 3)

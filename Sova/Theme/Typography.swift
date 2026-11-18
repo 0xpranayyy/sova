@@ -81,14 +81,14 @@ extension Font {
     }
 }
 
-/// A small secondary label in plain SF Pro, sentence case. (Name kept for
-/// existing call sites; monospaced type is reserved for times and numbers.)
+/// A tiny uppercase monospaced label, used sparingly on cards
+/// ("UP NEXT · 14:00", "01 · 21 DAYS LEFT").
 struct MonoCaps: View {
     let text: String
-    var color: Color = .inkTertiary
-    var size: CGFloat = 11
+    var color: Color = .black.opacity(0.45)
+    var size: CGFloat = 10.5
 
-    init(_ text: String, color: Color = .inkTertiary, size: CGFloat = 11) {
+    init(_ text: String, color: Color = .black.opacity(0.45), size: CGFloat = 10.5) {
         self.text = text
         self.color = color
         self.size = size
@@ -96,18 +96,20 @@ struct MonoCaps: View {
 
     var body: some View {
         Text(text)
-            .font(.allo(size: size + 2, weight: .semibold, relativeTo: .footnote))
+            .font(.system(size: size, weight: .regular, design: .monospaced))
+            .tracking(0.8)
+            .textCase(.uppercase)
             .foregroundStyle(color)
     }
 }
 
-/// A section heading: mono caps on the left, a mono detail on the right.
+/// A section heading: quiet, sentence case.
 struct SectionLabel: View {
     let title: String
     var trailing: String? = nil
-    var color: Color = .inkTertiary
+    var color: Color = .inkSecondary
 
-    init(_ title: String, trailing: String? = nil, color: Color = .inkTertiary) {
+    init(_ title: String, trailing: String? = nil, color: Color = .inkSecondary) {
         self.title = title
         self.trailing = trailing
         self.color = color
@@ -115,15 +117,19 @@ struct SectionLabel: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            MonoCaps(title, color: color)
+            Text(title)
+                .font(.allo(.subheadline, .medium))
+                .foregroundStyle(color)
             Spacer()
             if let trailing {
                 Text(trailing)
-                    .font(.mono(10.5))
+                    .font(.mono(13, weight: .regular))
                     .foregroundStyle(Color.inkTertiary)
                     .contentTransition(.numericText())
             }
         }
+        .textCase(nil)
+        .padding(.horizontal, 4)
         .accessibilityAddTraits(.isHeader)
     }
 }

@@ -10,13 +10,13 @@ struct IconTile: View {
     var active = false
 
     var body: some View {
-        let tint = SovaTheme.current.accent.color
         Image(systemName: symbol)
-            .font(.allo(size: size * 0.46, weight: .medium))
-            .foregroundStyle(filled ? Color.inkInverse : (active ? tint : Color.inkSecondary))
+            .font(.system(size: size * 0.5, weight: .regular))
+            .foregroundStyle(filled ? Color.inkInverse : Color.ink)
             .frame(width: size, height: size)
-            .background(filled ? tint : (active ? tint.opacity(0.12) : Color.surfaceRaised),
+            .background(filled ? Color.black : Color.clear,
                         in: .rect(cornerRadius: size * 0.29, style: .continuous))
+            .opacity(active || filled ? 1 : 0.85)
             .accessibilityHidden(true)
     }
 }
@@ -92,7 +92,7 @@ struct EmptyState: View {
 struct ThemeSwatches: View {
     @Binding var themeRaw: String
 
-    private var selected: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .lime }
+    private var selected: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ink }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -103,10 +103,10 @@ struct ThemeSwatches: View {
                     VStack(spacing: 12) {
                         Circle()
                             .fill(option.accent.color)
-                            .frame(width: 36, height: 36)
+                            .frame(width: 34, height: 34)
                             .overlay {
                                 Circle()
-                                    .strokeBorder(Color.ink, lineWidth: 1.5)
+                                    .strokeBorder(Color.black, lineWidth: 1.5)
                                     .padding(-6)
                                     .opacity(option == selected ? 1 : 0)
                                     .scaleEffect(option == selected ? 1 : 0.85)

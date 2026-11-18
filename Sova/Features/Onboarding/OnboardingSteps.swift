@@ -6,14 +6,16 @@ import SwiftUI
 private struct StepHeadline: View {
     let text: String
     var index = 0
-    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 32
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 34
 
     var body: some View {
         Text(text)
-            .font(.hero(size, weight: .bold))
-            .tracking(-0.8)
+            .font(.hero(size, weight: .medium))
+            .tracking(-1.4)
             .foregroundStyle(Color.ink)
+            .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
             .reveal(index)
     }
 }
@@ -26,7 +28,9 @@ private struct StepBody: View {
         Text(text)
             .font(.allo(.body))
             .foregroundStyle(Color.inkSecondary)
+            .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
             .reveal(index)
     }
 }
@@ -37,28 +41,32 @@ private var accent: Color { SovaTheme.current.accent.color }
 
 struct HelloStep: View {
     var look: CGSize
-    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 44
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 104
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            OwlMark(size: 112, look: look)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: 0) {
+            OwlMark(size: 40, look: look, bodyColor: .white, eyeColor: Color.sun)
+                .padding(.top, 12)
                 .reveal(0)
-
+            Spacer().frame(height: 96)
+            Text("A calmer way to plan your day.")
+                .font(.allo(size: 23, weight: .medium, relativeTo: .title2))
+                .tracking(-0.8)
+                .multilineTextAlignment(.center)
+                .reveal(1)
             Text("Sova")
                 .font(.hero(titleSize, weight: .bold))
-                .tracking(-1.6)
-                .foregroundStyle(Color.ink)
-                .reveal(1)
-            Text("A day planner for your tasks, rituals and goals.")
-                .font(.allo(.title3))
-                .foregroundStyle(Color.inkSecondary)
-                .fixedSize(horizontal: false, vertical: true)
+                .tracking(-5.5)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .padding(.top, 8)
-                .padding(.bottom, 28)
                 .reveal(2)
+            Spacer()
         }
-        .padding(.horizontal, 28)
+        .foregroundStyle(.white)
+        .shadow(color: .black.opacity(0.08), radius: 10, y: 2)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
     }
 }
 
@@ -548,7 +556,7 @@ struct ThemeStep: View {
     var rituals: [RitualOption]
     var goalTitle: String
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .lime }
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ink }
 
     var body: some View {
         ScrollView {
@@ -662,8 +670,8 @@ struct FinishStep: View {
             .reveal(0)
 
             Text(name.isEmpty ? String(localized: "You're all set.") : String(localized: "You're all set, \(name)."))
-                .font(.hero(size, weight: .bold))
-                .tracking(-2)
+                .font(.hero(size, weight: .medium))
+                .tracking(-1.6)
                 .foregroundStyle(Color.ink)
                 .fixedSize(horizontal: false, vertical: true)
                 .reveal(1)

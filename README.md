@@ -4,21 +4,22 @@ A native iOS app for **daily tasks, goals and routines**, built with SwiftUI and
 
 ## Design
 
-Inspired by Opal, Arc and Linear: dark-first, confident and precise.
+Inspired by [Dia](https://www.diabrowser.com/) for warmth and calm, and by GO Club for confidence and character.
 
-- **Near-black canvas, one electric accent.** Lime by default (Coral, Ice, Violet and Mint are the alternatives). The accent marks only what matters: progress, selection, "now" and the create button. No glows, gradients or decorative motifs.
-- **Big, tight type.** Set in Allo throughout: big numbers (the day score, goal percentages, consistency), plain sentence-case labels, and SF Mono only for times and counts. Copy is plain and specific, with no slogans.
-- **Today as a timeline.** Rituals and tasks merge into one line through Morning, Afternoon and Evening, plus Overdue and Anytime. A live "now" marker shows where you are, and an **Up next** card highlights the one thing that deserves attention. Round markers are rituals; square markers are tasks.
-- **Quiet surfaces, glass where it floats.** Content sits on near-transparent cards with hairline edges. Liquid Glass is used for the tab bar (with a separated "+" create button), toolbar buttons, sheets, notifications and the undo bar.
-- **Details:** a check that draws itself, milestone nodes on goal progress lines, a 17-week activity heatmap, inline highlighting of what quick capture understood, haptics throughout, and an owl mascot that blinks, follows your finger and smiles when you're done.
+- **Paper and sunlight.** A warm off-white page with soft-black ink. The one signature moment is a hero of sunlight falling through leaves, which ends in a wide arc into the page. It appears on Welcome and Today.
+- **Allo throughout.** Medium-weight headlines with tight tracking, big bold numbers (the day, goal percentages, consistency) and tabular figures for times.
+- **Monochrome UI.** Black pill buttons, white cards with hairline edges, black checks that draw themselves, and tiny uppercase mono labels on cards ("UP NEXT · 14:00"). Gold is reserved for sunlight: the hero, quick-capture highlights, today's bar and the heatmap.
+- **Today.** A greeting over the sunlight, then one **Up next** card with Mark done and Tomorrow, then grouped cards (This afternoon, This evening, Anytime, Overdue, Done today) with native swipe actions.
+- **Character.** Fat capsule bars for the week, and an owl mascot that blinks, follows your finger on the welcome screen and smiles from the hero when your day is done.
+- **Liquid Glass** stays on the system tab bar (with its separated "+" create button), sheets and the undo bar.
 
-![Previews](screenshots/3-today.png)
+![Today](screenshots/3-today.png)
 
 ## Onboarding
 
 Eight short steps. Each has one idea, a staggered blur-in reveal, and drifting washes of color that change mood per step. Swipe right to go back.
 
-1. **Welcome.** The owl (its eyes follow your touch), the name, and one plain line about what Sova is.
+1. **Welcome.** A sunlit hero with the owl (its eyes follow your touch), "A calmer way to plan your day." and a huge "Sova".
 2. **Three kinds of intention.** Fanned cards explain Today, Always and Someday. The example task is live, so tick it.
 3. **Your name**, with a live preview of your greeting.
 4. **Rituals.** Tactile tiles; each one you pick becomes a real routine.

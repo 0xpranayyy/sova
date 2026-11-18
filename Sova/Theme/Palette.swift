@@ -22,79 +22,82 @@ extension Color {
 
 // MARK: - Semantic tokens
 //
-// Sova is dark-first: a near-black canvas, warm-white ink, hairlines at a
-// few percent white, and one electric accent used sparingly.
+// Warm paper, soft-black ink, white hairline cards. Color comes from one
+// sunlit moment per screen, never from the chrome.
 
 extension Color {
-    static let canvas = Color(hex: 0x08080A)
-    static let ink = Color(hex: 0xF5F5F7)
-    static let inkSecondary = Color(hex: 0xEBEBF5, opacity: 0.56)
-    static let inkTertiary = Color(hex: 0xEBEBF5, opacity: 0.30)
-    /// Text and glyphs placed on the accent or on the white pill.
-    static let inkInverse = Color(hex: 0x08080A)
-    static let well = Color.white.opacity(0.08)
-    static let surface = Color.white.opacity(0.04)
-    static let surfaceRaised = Color.white.opacity(0.06)
-    static let hairline = Color.white.opacity(0.07)
-    static let danger = Color(hex: 0xFF6B4A)
+    static let canvas = Color(hex: 0xFBFAF6)
+    static let ink = Color.black.opacity(0.86)
+    static let inkSecondary = Color.black.opacity(0.52)
+    static let inkTertiary = Color.black.opacity(0.32)
+    /// Text on black buttons and filled checks.
+    static let inkInverse = Color(hex: 0xF8F8F8)
+    static let well = Color.black.opacity(0.06)
+    static let surface = Color.white
+    static let surfaceRaised = Color.white
+    static let hairline = Color.black.opacity(0.08)
+    static let danger = Color(hex: 0xD9483B)
+    /// The sunlight: used for highlights, never for chrome.
+    static let sun = Color(hex: 0xE9B10F)
+    static let sunSoft = Color(hex: 0xFCE7A4)
 }
 
 // MARK: - Accents
 
-/// Item colors, tuned to glow on near-black.
+/// Item colors (kept for stored data and the accent setting).
 enum Accent: String, CaseIterable, Identifiable {
-    case lime, ember, marigold, moss, lagoon, tide, plum, rose, clay, graphite
+    case ink, lime, ember, marigold, moss, lagoon, tide, plum, rose, clay, graphite
 
     var id: String { rawValue }
 
     var name: String {
         switch self {
+        case .ink: "Ink"
         case .lime: "Lime"
-        case .ember: "Coral"
-        case .marigold: "Amber"
-        case .moss: "Mint"
+        case .ember: "Clay"
+        case .marigold: "Sun"
+        case .moss: "Fern"
         case .lagoon: "Teal"
-        case .tide: "Ice"
-        case .plum: "Violet"
-        case .rose: "Pink"
+        case .tide: "Lake"
+        case .plum: "Plum"
+        case .rose: "Rose"
         case .clay: "Sand"
-        case .graphite: "Steel"
+        case .graphite: "Slate"
         }
     }
 
     var color: Color {
         switch self {
-        case .lime: Color(hex: 0xC8FF4D)
-        case .ember: Color(hex: 0xFF6B4A)
-        case .marigold: Color(hex: 0xFFC24D)
-        case .moss: Color(hex: 0x4DE0B0)
-        case .lagoon: Color(hex: 0x4DD4E0)
-        case .tide: Color(hex: 0x7CC8FF)
-        case .plum: Color(hex: 0xB18CFF)
-        case .rose: Color(hex: 0xFF7EB0)
-        case .clay: Color(hex: 0xE8C9A0)
-        case .graphite: Color(hex: 0xA0A6B5)
+        case .ink: Color.black
+        case .lime: Color(hex: 0x7A9A1F)
+        case .ember: Color(hex: 0xC4532F)
+        case .marigold: Color(hex: 0xC9940A)
+        case .moss: Color(hex: 0x3F7D4E)
+        case .lagoon: Color(hex: 0x1F7A80)
+        case .tide: Color(hex: 0x2F5FA8)
+        case .plum: Color(hex: 0x6E4A9E)
+        case .rose: Color(hex: 0xB8466B)
+        case .clay: Color(hex: 0xA77B52)
+        case .graphite: Color(hex: 0x4A4E55)
         }
     }
 
-    /// Kept for older call sites; always a single flat color.
     var gradient: Color { color }
-    var soft: Color { color.opacity(0.14) }
+    var soft: Color { color.opacity(0.1) }
 }
 
 // MARK: - Themes
 
-/// The one electric accent the whole app is built around.
+/// The accent used for checks, progress and the create button.
 enum SovaTheme: String, CaseIterable, Identifiable {
-    case lime, ember, tide, plum, moss
+    case ink, ember, tide, plum, moss
 
     var id: String { rawValue }
-
     var name: String { accent.name }
 
     var accent: Accent {
         switch self {
-        case .lime: .lime
+        case .ink: .ink
         case .ember: .ember
         case .tide: .tide
         case .plum: .plum
@@ -106,6 +109,6 @@ enum SovaTheme: String, CaseIterable, Identifiable {
     var swatch: Color { accent.color }
 
     static var current: SovaTheme {
-        SovaTheme(rawValue: UserDefaults.standard.string(forKey: "theme") ?? "") ?? .lime
+        SovaTheme(rawValue: UserDefaults.standard.string(forKey: "theme") ?? "") ?? .ink
     }
 }

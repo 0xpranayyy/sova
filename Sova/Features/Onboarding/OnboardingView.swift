@@ -16,7 +16,7 @@ enum OnboardingStep: Int, CaseIterable, Comparable {
 struct OnboardingView: View {
     @Environment(\.modelContext) private var context
     @AppStorage("hasOnboarded") private var hasOnboarded = false
-    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
     @AppStorage("userName") private var userName = ""
     @AppStorage("morningReminderOn") private var savedMorningOn = false
     @AppStorage("morningReminderMinutes") private var savedMorningMinutes = 8 * 60
@@ -35,7 +35,7 @@ struct OnboardingView: View {
     @State private var isRequesting = false
     @State private var look = CGSize(width: 0, height: 0.4)
 
-    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .lime }
+    private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ink }
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedGoal: String { goalTitle.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var chosenRituals: [RitualOption] { RitualOption.all.filter { rituals.contains($0.id) } }
@@ -106,43 +106,29 @@ struct OnboardingView: View {
     private var topBar: some View {
         let indicated = OnboardingStep.indicated
         let position = (indicated.firstIndex(of: step) ?? 0) + 1
-        return HStack(spacing: 16) {
-            if step > .hello && step < .finish {
-                Button(action: back) {
-                    Image(systemName: "chevron.left")
-                        .font(.allo(.body, .semibold))
-                        .frame(width: 44, height: 44)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .accessibilityLabel("Back")
-                .transition(.opacity.combined(with: .scale(scale: 0.8)))
-            } else {
-                Color.clear.frame(width: 44, height: 44)
-            }
-
+        return ZStack {
             if indicated.contains(step) {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color.well)
-                        Capsule()
-                            .fill(theme.accent.color)
-                            .frame(width: geo.size.width * Double(position) / Double(indicated.count))
-                    }
-                }
-                .frame(height: 3)
-                .transition(.opacity)
-                Text("\(position)/\(indicated.count)")
-                    .font(.mono(12))
-                    .foregroundStyle(Color.inkTertiary)
+                MonoCaps(String(format: String(localized: "Step %02d of %02d"), position, indicated.count))
                     .contentTransition(.numericText())
-                    .frame(width: 34, alignment: .trailing)
-                    .accessibilityLabel("Step \(position) of \(indicated.count)")
-            } else {
+                    .transition(.opacity)
+            }
+            HStack {
+                if step > .hello && step < .finish {
+                    Button(action: back) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundStyle(Color.ink)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white, in: .circle)
+                            .overlay(Circle().strokeBorder(Color.hairline))
+                    }
+                    .buttonStyle(.pressable)
+                    .accessibilityLabel("Back")
+                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                }
                 Spacer()
             }
         }
-        .foregroundStyle(Color.ink)
         .animation(.spring(response: 0.5, dampingFraction: 0.85), value: step)
     }
 
@@ -188,7 +174,7 @@ struct OnboardingView: View {
             if step == .hello {
                 Text("Your data stays on this iPhone.")
                     .font(.allo(.footnote))
-                    .foregroundStyle(Color.inkTertiary)
+                    .foregroundStyle(Color.inkSecondary)
                     .transition(.opacity)
             }
         }
@@ -239,15 +225,24 @@ struct OnboardingView: View {
     }
 }
 
-/// A flat near-black canvas.
+/// Paper, with the sunlight hero behind the welcome screen.
 struct OnboardingBackdrop: View {
     var step: OnboardingStep
     var theme: SovaTheme
 
     var body: some View {
-        Color.canvas
-            .ignoresSafeArea()
-            .accessibilityHidden(true)
+        GeometryReader { geo in
+            ZStack(alignment: .top) {
+                Color.canvas
+                if step == .hello {
+                    SunHero(height: geo.size.height * 0.68, arcDepth: 70) { EmptyView() }
+                        .transition(.opacity)
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .animation(.smooth(duration: 0.6), value: step)
+        .accessibilityHidden(true)
     }
 }
 

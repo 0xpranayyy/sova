@@ -48,7 +48,7 @@ struct WeekTrack: View {
     let routine: Routine
 
     var body: some View {
-        let accent = SovaTheme.current.accent.color
+        let accent = Color.black
         HStack(spacing: 3) {
             ForEach(-6...0, id: \.self) { offset in
                 let day = Date.now.adding(days: offset)

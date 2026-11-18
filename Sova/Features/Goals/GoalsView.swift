@@ -19,24 +19,27 @@ struct GoalsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 18) {
-                        MonoCaps(active.isEmpty ? String(localized: "No active goals")
-                                 : String(localized: "\(active.count) active · \(averageText) average"))
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("Goals")
-                            .font(.hero(44, weight: .bold))
+                            .font(.hero(40, weight: .medium))
                             .tracking(-1.8)
                             .foregroundStyle(Color.ink)
+                        Text(active.isEmpty ? String(localized: "Nothing in progress yet.")
+                             : String(localized: "\(active.count) in progress, \(averageText) on average."))
+                            .font(.allo(.subheadline))
+                            .foregroundStyle(Color.inkSecondary)
                     }
                     .padding(.horizontal, 4)
-                    .padding(.bottom, 10)
+                    .padding(.top, 12)
+                    .padding(.bottom, 12)
 
                     if active.isEmpty {
                         EmptyState(title: String(localized: "No goals yet"),
                                    message: String(localized: "Add a goal and break it into steps you can check off."),
                                    actionTitle: String(localized: "Set a goal")) { router.sheet = .newGoal }
                     } else {
-                        ForEach(active) { goal in
-                            NavigationLink(value: goal) { GoalCard(goal: goal) }
+                        ForEach(Array(active.enumerated()), id: \.element.id) { index, goal in
+                            NavigationLink(value: goal) { GoalCard(goal: goal, number: index + 1) }
                                 .buttonStyle(.pressable)
                                 .matchedTransitionSource(id: goal.persistentModelID, in: zoom)
                         }
@@ -75,15 +78,21 @@ struct GoalsView: View {
             }
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
-            .toolbarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                SovaNavPill {
+                    Button { router.sheet = .newGoal } label: {
+                        Image(systemName: "plus").font(.system(size: 18)).frame(width: 36, height: 36)
+                    }
+                    .buttonStyle(.pressable)
+                    .accessibilityLabel("New goal")
+                }
+                .padding(.top, 4)
+            }
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .navigationDestination(for: Goal.self) { goal in
                 GoalDetailView(goal: goal)
+                    .toolbarVisibility(.visible, for: .navigationBar)
                     .navigationTransition(.zoom(sourceID: goal.persistentModelID, in: zoom))
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("New Goal", systemImage: "plus") { router.sheet = .newGoal }
-                }
             }
         }
     }

@@ -8,7 +8,7 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
 
     @AppStorage("userName") private var userName = ""
-    @AppStorage("theme") private var themeRaw = SovaTheme.lime.rawValue
+    @AppStorage("theme") private var themeRaw = SovaTheme.ink.rawValue
     @AppStorage("hasOnboarded") private var hasOnboarded = true
     @AppStorage("morningReminderOn") private var morningOn = false
     @AppStorage("morningReminderMinutes") private var morningMinutes = 8 * 60
@@ -105,7 +105,7 @@ struct SettingsView: View {
             .onChange(of: eveningMinutes) { applyReminders() }
             .task { await refreshPermission() }
         }
-        .tint((SovaTheme(rawValue: themeRaw) ?? .lime).accent.color)
+        .tint((SovaTheme(rawValue: themeRaw) ?? .ink).accent.color)
     }
 
     private func reminderRow(title: String, symbol: String, accent: Accent,
