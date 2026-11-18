@@ -7,74 +7,69 @@ Sova: Tasks, Habits & Goals
 Plan your day with a cute owl
 
 ## Promotional text (170 max)
-Your tasks, daily habits and big goals in one happy app. Type it, tick it, and let a cheerful little owl celebrate every win with you. 🦉
+Tasks, habits and big goals in one app. Type a task the way you'd say it, tick it off, and watch your day come together, with a little owl along for the ride.
 
 ## Keywords (100 max, comma separated)
 todo,planner,habit,tracker,routine,goals,reminder,daily,streak,productivity,checklist,list,focus
 
 ## Description
 
-Meet Sova, the happiest way to plan your day. 🦉
-
-Sova keeps your tasks, your daily habits and your big goals in one simple, beautiful app, with a friendly owl cheering you on every step of the way.
+Sova keeps your tasks, daily habits and big goals in one simple app for iPhone.
 
 JUST TYPE IT
-Write the way you talk: "Call Mom tomorrow 6pm !!"
-Sova understands the day, the time and the priority, and sets everything up for you.
+Write the way you talk: "Call Mom tomorrow 6pm !!". Sova fills in the day, the time and the priority. Add "every Monday" and it repeats.
 
-YOUR DAY, IN ONE PLACE
-• See only what matters today: tasks, habits and anything overdue
-• "Up Next" shows the one thing to do right now
-• A progress ring fills up as you finish your day
-• Can't do it today? Swipe it to tomorrow
-• Made a mistake? Just tap Undo
+ONE SCREEN FOR TODAY
+• Today shows what's due, the rituals you planned and anything overdue
+• Up Next picks the one thing to do right now
+• A progress ring fills as you finish your day
+• Swipe anything you can't do today to tomorrow
+• Tap Undo if you tick, move or delete something by mistake
 
-BUILD HABITS THAT STICK
+HABITS, ON A SCHEDULE
 • Add rituals like "Drink water", "Morning walk" or "Read 20 pages"
-• Choose the time of day and the days of the week
-• Keep your streak going 🔥 and watch your week fill up
+• Choose morning, afternoon or evening, and the days of the week
+• Keep your streak going. Rest days don't break it.
 
-REACH YOUR BIG GOALS
-• Break big dreams into small, simple steps
-• Tick each step and watch your progress grow
-• Link tasks to goals so every day moves you forward
+BIG GOALS, SMALL STEPS
+• Give a goal a deadline and break it into steps
+• Each step you tick moves the percentage
+• Link tasks to the goal they serve
+
+ALERTS AND REPEATS
+• A notification at a task's time, or a few minutes before
+• Repeat daily, on weekdays, weekly, monthly or yearly
+• Optional morning and evening reminders to plan and look back
 
 WIDGETS AND SIRI
-• Home Screen widgets with the owl and your progress ring
-• Tick off rituals right from the Home Screen
-• Lock Screen widgets for what's next
-• "Hey Siri, add a task in Sova"
+• Today widget with your progress ring
+• Rituals widget: tick habits off right from the Home Screen
+• Lock Screen widgets for your progress and what's next
+• "Hey Siri, add a task in Sova", plus actions in Shortcuts
 
-SEE HOW YOU'RE DOING
-• Weekly charts and a colorful activity calendar
-• Find out which habits you keep best
+INSIGHTS
+• Your week at a glance and a 17-week activity calendar
+• See which rituals you keep most often
 
-GENTLE REMINDERS
-Alerts right when a task is due, plus one note in the morning to plan your day and one at night to look back.
+DESIGNED WITH CARE
+• A friendly owl that celebrates when you finish your day
+• Soft sounds and haptics when you check things off, both optional
+• Light and dark mode, with a theme color you choose
 
-MADE TO FEEL GOOD
-• A cute owl that hops, blinks and celebrates with you
-• Sparkles, soft sounds and haptics when you check things off
-• A beautiful dark mode for late nights
-• Pick your favorite theme color
-
-PRIVATE BY DESIGN
-No account. No sign-up. No tracking. Everything stays on your iPhone, or in your own iCloud if you turn on sync.
+PRIVATE
+No account and no sign-up. No tracking, no ads. Your data stays on your iPhone, or in your own iCloud if you turn on sync.
 
 SOVA PLUS
-Sova is free to use with unlimited tasks, 3 rituals and 1 goal. Sova Plus unlocks:
+Sova is free with unlimited tasks, 3 rituals and 1 active goal. Sova Plus adds:
 • Unlimited rituals and goals
 • iCloud sync across your devices
 • Extra app icons
 
-Sova Plus is available as a monthly or yearly auto-renewing subscription (the yearly plan starts with a 7-day free trial), or as a one-time lifetime purchase. Payment is charged to your Apple Account when you confirm. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period, and you can manage or cancel them in your Apple Account settings. Any unused part of a free trial ends when you buy a subscription.
+Sova Plus is available as a monthly or yearly auto-renewable subscription (the yearly plan starts with a 7-day free trial), or as a one-time lifetime purchase. Payment is charged to your Apple Account when you confirm the purchase. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period, and your account is charged for renewal within 24 hours before the period ends. Manage or cancel anytime in your Apple Account settings. Any unused part of a free trial ends when you buy a subscription.
 
 Privacy Policy: https://0xpranayyy.github.io/sova/privacy.html
-Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-
-Perfect for students, busy professionals, parents, fitness lovers and anyone who wants to get things done and feel good doing it.
-
-Download Sova and make today a good day. ✨
+Terms of Use: https://0xpranayyy.github.io/sova/terms.html
+License Agreement (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
 ## What's New (version 1.0)
 Hello, world! 🦉 Sova is here: tasks, habits and goals in one happy app.
