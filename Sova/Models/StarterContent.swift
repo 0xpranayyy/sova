@@ -46,6 +46,7 @@ struct GoalSuggestion: Identifiable, Hashable {
 enum StarterContent {
     @MainActor
     static func install(rituals: [RitualOption], goalTitle: String, theme: SovaTheme, in context: ModelContext) {
+        defer { SovaRefresh.changed(context) }
         let existingRoutines = (try? context.fetch(FetchDescriptor<Routine>())) ?? []
         let existingTitles = Set(existingRoutines.map(\.title))
         var order = (existingRoutines.map(\.order).max() ?? -1) + 1

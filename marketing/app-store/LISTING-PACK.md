@@ -125,7 +125,7 @@ PRIVATE
 No account and no sign-up. No tracking, no ads. Your data stays on your iPhone, or in your own iCloud if you turn on sync.
 
 SOVA PLUS
-Sova is free with unlimited tasks, 3 rituals and 1 active goal. Sova Plus adds:
+Sova is free with unlimited tasks, 5 rituals and 3 active goals. Sova Plus adds:
 • Unlimited rituals and goals
 • iCloud sync across your devices
 • Extra app icons
@@ -181,7 +181,7 @@ Click **+** and add all three products from section 6, so they're reviewed toget
 ```
 Sova needs no account or sign-in. Everything works offline on the device.
 
-Free plan: unlimited tasks, up to 3 rituals and 1 active goal.
+Free plan: unlimited tasks, up to 5 rituals and 3 active goals.
 Sova Plus (auto-renewable subscription: monthly, or yearly with a 1-week free trial; or a one-time lifetime purchase) unlocks unlimited rituals and goals, iCloud sync and an alternate app icon.
 
 To see the paywall: open Settings (gear icon on the Today tab) and tap Sova Plus, or try to add a 4th ritual on the Rituals tab. Restore Purchases is in Settings → Help and on the paywall. The Privacy Policy and Terms of Use (Apple standard EULA) are linked on the paywall and in the description.

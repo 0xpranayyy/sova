@@ -85,7 +85,7 @@ For each product:
 ```
 Sova needs no account or sign-in. Everything works offline on the device.
 
-Free plan: unlimited tasks, up to 3 rituals and 1 active goal.
+Free plan: unlimited tasks, up to 5 rituals and 3 active goals.
 Sova Plus (auto-renewable subscription, monthly or yearly with a 1-week
 free trial, or a one-time lifetime purchase) unlocks unlimited rituals and
 goals, iCloud sync and an alternate app icon.

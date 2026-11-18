@@ -60,7 +60,7 @@ PRIVATE
 No account and no sign-up. No tracking, no ads. Your data stays on your iPhone, or in your own iCloud if you turn on sync.
 
 SOVA PLUS
-Sova is free with unlimited tasks, 3 rituals and 1 active goal. Sova Plus adds:
+Sova is free with unlimited tasks, 5 rituals and 3 active goals. Sova Plus adds:
 • Unlimited rituals and goals
 • iCloud sync across your devices
 • Extra app icons

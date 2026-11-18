@@ -54,7 +54,10 @@ enum TaskAlerts {
 
 /// After anything changes: refresh widgets and the overdue badge.
 enum SovaRefresh {
+    /// Writes any pending changes to disk first, so the widgets and Siri,
+    /// which read the store from their own process, see them.
     static func changed(_ context: ModelContext?) {
+        if let context, context.hasChanges { try? context.save() }
         WidgetCenter.shared.reloadAllTimelines()
         updateBadge(context)
     }

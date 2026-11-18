@@ -73,7 +73,7 @@ Onboarding creates only what you choose; there is no sample or placeholder data.
 | **Insights** | This week's bars, stats, a 17-week activity calendar and 30-day ritual consistency |
 | **Widgets** | Today (owl and progress ring, Up Next), **My Day** (large: the owl, your week, tasks and rituals you can tick right there), interactive Rituals sticker tiles, and Lock Screen widgets. All of them read well tinted, clear and on StandBy |
 | **Siri & Shortcuts** | "Add a task in Sova", "Tick off a ritual in Sova", "Show my day in Sova" |
-| **Sova Plus** | Unlimited rituals and goals (free: 3 rituals, 1 active goal), iCloud sync, extra app icons. Monthly, yearly (7-day trial) or lifetime, using StoreKit 2 |
+| **Sova Plus** | Unlimited rituals and goals (free: 5 rituals, 3 active goals), iCloud sync, extra app icons. Monthly, yearly (7-day trial) or lifetime, using StoreKit 2 |
 | **Settings** | Appearance, theme, app icon, sounds, haptics, week start, alert timing, overdue badge, reminders, iCloud sync, help and legal links |
 
 Data lives in a SwiftData store in the App Group container, shared with the widgets. With Plus and iCloud sync on, it mirrors to the user's private CloudKit database.

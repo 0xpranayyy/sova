@@ -23,8 +23,11 @@ extension PlusReason: Identifiable {
 
 /// What's free, and what Plus unlocks.
 enum PlusGate {
-    static let freeRituals = 3
-    static let freeGoals = 1
+    static let freeRituals = 5
+    static let freeGoals = 3
+    /// How many rituals onboarding offers, leaving room on the free plan to
+    /// add your own before Plus comes up.
+    static let starterRituals = 3
 
     static func canAddRitual(existing: Int) -> Bool { SovaSettings.isPlus || existing < freeRituals }
     static func canAddGoal(existing: Int) -> Bool { SovaSettings.isPlus || existing < freeGoals }

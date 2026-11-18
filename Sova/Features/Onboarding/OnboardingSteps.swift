@@ -370,7 +370,7 @@ struct RitualsStep: View {
     @State private var cheers = 0
     @State private var limitNudge = 0
 
-    private var atLimit: Bool { !SovaSettings.isPlus && selection.count >= PlusGate.freeRituals }
+    private var atLimit: Bool { selection.count >= PlusGate.starterRituals }
 
     var body: some View {
         ScrollView {
@@ -403,7 +403,7 @@ struct RitualsStep: View {
                 }
                 .padding(.top, 20)
 
-                Text("Start with up to \(PlusGate.freeRituals). You can add more anytime.")
+                Text("Start with up to \(PlusGate.starterRituals). You can add more anytime.")
                     .font(.allo(.footnote, .bold))
                     .foregroundStyle(atLimit ? Color.ink : Color.inkSecondary)
                     .padding(.top, 14)
