@@ -617,6 +617,93 @@ html.lenis,html.lenis body{height:auto}
 @media (hover:hover){.plan:hover::before{opacity:1}}
 .final{will-change:clip-path}
 
+/* ===================== v6: home screen section ===================== */
+.home-sec{margin-top:clamp(80px,10vw,130px)}
+.home-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-top:36px}
+.hs,.ls{position:relative;border-radius:var(--r-xl);overflow:hidden;padding:clamp(24px,3.4vw,40px);min-height:470px;display:flex;flex-direction:column}
+.hs{background:#2B1677;color:#fff}
+.hs-wall span{position:absolute;border-radius:50%;filter:blur(0);opacity:.5}
+.hs-wall span:nth-child(1){width:340px;height:340px;background:#3B26A6;right:-90px;top:-120px}
+.hs-wall span:nth-child(2){width:220px;height:220px;background:#3B26A6;left:-80px;bottom:-60px}
+.hs-wall span:nth-child(3){width:120px;height:120px;background:#4A34C0;right:30%;bottom:22%}
+.hs-row{position:relative;display:flex;gap:18px;align-items:stretch}
+.wd-ring{position:relative;flex:none;width:170px;height:170px;border-radius:38px;background:#3B26A6;box-shadow:0 30px 50px -26px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.08)}
+.wd-ring svg.ring{position:absolute;inset:18px;width:134px;height:134px}
+.wd-ring #wdFill{transition:stroke-dashoffset .7s cubic-bezier(.2,.8,.2,1)}
+.wd-owl{position:absolute;inset:48px;}
+.wd-owl svg{position:absolute;inset:0;width:100%;height:100%;transition:opacity .25s,transform .45s cubic-bezier(.2,.9,.2,1.4)}
+.wd-owl .o-wd-happy{opacity:0}
+.wd-ring.all .o-wd-happy{opacity:1}.wd-ring.all .o-wd{opacity:0}
+.wd-ring.all .wd-owl svg{transform:scale(1.12)}
+.wd-tag{position:absolute;left:12px;bottom:12px;background:#FFE94D;color:#5E4A00;font-weight:900;font-size:12.5px;padding:5px 10px;border-radius:999px;transform:rotate(-4deg)}
+.wd-rituals{flex:1;min-width:0;background:#FCFCFA;border-radius:38px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;box-shadow:0 30px 50px -26px rgba(0,0,0,.6)}
+.wd-head{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;color:#15102E;padding:0 4px 2px}
+.wd-head b{font-weight:900;font-size:16px;letter-spacing:-.02em}
+.wd-head span{font-weight:800;font-size:13px;color:rgba(21,16,46,.5);font-variant-numeric:tabular-nums}
+.wd-pill{font:inherit;cursor:pointer;border:0;display:flex;align-items:center;gap:7px;height:52px;padding:0 12px;border-radius:16px;background:var(--f);color:var(--d);font-weight:900;font-size:14px;text-align:left;transition:transform .25s cubic-bezier(.2,.9,.2,1.4),opacity .25s}
+.wd-pill span{flex:1;line-height:1.1}
+.wd-pill i{position:relative;width:22px;height:22px;border-radius:50%;border:2.5px solid var(--d);flex:none;transition:background .2s}
+.wd-pill.done i{background:var(--d)}
+.wd-pill.done i::after{content:"";position:absolute;left:5.5px;top:2.5px;width:5px;height:9px;border:solid var(--f);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+.wd-pill.done{opacity:.8}
+.wd-pill:active{transform:scale(.94)}
+.wd-pill.pop{animation:wpop .45s cubic-bezier(.2,.9,.2,1.4)}
+@keyframes wpop{40%{transform:scale(1.06) rotate(-2deg)}100%{transform:none}}
+.hs-caption,.ls-caption{position:relative;margin-top:auto;padding-top:28px}
+.hs h3,.ls h3{font-weight:900;font-size:clamp(24px,2.4vw,30px);letter-spacing:-.035em;line-height:1.05}
+.hs p{color:rgba(255,255,255,.75);font-weight:600;font-size:16px;margin-top:8px;max-width:440px}
+.ls{background:#0E0B1F;color:#fff;border:1px solid rgba(255,255,255,.08);align-items:center;text-align:center}
+.ls-stars span{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.6;animation:tw 3s ease-in-out infinite}
+.ls-stars span:nth-child(1){top:12%;left:14%}.ls-stars span:nth-child(2){top:20%;left:80%;animation-delay:-1s}.ls-stars span:nth-child(3){top:44%;left:8%;animation-delay:-2s}
+.ls-stars span:nth-child(4){top:56%;left:90%;animation-delay:-.5s}.ls-stars span:nth-child(5){top:8%;left:56%;animation-delay:-1.6s}.ls-stars span:nth-child(6){top:36%;left:66%;animation-delay:-2.3s}
+.ls-date{position:relative;font-weight:800;font-size:17px;color:rgba(255,255,255,.85)}
+.ls-time{position:relative;font-weight:900;font-size:clamp(84px,9vw,118px);letter-spacing:-.05em;line-height:.95;color:#D9CEFF}
+.ls-widgets{position:relative;display:flex;gap:10px;margin-top:16px}
+.ls-gauge,.ls-next{background:rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:22px}
+.ls-gauge{position:relative;width:76px;height:76px;display:grid;place-items:center}
+.ls-gauge svg{position:absolute;inset:8px}
+.ls-gauge b{font-weight:900;font-size:20px}
+.ls-next{text-align:left;padding:11px 16px;min-width:170px}
+.ls-next small{display:block;font-weight:900;font-size:10.5px;letter-spacing:.14em;opacity:.7}
+.ls-next b{display:block;font-weight:900;font-size:17px;letter-spacing:-.02em}
+.ls-next span{font-weight:700;font-size:13px;opacity:.75}
+.ls p{color:rgba(255,255,255,.7);font-weight:600;font-size:16px;margin-top:8px}
+
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.feat{background:var(--surface);border:1.5px solid var(--hair);border-radius:var(--r-lg);padding:16px 16px 24px}
+.fv{height:136px;border-radius:22px;background:var(--well);display:grid;place-items:center;margin-bottom:20px;overflow:hidden;padding:12px}
+.feat h3{font-weight:900;font-size:21px;letter-spacing:-.03em;padding:0 6px}
+.feat p{color:var(--ink2);font-weight:600;font-size:15.5px;line-height:1.45;margin-top:6px;padding:0 6px}
+.v-siri{display:grid;gap:8px;width:100%;max-width:250px}
+.v-siri span{justify-self:start;background:var(--surface);color:var(--ink);font-weight:800;font-size:14px;padding:9px 13px;border-radius:16px 16px 16px 5px;box-shadow:0 6px 16px -10px rgba(20,10,60,.4)}
+.v-siri .me{justify-self:end;background:#2B1677;color:#FFE94D;border-radius:16px 16px 5px 16px}
+.v-notif{display:flex;gap:10px;align-items:center;width:100%;max-width:280px;background:var(--surface);border-radius:18px;padding:10px 12px;box-shadow:0 10px 24px -14px rgba(20,10,60,.45)}
+.v-notif img{width:30px;height:30px;border-radius:8px}
+.v-notif b{display:block;font-weight:900;font-size:14px;color:var(--ink)}
+.v-notif small{font-weight:600;font-size:12px;color:var(--ink2)}
+.v-notif em{margin-left:auto;align-self:flex-start;font-style:normal;font-weight:700;font-size:11px;color:var(--ink3)}
+.v-toast{display:flex;gap:14px;align-items:center;background:var(--surface);color:var(--ink);font-weight:800;font-size:14px;padding:11px 16px;border-radius:999px;box-shadow:0 10px 24px -14px rgba(20,10,60,.45)}
+.v-toast u{text-decoration:none;font-weight:900;color:#3B26A6}
+.v-eq{display:flex;align-items:center;gap:6px;height:70px;color:#FFA03A}
+.v-eq i{width:9px;border-radius:6px;background:currentColor;animation:eq 1.1s ease-in-out infinite}
+.v-eq i:nth-child(2n){animation-delay:-.3s;color:#FF5C93;background:#FF5C93}.v-eq i:nth-child(3n){animation-delay:-.6s;background:#3B26A6}
+.v-heat{display:grid;grid-template-columns:repeat(12,14px);gap:4px}
+.v-heat i{width:14px;height:14px;border-radius:4px;background:var(--hair)}
+.v-private{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:240px}
+.v-private span{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1.5px solid var(--hair);padding:7px 11px;border-radius:999px;font-weight:800;font-size:13px;color:var(--ink)}
+@media (max-width:980px){.home-grid{grid-template-columns:1fr}.feats{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){
+  .feats{grid-template-columns:1fr}
+  .hs,.ls{min-height:0}
+  .hs-row{flex-direction:column}
+  .wd-ring{width:150px;height:150px;border-radius:34px}
+  .wd-ring svg.ring{inset:16px;width:118px;height:118px}
+  .wd-owl{inset:42px}
+  .wd-rituals{border-radius:30px}
+  .wd-pill{height:48px;font-size:13px}
+  .ls-widgets{flex-direction:column;align-items:center}
+}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
@@ -817,13 +904,20 @@ html.lenis,html.lenis body{height:auto}
   </section>
 
   <!-- ALSO -->
-  <section class="wrap" id="widgets">
-    <div class="also reveal">
-      <div class="also-widget">
-        <div class="widgets" aria-hidden="true">
-          <div class="w-small">
-            <svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,.15)" stroke-width="10" fill="none"/><circle cx="50" cy="50" r="44" stroke="#FFE94D" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="207 277" transform="rotate(-90 50 50)"/></svg>
-            <svg class="owl" viewBox="-14 -6 128 136" width="54" height="57" aria-hidden="true">
+  <section class="wrap home-sec" id="widgets">
+    <div class="wall-head">
+      <h2 class="h-lg">On your Home Screen, too.</h2>
+      <p class="lead">Sova's widgets work without opening the app. Try it: tap a ritual.</p>
+    </div>
+
+    <div class="home-grid">
+      <!-- Home Screen widgets (interactive) -->
+      <div class="hs reveal">
+        <div class="hs-wall" aria-hidden="true"><span></span><span></span></div>
+        <div class="hs-row">
+          <div class="wd-ring" id="wdRing">
+            <svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,.15)" stroke-width="10" fill="none"/><circle id="wdFill" cx="50" cy="50" r="42" stroke="#FFE94D" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="131.9" transform="rotate(-90 50 50)"/></svg>
+            <div class="wd-owl"><svg class="owl o-wd" viewBox="-14 -6 128 136" width="74" height="79" aria-hidden="true">
 <ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
 <path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#FFE94D" />
 <path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#FFE94D" />
@@ -832,27 +926,70 @@ html.lenis,html.lenis body{height:auto}
 <path d="M40 84 q5 4 10 0 q5 4 10 0 M43 95 q4 3.5 7 0 q3.5 3.5 7 0" stroke="#FFE94D" stroke-opacity=".35" stroke-width="2.4" fill="none" stroke-linecap="round"/>
 <g class="eyes"><circle cx="30" cy="47" r="17" fill="#2B1677"/><g class="pupil"><circle cx="31.5" cy="49" r="8.5" fill="#FFE94D"/><circle cx="34.5" cy="45.5" r="2.8" fill="#2B1677"/></g><circle cx="70" cy="47" r="17" fill="#2B1677"/><g class="pupil"><circle cx="71.5" cy="49" r="8.5" fill="#FFE94D"/><circle cx="74.5" cy="45.5" r="2.8" fill="#2B1677"/></g></g>
 <circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
-<path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg>
-            <span class="tag">3 of 4 done</span>
+<path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg><svg class="owl o-wd-happy" viewBox="-14 -6 128 136" width="74" height="79" aria-hidden="true">
+<ellipse cx="38" cy="119" rx="9" ry="5" fill="#FFA03A"/><ellipse cx="62" cy="119" rx="9" ry="5" fill="#FFA03A"/>
+<path class="wing wl" d="M-6 66 Q-12 92 8 104 Q4 84 6 66Z" fill="#FFE94D" />
+<path class="wing wr" d="M106 66 Q112 92 92 104 Q96 84 94 66Z" fill="#FFE94D" />
+<path d="M10 0 Q30 21.6 50 18.36 Q70 21.6 90 0 C110 45.36 104 116 50 116 C-4 116 -10 45.36 10 0Z" fill="#FFE94D" />
+<ellipse cx="50" cy="90" rx="25" ry="22" fill="#FFF4A8"/>
+<path d="M40 84 q5 4 10 0 q5 4 10 0 M43 95 q4 3.5 7 0 q3.5 3.5 7 0" stroke="#FFE94D" stroke-opacity=".35" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+<g class="eyes"><circle cx="30" cy="47" r="17" fill="#2B1677"/><path d="M21 51 Q30 39 39 51" stroke="#FFE94D" stroke-width="5.5" fill="none" stroke-linecap="round"/><circle cx="70" cy="47" r="17" fill="#2B1677"/><path d="M61 51 Q70 39 79 51" stroke="#FFE94D" stroke-width="5.5" fill="none" stroke-linecap="round"/></g>
+<circle cx="14" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/><circle cx="86" cy="63" r="6" fill="#FF5C93" fill-opacity=".85"/>
+<path d="M44 62 L56 62 L50 72Z" fill="#FFA03A"/></svg></div>
+            <span class="wd-tag" id="wdTag">2 of 4 done</span>
           </div>
-          <div class="w-medium">
-            <div class="w-pill done" style="background:#4DF2B0;color:#0B5A3C"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z" /><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z" /><path d="M16 17h4" /><path d="M4 13h4" /></svg>Walk<span class="ck"></span></div>
-            <div class="w-pill" style="background:#FFE94D;color:#5E4A00"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14" /><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" /></svg>Read<span class="ck"></span></div>
-            <div class="w-pill done" style="background:#3DCBFF;color:#063F73"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" /></svg>Water<span class="ck"></span></div>
-            <div class="w-pill" style="background:#D9CEFF;color:#4423B8"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>Wind down<span class="ck"></span></div>
+          <div class="wd-rituals" role="group" aria-label="Rituals widget">
+            <div class="wd-head"><b>Rituals</b><span id="wdCount">2 of 4</span></div>
+            <button type="button" class="wd-pill done" style="--f:#4DF2B0;--d:#0B5A3C" aria-pressed="true"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z" /><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z" /><path d="M16 17h4" /><path d="M4 13h4" /></svg><span>Walk</span><i></i></button>
+            <button type="button" class="wd-pill" style="--f:#FFE94D;--d:#5E4A00" aria-pressed="false"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14" /><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" /></svg><span>Read</span><i></i></button>
+            <button type="button" class="wd-pill done" style="--f:#3DCBFF;--d:#063F73" aria-pressed="true"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" /></svg><span>Water</span><i></i></button>
+            <button type="button" class="wd-pill" style="--f:#D9CEFF;--d:#4423B8" aria-pressed="false"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg><span>Wind down</span><i></i></button>
           </div>
         </div>
-        <h2 class="h-md">Widgets you can tick.</h2>
-        <p>The Today widget shows your progress ring. The Rituals widget lets you tick habits off from the Home Screen, and the Lock Screen shows what's next.</p>
+        <div class="hs-caption">
+          <h3>Tick rituals from the Home Screen</h3>
+          <p>The Today widget shows your ring. The Rituals widget checks habits off with one tap.</p>
+        </div>
       </div>
-      <dl class="also-list">
-        <div><dt>Siri and Shortcuts</dt><dd>“Add a task in Sova” works by voice, and every action is available in Shortcuts.</dd></div>
-        <div><dt>Alerts and repeats</dt><dd>A notification at the task's time, or a few minutes before. Repeat daily, on weekdays, weekly, monthly or yearly.</dd></div>
-        <div><dt>Undo</dt><dd>Ticked, moved or deleted something by mistake? The bar at the bottom brings it back.</dd></div>
-        <div><dt>Sounds and haptics</dt><dd>Short tones and taps when you check things off. Both can be turned off, and sounds follow the silent switch.</dd></div>
-        <div><dt>Insights</dt><dd>Your week at a glance, a 17-week activity calendar and which rituals you keep most often.</dd></div>
-        <div><dt>Private</dt><dd>No account, no tracking, no ads. Data stays on your iPhone, or in your own iCloud with Plus.</dd></div>
-      </dl>
+
+      <!-- Lock Screen -->
+      <div class="ls reveal" aria-hidden="true">
+        <div class="ls-stars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="ls-date">Wednesday, November 18</div>
+        <div class="ls-time">9:41</div>
+        <div class="ls-widgets">
+          <div class="ls-gauge"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" stroke="rgba(255,255,255,.22)" stroke-width="6" fill="none"/><circle cx="30" cy="30" r="24" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="113 151" transform="rotate(-90 30 30)"/></svg><b>3</b></div>
+          <div class="ls-next"><small>UP NEXT</small><b>Call Mom</b><span>6:00 PM</span></div>
+        </div>
+        <div class="ls-caption"><h3>And on the Lock Screen</h3><p>Your progress and the next thing to do, before you unlock.</p></div>
+      </div>
+    </div>
+
+    <div class="feats">
+      <div class="feat reveal">
+        <div class="fv"><div class="v-siri"><span class="me">Add a task in Sova</span><span>What do you need to do?</span></div></div>
+        <h3>Siri and Shortcuts</h3><p>Add tasks by voice. Every action is also in the Shortcuts app.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="fv"><div class="v-notif"><img src="assets/icon.png" alt="" width="30" height="30"><div><b>Call Mom</b><small>It's 6:00 PM. Time for this one!</small></div><em>now</em></div></div>
+        <h3>Alerts and repeats</h3><p>A notification at the task's time, or a few minutes before. Repeat daily, weekly or monthly.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="fv"><div class="v-toast">Done: Gym, leg day <u>Undo</u></div></div>
+        <h3>Undo</h3><p>Ticked, moved or deleted something by mistake? One tap brings it back.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="fv"><div class="v-eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <h3>Sounds and haptics</h3><p>Short tones and taps when you check things off. Sounds follow the silent switch.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="fv"><div class="v-heat"><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:#12C985"></i><i style="background:#B8F7DC"></i><i style="background:#4DF2B0"></i><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:#12C985"></i><i style="background:#B8F7DC"></i><i style="background:var(--hair)"></i><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:#7EF0C2"></i><i style="background:#12C985"></i><i style="background:#B8F7DC"></i><i style="background:#4DF2B0"></i><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:var(--hair)"></i><i style="background:#B8F7DC"></i><i style="background:#4DF2B0"></i><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:#12C985"></i><i style="background:#12C985"></i><i style="background:#B8F7DC"></i><i style="background:#4DF2B0"></i><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:#12C985"></i><i style="background:#B8F7DC"></i><i style="background:#4DF2B0"></i><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:#12C985"></i><i style="background:#B8F7DC"></i><i style="background:var(--hair)"></i><i style="background:#4DF2B0"></i><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:#12C985"></i><i style="background:#B8F7DC"></i><i style="background:#4DF2B0"></i><i style="background:var(--hair)"></i><i style="background:#7EF0C2"></i><i style="background:var(--hair)"></i><i style="background:#B8F7DC"></i><i style="background:#4DF2B0"></i></div></div>
+        <h3>Insights</h3><p>Your week at a glance, a 17-week activity calendar and your most consistent rituals.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="fv"><div class="v-private"><span><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>On-device</span><span>No account</span><span>No ads</span><span>No tracking</span></div></div>
+        <h3>Private</h3><p>Your data stays on your iPhone, or in your own iCloud with Plus.</p>
+      </div>
     </div>
   </section>
 
@@ -1237,6 +1374,29 @@ markDot();
     });
   }
   addEventListener("load", () => ScrollTrigger.refresh());
+})();
+
+// Interactive Rituals widget
+(() => {
+  const pills = [...document.querySelectorAll(".wd-pill")];
+  if (!pills.length) return;
+  const fill = document.getElementById("wdFill"), tag = document.getElementById("wdTag"),
+        count = document.getElementById("wdCount"), ring = document.getElementById("wdRing"), C = 263.9;
+  const update = () => {
+    const n = pills.filter(p => p.classList.contains("done")).length;
+    fill.style.strokeDashoffset = C * (1 - n / pills.length);
+    tag.textContent = n === pills.length ? "All done!" : `${n} of ${pills.length} done`;
+    count.textContent = `${n} of ${pills.length}`;
+    ring.classList.toggle("all", n === pills.length);
+  };
+  pills.forEach(p => p.addEventListener("click", () => {
+    const on = p.classList.toggle("done");
+    p.setAttribute("aria-pressed", String(on));
+    p.classList.remove("pop"); void p.offsetWidth; p.classList.add("pop");
+    if (navigator.vibrate) navigator.vibrate(on ? 12 : 6);
+    update();
+  }));
+  update();
 })();
 </script>
 </body>
