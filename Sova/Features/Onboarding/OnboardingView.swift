@@ -227,16 +227,17 @@ struct OnboardingView: View {
     private func finish() {
         userName = trimmedName
         StarterContent.install(rituals: chosenRituals, goalTitle: trimmedGoal, theme: theme, in: context)
-        // A wave in Sova's colors rises from the button and lands on Today;
-        // the real Today takes over underneath once it has landed.
-        let started = waves.play(.welcome, from: launchFrame) {
-            hasOnboarded = true
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(300))
-                waves.dismiss()
-            }
+        // A wave in Sova's colors rises from the button and lands on Today.
+        // The real Today is switched in underneath straight away; the wave
+        // is only a cover over it that clears itself.
+        let started = waves.play(.welcome, from: launchFrame)
+        if started {
+            var instant = Transaction()
+            instant.disablesAnimations = true
+            withTransaction(instant) { hasOnboarded = true }
+            return
         }
-        if !started { withAnimation(.smooth(duration: 0.7)) { hasOnboarded = true } }
+        withAnimation(.smooth(duration: 0.7)) { hasOnboarded = true }
     }
 }
 

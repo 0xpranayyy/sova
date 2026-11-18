@@ -99,6 +99,11 @@ struct DaySummary: Equatable {
 }
 
 /// Runs one wave at a time over the whole app.
+///
+/// The live screen underneath is always already the real destination: the
+/// caller changes it right after `play`. The wave is only a cover, and the
+/// cover always goes away on its own, on a plain main-queue timer, whatever
+/// the wave itself reports. A tap on it also skips it.
 @MainActor
 @Observable
 final class WaveDirector {
@@ -111,58 +116,68 @@ final class WaveDirector {
     /// the whole screen and passes no safe area down, so the destination
     /// views pad themselves with this.
     private(set) var insets = EdgeInsets()
-    private var onFinished: (() -> Void)?
     private var afterDismiss: (() -> Void)?
-    private var announced = false
+    /// Which run the pending timers belong to, so a stale timer does nothing.
+    private var run = 0
 
     var isActive: Bool { scene != nil }
 
-    /// Takes a picture of the screen, mounts the wave at rest over it, and
-    /// sends the wave out once its shaders have warmed up.
+    /// Takes a picture of the screen and covers the app with it, then sends
+    /// the wave out once its shaders have warmed up.
     /// - Returns: false if no picture could be taken; the caller should then
     ///   carry on without the wave.
     @discardableResult
-    func play(_ scene: WaveScene, from source: CGRect, then finished: (() -> Void)? = nil,
-              afterDismiss: (() -> Void)? = nil) -> Bool {
+    func play(_ scene: WaveScene, from source: CGRect, afterDismiss: (() -> Void)? = nil) -> Bool {
         guard !isActive, let picture = ScreenSnapshot.take() else { return false }
+        run += 1
+        let thisRun = run
         snapshot = picture
         insets = ScreenSnapshot.safeArea()
         self.source = source
         focus = CGPoint(x: source.midX, y: source.midY)
         revealed = false
-        announced = false
-        onFinished = finished
         self.afterDismiss = afterDismiss
         self.scene = scene
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(200))
-            guard self.scene == scene else { return }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            guard let self, self.run == thisRun, self.scene != nil else { return }
             // The day-done moment already celebrated when the last thing was ticked.
             if scene == .welcome { Haptics.celebrate() }
             self.revealed = true
-            // Don't rely on the wave's completion alone: if it never reports
-            // back, hand over anyway so the app can't stay covered.
-            try? await Task.sleep(for: .seconds(scene.handOver))
-            guard self.scene == scene else { return }
-            self.waveFinished()
+        }
+        // The welcome uncovers the real Today once the wave has crossed the
+        // screen. The day summary waits for its "Nice!", but never forever.
+        let limit = scene == .welcome ? scene.handOver : 30
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2 + limit) { [weak self] in
+            guard let self, self.run == thisRun else { return }
+            self.dismiss()
         }
         return true
     }
 
     /// Called by the wave when it has left and the edges have cleared.
     func waveFinished() {
-        guard onFinished != nil || afterDismiss != nil else { return }
-        if case .dayDone? = scene, !announced {
-            announced = true
+        guard let scene, revealed else { return }
+        switch scene {
+        case .welcome:
+            dismiss()
+        case .dayDone:
             AccessibilityNotification.Announcement(String(localized: "Day complete")).post()
         }
-        let finished = onFinished
-        onFinished = nil
-        finished?()
     }
 
-    /// Fades the overlay away, uncovering the live screen underneath.
+    /// A tap on the cover: skip ahead to the real screen. The day summary
+    /// only closes once it's on screen.
+    func skip() {
+        guard let scene else { return }
+        if case .dayDone = scene, !revealed { return }
+        dismiss()
+    }
+
+    /// Fades the cover away, uncovering the live screen underneath.
     func dismiss() {
+        guard scene != nil else { return }
+        run += 1
         withAnimation(.smooth(duration: 0.35)) {
             scene = nil
             snapshot = nil
@@ -193,6 +208,8 @@ struct WaveOverlay: View {
             } revealed: {
                 destination(for: scene)
             }
+            .contentShape(.rect)
+            .onTapGesture { waves.skip() }
             .ignoresSafeArea()
             .transition(.opacity)
             .zIndex(10)
