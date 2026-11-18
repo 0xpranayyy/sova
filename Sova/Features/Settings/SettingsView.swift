@@ -162,8 +162,12 @@ struct SettingsView: View {
                     }
 
                     Section("Help") {
-                        if Links.hasSupportEmail, let mail = URL(string: "mailto:\(Links.supportEmail)?subject=Sova%20feedback") {
-                            Button("Help & feedback", systemImage: "envelope") { openURL(mail) }
+                        Button("Help & feedback", systemImage: "envelope") {
+                            if Links.hasSupportEmail, let mail = URL(string: "mailto:\(Links.supportEmail)?subject=Sova%20feedback") {
+                                openURL(mail)
+                            } else {
+                                openURL(Links.support)
+                            }
                         }
                         Button("Rate Sova", systemImage: "star") {
                             if let url = Links.writeReview { openURL(url) } else { requestReview() }

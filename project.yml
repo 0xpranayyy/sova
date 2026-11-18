@@ -13,7 +13,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.sova.Sova
         SWIFT_VERSION: "5.0"
-        TARGETED_DEVICE_FAMILY: "1,2"
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Sova
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -37,7 +37,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.sova.Sova.Widgets
         SWIFT_VERSION: "5.0"
-        TARGETED_DEVICE_FAMILY: "1,2"
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: SovaWidgets/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: Sova

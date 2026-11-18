@@ -90,15 +90,17 @@ Data lives in a SwiftData store in the App Group container, shared with the widg
 
 The project uses Xcode's synchronized folders, so files you add under `Sova/`, `Shared/` or `SovaWidgets/` are picked up automatically. A `project.yml` for [XcodeGen](https://github.com/yonaskolb/XcodeGen) is included too.
 
-## Before submitting to the App Store
+## Publishing
 
-1. In App Store Connect, create the in-app purchases:
-   - an auto-renewable subscription group "Sova Plus" with `app.sova.plus.monthly` and `app.sova.plus.yearly` (add a 1-week free trial to yearly)
-   - a non-consumable `app.sova.plus.lifetime`
-2. Turn on GitHub Pages (Settings → Pages → branch `main`, folder `/docs`) so the privacy policy is live at `https://0xpranayyy.github.io/sova/privacy.html`. Use that URL in App Store Connect.
-3. Set your support address in `Sova/Support/Links.swift` (`supportEmail`). The Help & feedback row stays hidden until you do. Add the App Store id there too, once you have it, for the "Rate Sova" link.
-4. For App Privacy, answer **Data Not Collected**.
-5. Listing copy and screenshots are in `marketing/app-store/`.
+Follow `marketing/app-store/PUBLISHING.md`, a step-by-step checklist covering:
+- accounts and agreements
+- the two placeholders to fill in
+- GitHub Pages for the privacy and support pages
+- signing and the CloudKit production schema
+- in-app purchase setup
+- App Store Connect fields
+- App Privacy answers
+- ready-to-paste review notes
 
 ## Structure
 
