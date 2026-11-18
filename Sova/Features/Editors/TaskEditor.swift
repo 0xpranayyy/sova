@@ -16,6 +16,7 @@ struct TaskEditor: View {
     @State private var priority: Priority
     @State private var accent: Accent
     @State private var goal: Goal?
+    @State private var repeatRule: RepeatRule
     @State private var confirmDelete = false
     @FocusState private var titleFocused: Bool
 
@@ -29,6 +30,7 @@ struct TaskEditor: View {
         _priority = State(initialValue: task?.priority ?? .low)
         _accent = State(initialValue: task?.accent ?? defaultGoal?.accent ?? SovaTheme.current.accent)
         _goal = State(initialValue: task?.goal ?? defaultGoal)
+        _repeatRule = State(initialValue: task?.repeatRule ?? .none)
     }
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -54,6 +56,11 @@ struct TaskEditor: View {
                                        displayedComponents: hasTime ? [.date, .hourAndMinute] : [.date])
                             Toggle(isOn: $hasTime.animation(.snappy)) {
                                 Label("Time", systemImage: "clock")
+                            }
+                            Picker(selection: $repeatRule) {
+                                ForEach(RepeatRule.allCases) { Text($0.label).tag($0) }
+                            } label: {
+                                Label("Repeat", systemImage: "repeat")
                             }
                         }
                     }
@@ -103,7 +110,11 @@ struct TaskEditor: View {
             }
             .confirmationDialog("Delete this task?", isPresented: $confirmDelete, titleVisibility: .visible) {
                 Button("Delete Task", role: .destructive) {
-                    if let task { context.delete(task) }
+                    if let task {
+                        TaskAlerts.cancel(task)
+                        context.delete(task)
+                        SovaRefresh.changed(context)
+                    }
                     dismiss()
                 }
             }
@@ -125,6 +136,10 @@ struct TaskEditor: View {
         target.priority = priority
         target.accent = accent
         target.goal = goal
+        target.repeatRule = hasDue ? repeatRule : .none
+        TaskAlerts.schedule(target)
+        SovaRefresh.changed(context)
+        if target.hasTime { Task { await TaskAlerts.requestPermissionIfNeeded() } }
         dismiss()
     }
 }

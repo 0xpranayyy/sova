@@ -441,6 +441,12 @@ struct DayRow: View {
                         .lineLimit(1)
                 }
                 Spacer(minLength: 6)
+                if t.repeatRule != .none && !t.isDone {
+                    Image(systemName: "repeat")
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Color.inkTertiary)
+                        .accessibilityLabel(t.repeatRule.label)
+                }
                 if let time = time(t) {
                     Text(time)
                         .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline).monospacedDigit())

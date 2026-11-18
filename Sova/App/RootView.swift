@@ -27,6 +27,8 @@ struct RootView: View {
 
 struct MainTabView: View {
     @State private var router = AppRouter()
+    @Environment(\.modelContext) private var context
+    @Environment(\.scenePhase) private var scenePhase
     /// Bumps at midnight so day-based screens don't keep showing yesterday.
     @State private var today = Date.now.startOfDay
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
@@ -54,6 +56,14 @@ struct MainTabView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
             today = Date.now.startOfDay
+        }
+        .task {
+            await TaskAlerts.resync(in: context)
+            SovaRefresh.changed(context)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Leaving the app: make the widgets and the badge match what just changed.
+            if phase == .background { SovaRefresh.changed(context) }
         }
         .sensoryFeedback(.selection, trigger: router.tab)
         .onChange(of: router.tab) { previous, current in

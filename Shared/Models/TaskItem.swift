@@ -33,6 +33,54 @@ enum Priority: Int, CaseIterable, Identifiable {
     }
 }
 
+/// How a task comes back after it's done.
+enum RepeatRule: String, CaseIterable, Identifiable {
+    case none, daily, weekdays, weekly, monthly, yearly
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .none: String(localized: "Never")
+        case .daily: String(localized: "Every day")
+        case .weekdays: String(localized: "Weekdays")
+        case .weekly: String(localized: "Every week")
+        case .monthly: String(localized: "Every month")
+        case .yearly: String(localized: "Every year")
+        }
+    }
+
+    /// The next date after `date` (keeps the time of day).
+    func step(_ date: Date) -> Date? {
+        let cal = Calendar.current
+        switch self {
+        case .none: return nil
+        case .daily: return cal.date(byAdding: .day, value: 1, to: date)
+        case .weekly: return cal.date(byAdding: .day, value: 7, to: date)
+        case .monthly: return cal.date(byAdding: .month, value: 1, to: date)
+        case .yearly: return cal.date(byAdding: .year, value: 1, to: date)
+        case .weekdays:
+            var next = cal.date(byAdding: .day, value: 1, to: date) ?? date
+            while [1, 7].contains(cal.component(.weekday, from: next)) {
+                next = cal.date(byAdding: .day, value: 1, to: next) ?? next
+            }
+            return next
+        }
+    }
+
+    /// The first occurrence after `date` that lands today or later, so a
+    /// repeating task finished late doesn't come back already overdue.
+    func next(after date: Date) -> Date? {
+        guard var next = step(date) else { return nil }
+        let today = Date.now.startOfDay
+        for _ in 0..<800 where next < today {
+            guard let n = step(next) else { break }
+            next = n
+        }
+        return next
+    }
+}
+
 @Model
 final class TaskItem {
     var title: String = ""
@@ -44,6 +92,7 @@ final class TaskItem {
     var isDone: Bool = false
     var completedAt: Date?
     var createdAt: Date = Date.now
+    var repeatRaw: String = RepeatRule.none.rawValue
     var goal: Goal?
 
     init(
@@ -74,6 +123,14 @@ final class TaskItem {
         get { Accent(rawValue: accentRaw) ?? .ember }
         set { accentRaw = newValue.rawValue }
     }
+
+    var repeatRule: RepeatRule {
+        get { RepeatRule(rawValue: repeatRaw) ?? .none }
+        set { repeatRaw = newValue.rawValue }
+    }
+
+    /// A stable id for this task's notification.
+    var alertID: String { "sova.task.\(Int(createdAt.timeIntervalSinceReferenceDate * 1000))" }
 
     var isOverdue: Bool {
         guard let dueDate, !isDone else { return false }

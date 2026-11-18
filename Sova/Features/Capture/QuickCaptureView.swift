@@ -48,6 +48,10 @@ struct QuickCaptureView: View {
             attributed[r].foregroundColor = StickerTone.yellow.deep
             attributed[r].backgroundColor = StickerTone.yellow.fill
         }
+        if let range = parsed.repeatRange, let r = Range(range, in: attributed) {
+            attributed[r].foregroundColor = StickerTone.mint.deep
+            attributed[r].backgroundColor = StickerTone.mint.fill
+        }
         if let range = parsed.priorityRange, let r = Range(range, in: attributed) {
             attributed[r].foregroundColor = StickerTone.pink.deep
             attributed[r].backgroundColor = StickerTone.pink.fill
@@ -103,6 +107,9 @@ struct QuickCaptureView: View {
                         .buttonStyle(.pressable)
                     }
                 }
+                if parsed.repeatRule != .none {
+                    Token(symbol: "repeat", text: parsed.repeatRule.label)
+                }
                 if parsed.priority != .low {
                     Token(symbol: "flag", text: parsed.priority == .high ? String(localized: "High") : String(localized: "Medium"))
                 }
@@ -139,6 +146,7 @@ struct QuickCaptureView: View {
         .sensoryFeedback(.success, trigger: added)
         .sensoryFeedback(.selection, trigger: parsed.dueDate != nil) { _, found in found }
         .sensoryFeedback(.selection, trigger: parsed.priority)
+        .sensoryFeedback(.selection, trigger: parsed.repeatRule)
         .task { focused = true }
     }
 
@@ -153,7 +161,11 @@ struct QuickCaptureView: View {
             priority: p.priority,
             accent: theme.accent
         )
+        task.repeatRule = p.repeatRule
         context.insert(task)
+        TaskAlerts.schedule(task)
+        SovaRefresh.changed(context)
+        if task.hasTime { Task { await TaskAlerts.requestPermissionIfNeeded() } }
         QuickCaptureTip().invalidate(reason: .actionPerformed)
         SwipeTip.isReady = true
         return task
