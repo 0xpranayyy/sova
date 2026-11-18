@@ -1,6 +1,14 @@
 # Sova: launch film (31s, 9:16)
 
-The music is 120 BPM in C major, and every cut and slam lands on a beat.
+The music is 120 BPM in C major: marimba chords, a glockenspiel hook, a soft round bass, and boing and pop sounds. Every cut and slam lands on a beat.
+
+**The owl is the host.** From the capture scene on, it sits on top of the phone and reacts in speech bubbles: "Psst… just type it!", "Ooh, got it! 💛", "Let's tick some!", "Yay, all done!!", "Tiny daily wins.", "12 days in a row!", "Dream big!", "So proud of you!", "Cozy night mode 🌙". It hops and cheers in a burst of hearts and sparkles at each big moment.
+
+**Look and feel**
+- Scenes change with soft circular wipes instead of hard cuts.
+- Hearts and clouds drift in flat colors behind the phone.
+- The phone tilts in 3D and zooms in on the typing and on each check-off.
+- At the end, the owl pops up from the bottom and waves "See you soon!".
 
 | Time | Scene | On screen | Sound |
 | --- | --- | --- | --- |
