@@ -49,10 +49,13 @@ struct CheckmarkShape: Shape {
 /// A checkbox wrapped in a 44pt button with haptics.
 struct CheckButton: View {
     var isOn: Bool
-    var color: Color = SovaTheme.current.accent.color
+    /// Fill when done (a tone's deep color).
+    var color: Color = Color.ink
     var round = false
-    var size: CGFloat = 26
+    var size: CGFloat = 28
     var emphasized = false
+    /// The tick's color (a tone's fill color).
+    var checkColor: Color = .white
     var label: String = ""
     var action: () -> Void
 
