@@ -67,40 +67,70 @@ struct InsightsView: View {
 
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 12) {
                     ScreenTitle(title: String(localized: "Insights"),
                                 subtitle: String(localized: "Last 30 days")) { EmptyView() }
                         .padding(.top, 4)
-                        .padding(.bottom, 6)
+                        .padding(.bottom, 4)
 
-                    // Rituals kept, on indigo, with the week as fat bars.
-                    VStack(alignment: .leading, spacing: 0) {
-                        MonoCaps(hasHistory ? String(localized: "Rituals kept") : String(localized: "No history yet"),
-                                 color: StickerTone.indigo.deep)
-                        HStack(alignment: .bottom, spacing: 12) {
+                    // The headline number on indigo, with the happy owl.
+                    ZStack(alignment: .topTrailing) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            MonoCaps(hasHistory ? String(localized: "Rituals kept · 30 days") : String(localized: "No history yet"),
+                                     color: StickerTone.indigo.deep)
                             HStack(alignment: .firstTextBaseline, spacing: 0) {
                                 Text(Int((current * 100).rounded()), format: .number)
-                                    .font(.hero(88, weight: .heavy))
+                                    .font(.hero(86, weight: .heavy))
                                     .tracking(-4)
                                     .contentTransition(.numericText(value: current))
-                                Text("%").font(.hero(40, weight: .heavy)).opacity(0.6)
+                                Text("%").font(.hero(38, weight: .heavy)).opacity(0.6)
                             }
                             .foregroundStyle(StickerTone.indigo.deep)
-                            if hasHistory, routines.contains(where: { $0.createdAt < Date.now.adding(days: -30) }) {
-                                Text(delta >= 0 ? String(localized: "up \(delta)% from\nlast month")
-                                                : String(localized: "down \(-delta)% from\nlast month"))
-                                    .font(.allo(.subheadline, .heavy))
-                                    .padding(.bottom, 14)
-                            }
+                            .padding(.top, 4)
+                            WeekBars(values: weekCounts)
+                                .padding(.top, 8)
                         }
-                        WeekBars(values: weekCounts)
-                            .padding(.top, 12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        HStack(alignment: .top, spacing: 0) {
+                            if hasHistory, routines.contains(where: { $0.createdAt < Date.now.adding(days: -30) }) {
+                                TiltPill(text: delta >= 0 ? "↑ \(delta)%" : "↓ \(-delta)%",
+                                         tone: delta >= 0 ? .mint : .pink, tilt: -8, size: 14)
+                                    .padding(.top, 50)
+                                    .padding(.trailing, -2)
+                                    .zIndex(1)
+                            }
+                            OwlMark(size: 62, happy: current >= 0.5, bodyColor: StickerTone.yellow.fill,
+                                    eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
+                                    bellyColor: Color(hex: 0xFFF4A8))
+                                .rotationEffect(.degrees(8))
+                        }
                     }
-                    .block(.indigo)
+                    .padding(20)
+                    .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 34, style: .continuous))
+                    .overlay(alignment: .topLeading) {
+                        SparkleDot(color: StickerTone.pink.fill, size: 14)
+                            .padding(.leading, 236)
+                            .padding(.top, 22)
+                            .allowsHitTesting(false)
+                    }
 
                     HStack(spacing: 10) {
                         StatBlock(label: String(localized: "Tasks done"), value: "\(tasksDone)", tone: .pink)
+                            .rotationEffect(.degrees(-1.5))
                         StatBlock(label: String(localized: "Best streak"), value: "\(bestStreak)", unit: "d", tone: .orange)
+                            .rotationEffect(.degrees(1.5))
+                    }
+                    .padding(.vertical, 2)
+
+                    if !routines.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            MonoCaps(String(localized: "Most consistent"))
+                            ForEach(routines.sorted { $0.consistency(days: 30) > $1.consistency(days: 30) }.prefix(4)) { routine in
+                                ConsistencyRow(routine: routine)
+                            }
+                        }
+                        .surface(cornerRadius: 30, padding: 18)
                     }
 
                     VStack(alignment: .leading, spacing: 12) {
@@ -109,12 +139,7 @@ struct InsightsView: View {
                     }
                     .padding(18)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(StickerTone.mint.fill.opacity(0.35), in: .rect(cornerRadius: 28, style: .continuous))
-
-                    HStack(spacing: 10) {
-                        StatBlock(label: String(localized: "Per day"), value: perDay.formatted(.number.precision(.fractionLength(1))), tone: .cyan)
-                        StatBlock(label: String(localized: "Goal progress"), value: "\(Int((goalAverage * 100).rounded()))", unit: "%", tone: .lilac)
-                    }
+                    .background(StickerTone.mint.fill.opacity(0.35), in: .rect(cornerRadius: 30, style: .continuous))
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -265,5 +290,34 @@ private struct WeekBars: View {
         .accessibilityElement()
         .accessibilityLabel("This week")
         .accessibilityValue(values.map { "\($0.1)" }.joined(separator: ", "))
+    }
+}
+
+/// A ritual's 30-day consistency as a bar in its own color.
+private struct ConsistencyRow: View {
+    let routine: Routine
+
+    var body: some View {
+        let tone = StickerTone(routine.accent)
+        let value = routine.consistency(days: 30)
+        HStack(spacing: 10) {
+            Image(systemName: routine.symbol)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+                .frame(width: 30, height: 30)
+                .background(tone.fill, in: .rect(cornerRadius: 10, style: .continuous))
+            VStack(alignment: .leading, spacing: 5) {
+                HStack {
+                    Text(routine.title)
+                    Spacer()
+                    Text(value, format: .percent.precision(.fractionLength(0)))
+                        .monospacedDigit()
+                }
+                .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
+                .foregroundStyle(Color.ink)
+                ProgressLine(progress: value, color: tone.fill, height: 10, track: tone.fill.opacity(0.3))
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 }
