@@ -93,7 +93,7 @@ struct TodayView: View {
                 } else {
                     ForEach(dueTasks) { task in
                         TaskRow(task: task) { router.sheet = .task(task) }
-                            .glassListRow(tint: task.accent.color)
+                            .glassListRow()
                             .taskSwipeActions(task)
                     }
                 }
@@ -111,7 +111,7 @@ struct TodayView: View {
                         .bareListRow(top: 18, bottom: 6)
                     ForEach(upcomingTasks.prefix(8)) { task in
                         TaskRow(task: task) { router.sheet = .task(task) }
-                            .glassListRow(tint: task.accent.color)
+                            .glassListRow()
                             .taskSwipeActions(task)
                     }
                 }

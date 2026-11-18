@@ -83,10 +83,7 @@ struct HelloStep: View {
 
     private func feature(_ symbol: String, _ accent: Accent, _ title: String, _ detail: String) -> some View {
         HStack(alignment: .top, spacing: 16) {
-            Image(systemName: symbol)
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(accent.gradient)
-                .frame(width: 40)
+            IconTile(symbol: symbol, accent: accent, size: 40, filled: true)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title).font(.headline).foregroundStyle(Color.ink)
                 Text(detail).font(.subheadline).foregroundStyle(Color.inkSecondary)
@@ -227,7 +224,7 @@ private struct PillarCard<Content: View>: View {
             }
             content
         }
-        .surface(cornerRadius: 24, padding: 18, tint: accent.color)
+        .surface(cornerRadius: 24, padding: 18)
         .rotationEffect(.degrees(settled ? rotation : 0))
         .offset(x: settled ? offsetX : 0)
     }
@@ -362,50 +359,51 @@ private struct RitualTile: View {
     let selected: Bool
     let action: () -> Void
 
+    private var accent: Color { SovaTheme.current.accent.color }
+
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top) {
-                    Image(systemName: ritual.symbol)
-                        .font(.title3.weight(.medium))
-                        .foregroundStyle(selected ? Color.white : ritual.accent.color)
+                    IconTile(symbol: ritual.symbol, accent: ritual.accent, size: 34, filled: true)
                     Spacer()
                     ZStack {
                         Circle()
                             .strokeBorder(Color.inkTertiary, lineWidth: 1.5)
                             .opacity(selected ? 0 : 1)
                         Circle()
-                            .fill(Color.white)
+                            .fill(accent)
                             .scaleEffect(selected ? 1 : 0.3)
                             .opacity(selected ? 1 : 0)
                         CheckmarkShape()
                             .trim(from: 0, to: selected ? 1 : 0)
-                            .stroke(ritual.accent.color, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                            .padding(6)
+                            .stroke(Color.white, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                            .padding(6.5)
                     }
-                    .frame(width: 22, height: 22)
+                    .frame(width: 24, height: 24)
                 }
-                Spacer(minLength: 20)
+                Spacer(minLength: 18)
                 Text(ritual.title)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(selected ? Color.white : Color.ink)
+                    .foregroundStyle(Color.ink)
                     .multilineTextAlignment(.leading)
                 Text(ritual.period.name)
                     .font(.caption)
-                    .foregroundStyle(selected ? Color.white.opacity(0.75) : Color.inkSecondary)
+                    .foregroundStyle(Color.inkSecondary)
                     .padding(.top, 2)
             }
             .padding(14)
             .frame(maxWidth: .infinity, minHeight: 116, alignment: .topLeading)
-            .background {
+            .glassEffect(Glass.card(tint: selected ? accent : nil, interactive: true),
+                         in: .rect(cornerRadius: 22, style: .continuous))
+            .overlay {
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(ritual.accent.gradient)
+                    .strokeBorder(accent, lineWidth: 2)
                     .opacity(selected ? 1 : 0)
             }
-            .glassEffect(Glass.card(tint: selected ? ritual.accent.color : nil, interactive: true),
-                         in: .rect(cornerRadius: 22, style: .continuous))
         }
         .buttonStyle(.pressable)
+        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: selected)
         .accessibilityLabel(ritual.title)
         .accessibilityValue(ritual.period.name)
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -442,16 +440,15 @@ struct GoalStep: View {
                             HStack(spacing: 7) {
                                 Image(systemName: suggestion.symbol)
                                     .font(.footnote.weight(.semibold))
-                                    .foregroundStyle(selected ? Color.white : suggestion.accent.color)
+                                    .foregroundStyle(selected ? Color.white : Color.inkSecondary)
                                 Text(suggestion.title)
                                     .font(.subheadline.weight(.medium))
                                     .foregroundStyle(selected ? Color.white : Color.ink)
                             }
                             .padding(.horizontal, 14)
                             .frame(height: 40)
-                            .background { Capsule().fill(suggestion.accent.gradient).opacity(selected ? 1 : 0) }
-                            .glassEffect(Glass.card(tint: selected ? suggestion.accent.color : nil, interactive: true),
-                                         in: .capsule)
+                            .background { Capsule().fill(SovaTheme.current.accent.color).opacity(selected ? 1 : 0) }
+                            .glassEffect(Glass.card(interactive: true), in: .capsule)
                         }
                         .buttonStyle(.pressable)
                         .accessibilityAddTraits(selected ? .isSelected : [])

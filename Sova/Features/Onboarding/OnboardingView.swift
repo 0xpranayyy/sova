@@ -246,22 +246,14 @@ struct StepIndicator: View {
     }
 }
 
-/// A vivid color blend that shifts mood with each step.
+/// The onboarding canvas: the brand color, flat.
 struct OnboardingBackdrop: View {
     var step: OnboardingStep
     var theme: SovaTheme
 
-    private var mood: SovaTheme {
-        switch step {
-        case .hello: .plum
-        case .pillars: .tide
-        case .name: .ember
-        case .rituals: .moss
-        case .goal: .plum
-        case .rhythm: .ember
-        case .theme, .finish: theme
-        }
-    }
+    /// One canvas for the whole flow, so it reads as a single place.
+    /// It only changes when the user picks a theme.
+    private var mood: SovaTheme { theme }
 
     var body: some View {
         MeshBackdrop(colors: mood)

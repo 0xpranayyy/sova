@@ -27,7 +27,7 @@ struct GoalCard: View {
                     .frame(minWidth: 36, alignment: .trailing)
             }
         }
-        .surface(cornerRadius: 26, padding: 18, tint: goal.accent.color, interactive: true)
+        .surface(cornerRadius: 26, padding: 18, interactive: true)
         .accessibilityElement(children: .combine)
     }
 
