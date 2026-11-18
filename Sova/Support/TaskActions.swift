@@ -47,7 +47,11 @@ enum TaskActions {
         let next = task.isDone ? spawnNext(after: task) : nil
         SovaRefresh.changed(context)
         guard task.isDone, let router else { return }
-        let message = next?.dueDate.map { String(localized: "Done! Next: \($0.relativeDayText(includingTime: false))") }
+        let lowered = task.title.lowercased()
+        let owlish = ["owl", "sova", "hoot"].contains { lowered.contains($0) }
+        if owlish { Haptics.owl() }
+        let message = owlish ? String(localized: "Hoo hoo! The owl approves. 🦉")
+            : next?.dueDate.map { String(localized: "Done! Next: \($0.relativeDayText(includingTime: false))") }
             ?? String(localized: "Done: \(task.title)")
         router.show(Toast(message: message) {
             // Only reopen it if it's still done (it may have been unticked since).
@@ -79,6 +83,49 @@ enum TaskActions {
     }
 
     /// Moves a task to tomorrow, keeping its time of day.
+    /// Pulls a task forward to today, keeping its time of day.
+    static func moveToToday(_ task: TaskItem, router: AppRouter?) {
+        let previous = task.dueDate
+        Haptics.pop(0.6, sound: true)
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            task.dueDate = sameTime(as: task, on: Date.now.startOfDay)
+        }
+        TaskAlerts.schedule(task)
+        SovaRefresh.changed(task.modelContext)
+        router?.show(Toast(message: String(localized: "Moved to today")) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { task.dueDate = previous }
+            TaskAlerts.schedule(task)
+            SovaRefresh.changed(task.modelContext)
+        })
+    }
+
+    /// Brings every overdue task to today in one go, with one Undo.
+    static func moveOverdueToToday(_ tasks: [TaskItem], router: AppRouter?) {
+        guard !tasks.isEmpty else { return }
+        let previous = tasks.map(\.dueDate)
+        Haptics.pop(0.7, sound: true)
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+            for task in tasks { task.dueDate = sameTime(as: task, on: Date.now.startOfDay) }
+        }
+        for task in tasks { TaskAlerts.schedule(task) }
+        SovaRefresh.changed(tasks.first?.modelContext)
+        router?.show(Toast(message: tasks.count == 1 ? String(localized: "Moved 1 task to today")
+                                                     : String(localized: "Moved \(tasks.count) tasks to today")) {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+                for (task, due) in zip(tasks, previous) { task.dueDate = due }
+            }
+            for task in tasks { TaskAlerts.schedule(task) }
+            SovaRefresh.changed(tasks.first?.modelContext)
+        })
+    }
+
+    /// The task's date moved to `day`, keeping the time if it has one.
+    private static func sameTime(as task: TaskItem, on day: Date) -> Date {
+        guard task.hasTime, let due = task.dueDate else { return day }
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: due)
+        return Calendar.current.date(bySettingHour: parts.hour ?? 9, minute: parts.minute ?? 0, second: 0, of: day) ?? day
+    }
+
     static func moveToTomorrow(_ task: TaskItem, router: AppRouter?) {
         let previous = task.dueDate
         Haptics.pop(0.6)

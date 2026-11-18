@@ -106,12 +106,21 @@ struct TaskSwipeActions: ViewModifier {
                     Label("Delete", systemImage: "trash")
                 }
                 if !task.isDone {
-                    Button {
-                        TaskActions.moveToTomorrow(task, router: router)
-                    } label: {
-                        Label("Tomorrow", systemImage: "arrow.turn.up.right")
+                    if let due = task.dueDate, due >= Date.now.endOfDay {
+                        Button {
+                            TaskActions.moveToToday(task, router: router)
+                        } label: {
+                            Label("Today", systemImage: "sun.max")
+                        }
+                        .tint(StickerTone.orange.fill)
+                    } else {
+                        Button {
+                            TaskActions.moveToTomorrow(task, router: router)
+                        } label: {
+                            Label("Tomorrow", systemImage: "arrow.turn.up.right")
+                        }
+                        .tint(StickerTone.indigo.fill)
                     }
-                    .tint(StickerTone.indigo.fill)
                 }
             }
     }
