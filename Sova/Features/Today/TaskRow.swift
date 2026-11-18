@@ -1,19 +1,20 @@
 import SwiftUI
 import SwiftData
 
-/// A task as a row in a grouped list, Things-style: a checkbox, the title,
-/// and quiet metadata.
+/// A task row, Things-style: a checkbox that draws itself, the title, and
+/// quiet metadata.
 struct TaskRow: View {
     let task: TaskItem
     var showGoal = true
     var onOpen: () -> Void
 
     @Environment(\.modelContext) private var context
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
         HStack(alignment: .top, spacing: 4) {
             CheckButton(isOn: task.isDone, color: task.accent.color, label: task.title) {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { task.toggle() }
+                TaskActions.toggle(task, router: router)
             }
             .padding(.top, -2)
 
@@ -45,17 +46,25 @@ struct TaskRow: View {
         .contextMenu {
             Button(task.isDone ? "Mark as Not Done" : "Mark as Done",
                    systemImage: task.isDone ? "circle" : "checkmark.circle") {
-                withAnimation(.snappy) { task.toggle() }
+                TaskActions.toggle(task, router: router)
+            }
+            if !task.isDone {
+                Button("Move to Tomorrow", systemImage: "arrow.turn.up.right") {
+                    TaskActions.moveToTomorrow(task, router: router)
+                }
             }
             Button("Edit", systemImage: "pencil", action: onOpen)
             Divider()
             Button("Delete", systemImage: "trash", role: .destructive) {
-                withAnimation { context.delete(task) }
+                TaskActions.delete(task, context: context, router: router)
             }
         }
         .accessibilityElement(children: .combine)
         .accessibilityAction(named: task.isDone ? "Mark as not done" : "Mark as done") {
-            withAnimation(.snappy) { task.toggle() }
+            TaskActions.toggle(task, router: router)
+        }
+        .accessibilityAction(named: "Delete") {
+            TaskActions.delete(task, context: context, router: router)
         }
     }
 
@@ -72,5 +81,60 @@ struct TaskRow: View {
             parts.append(.init(text: task.notes))
         }
         return parts
+    }
+}
+
+/// Native swipe actions for a task in a List.
+struct TaskSwipeActions: ViewModifier {
+    let task: TaskItem
+    @Environment(\.modelContext) private var context
+    @Environment(AppRouter.self) private var router
+
+    func body(content: Content) -> some View {
+        content
+            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                Button {
+                    TaskActions.toggle(task, router: router)
+                } label: {
+                    Label(task.isDone ? "Not Done" : "Done", systemImage: task.isDone ? "arrow.uturn.backward" : "checkmark")
+                }
+                .tint(task.accent.color)
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    TaskActions.delete(task, context: context, router: router)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                if !task.isDone {
+                    Button {
+                        TaskActions.moveToTomorrow(task, router: router)
+                    } label: {
+                        Label("Tomorrow", systemImage: "arrow.turn.up.right")
+                    }
+                    .tint(Accent.marigold.color)
+                }
+            }
+    }
+}
+
+extension View {
+    func taskSwipeActions(_ task: TaskItem) -> some View { modifier(TaskSwipeActions(task: task)) }
+
+    /// A row that reads as part of a single grouped surface.
+    func surfaceListRow(separatorInset: CGFloat = 52) -> some View {
+        self
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.surface)
+            .listRowSeparatorTint(Color.hairline)
+            .alignmentGuide(.listRowSeparatorLeading) { _ in separatorInset }
+    }
+
+    /// A row with no chrome, for headers, cards and scrollers inside a List.
+    func bareListRow() -> some View {
+        self
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
     }
 }

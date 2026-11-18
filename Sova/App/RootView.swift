@@ -56,6 +56,7 @@ struct MainTabView: View {
     @ViewBuilder
     private func editor(for sheet: EditorSheet) -> some View {
         switch sheet {
+        case .quickTask: QuickCaptureView()
         case .newTask(let goal): TaskEditor(task: nil, defaultGoal: goal)
         case .task(let task): TaskEditor(task: task)
         case .newGoal: GoalEditor(goal: nil)
@@ -66,40 +67,69 @@ struct MainTabView: View {
     }
 }
 
-/// Sits on the Liquid Glass bar above the tabs: one tap to create whatever
-/// fits the current tab.
+/// Sits on the Liquid Glass bar above the tabs. Normally one tap to create
+/// whatever fits the current tab; briefly an Undo bar after a change.
 struct QuickAddAccessory: View {
     @Environment(AppRouter.self) private var router
 
     var body: some View {
-        Button {
-            router.sheet = router.primaryCreateAction
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "plus")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.inkInverse)
-                    .frame(width: 26, height: 26)
-                    .background(Color.ink, in: .circle)
-                Text(router.primaryCreateTitle)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Color.ink)
-                    .contentTransition(.interpolate)
-                Spacer(minLength: 0)
+        ZStack {
+            if let toast = router.toast {
+                HStack(spacing: 12) {
+                    Text(toast.message)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.ink)
+                        .lineLimit(1)
+                    Spacer(minLength: 8)
+                    if let undo = toast.undo {
+                        Button("Undo") {
+                            undo()
+                            router.dismissToast()
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.accentColor)
+                        .buttonStyle(.plain)
+                        .frame(minHeight: 44)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .transition(.asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)))
+                .id(toast.id)
+            } else {
+                Button {
+                    router.sheet = router.primaryCreateAction
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "plus")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.inkInverse)
+                            .frame(width: 26, height: 26)
+                            .background(Color.ink, in: .circle)
+                        Text(router.primaryCreateTitle)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Color.ink)
+                            .contentTransition(.interpolate)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(maxHeight: .infinity)
+                    .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(router.primaryCreateTitle)
+                .transition(.asymmetric(insertion: .push(from: .bottom), removal: .push(from: .top)))
             }
-            .padding(.horizontal, 12)
-            .frame(maxHeight: .infinity)
-            .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .frame(maxHeight: .infinity)
+        .clipped()
         .animation(.snappy, value: router.tab)
-        .accessibilityLabel(router.primaryCreateTitle)
+        .sensoryFeedback(.impact(weight: .light), trigger: router.toast)
     }
 }
 
 #Preview("App") {
     MainTabView()
-        .modelContainer(SampleData.previewContainer)
+        .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }
 
 #Preview("Onboarding") {

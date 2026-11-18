@@ -208,11 +208,55 @@ private struct PillarCard<Content: View>: View {
 
 // MARK: - 3. Name
 
+/// A large serif text field with an underline that draws in on focus.
+struct SerifField: View {
+    let placeholder: String
+    @Binding var text: String
+    var contentType: UITextContentType? = nil
+    var autofocus = true
+    var onSubmit: () -> Void
+    @FocusState private var focused: Bool
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 36
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            TextField("", text: $text, prompt: Text(placeholder).foregroundStyle(Color.inkTertiary), axis: .vertical)
+                .font(.system(size: size, weight: .regular, design: .serif))
+                .italic()
+                .foregroundStyle(Color.ink)
+                .lineLimit(1...3)
+                .textContentType(contentType)
+                .textInputAutocapitalization(.sentences)
+                .submitLabel(.continue)
+                .focused($focused)
+                .onChange(of: text) { _, newValue in
+                    // A vertical field inserts newlines; treat Return as submit.
+                    if newValue.contains("\n") {
+                        text = newValue.replacingOccurrences(of: "\n", with: "")
+                        onSubmit()
+                    }
+                }
+
+            ZStack(alignment: .leading) {
+                Rectangle().fill(Color.hairline)
+                Rectangle()
+                    .fill(Color.accentColor)
+                    .scaleEffect(x: focused ? 1 : 0, anchor: .leading)
+            }
+            .frame(height: 2)
+            .animation(.spring(response: 0.5, dampingFraction: 0.85), value: focused)
+        }
+        .task {
+            guard autofocus else { return }
+            try? await Task.sleep(for: .milliseconds(550))
+            focused = true
+        }
+    }
+}
+
 struct NameStep: View {
     @Binding var name: String
     var onSubmit: () -> Void
-    @FocusState private var focused: Bool
-    @ScaledMetric(relativeTo: .largeTitle) private var fieldSize: CGFloat = 38
 
     private var greeting: String {
         switch Calendar.current.component(.hour, from: .now) {
@@ -222,54 +266,33 @@ struct NameStep: View {
         }
     }
 
+    private var trimmed: String { name.trimmingCharacters(in: .whitespaces) }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
             StepHeadline(text: String(localized: "What should\nwe call you?"))
                 .padding(.top, 8)
 
-            VStack(alignment: .leading, spacing: 10) {
-                TextField("", text: $name, prompt: Text("Your name").foregroundStyle(Color.inkTertiary))
-                    .font(.system(size: fieldSize, weight: .regular, design: .serif))
-                    .italic()
-                    .foregroundStyle(Color.ink)
-                    .textContentType(.givenName)
-                    .textInputAutocapitalization(.words)
-                    .autocorrectionDisabled()
-                    .submitLabel(.continue)
-                    .focused($focused)
-                    .onSubmit(onSubmit)
-
-                ZStack(alignment: .leading) {
-                    Rectangle().fill(Color.hairline)
-                    Rectangle()
-                        .fill(Color.accentColor)
-                        .scaleEffect(x: focused ? 1 : 0, anchor: .leading)
-                }
-                .frame(height: 2)
-                .animation(.spring(response: 0.5, dampingFraction: 0.85), value: focused)
-            }
-            .reveal(1)
+            SerifField(placeholder: String(localized: "Your name"), text: $name,
+                       contentType: .givenName, onSubmit: onSubmit)
+                .reveal(1)
 
             Group {
-                if name.trimmingCharacters(in: .whitespaces).isEmpty {
+                if trimmed.isEmpty {
                     Text("Just for your greeting. It never leaves this device.")
                 } else {
-                    Text("\(greeting), \(Text(name.trimmingCharacters(in: .whitespaces)).foregroundStyle(Color.ink)).")
+                    Text("\(greeting), \(Text(trimmed).foregroundStyle(Color.ink)).")
                 }
             }
             .font(.display(.title3))
             .foregroundStyle(Color.inkSecondary)
             .contentTransition(.opacity)
-            .animation(.smooth(duration: 0.3), value: name.isEmpty)
+            .animation(.smooth(duration: 0.3), value: trimmed.isEmpty)
             .reveal(2)
 
             Spacer()
         }
         .padding(.horizontal, 28)
-        .task {
-            try? await Task.sleep(for: .milliseconds(550))
-            focused = true
-        }
     }
 }
 
@@ -367,11 +390,211 @@ private struct RitualTile: View {
     }
 }
 
-// MARK: - 5. Theme
+// MARK: - 5. Goal
+
+struct GoalStep: View {
+    @Binding var title: String
+    var onSubmit: () -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 26) {
+                VStack(alignment: .leading, spacing: 12) {
+                    StepHeadline(text: String(localized: "One thing for\nthis season."))
+                    StepBody(text: String(localized: "Something you’d be proud of in three months. Pick one or write your own."))
+                }
+                .padding(.top, 8)
+
+                SerifField(placeholder: String(localized: "My goal is to…"), text: $title,
+                           autofocus: false, onSubmit: onSubmit)
+                    .reveal(2)
+
+                FlowLayout(spacing: 8) {
+                    ForEach(GoalSuggestion.all) { suggestion in
+                        let selected = title == suggestion.title
+                        Button {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                title = selected ? "" : suggestion.title
+                            }
+                        } label: {
+                            HStack(spacing: 7) {
+                                Image(systemName: suggestion.symbol)
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundStyle(selected ? Color.white : suggestion.accent.color)
+                                Text(suggestion.title)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(selected ? Color.white : Color.ink)
+                            }
+                            .padding(.horizontal, 14)
+                            .frame(height: 40)
+                            .background(selected ? suggestion.accent.color : Color.surface, in: .capsule)
+                            .overlay(Capsule().strokeBorder(Color.hairline).opacity(selected ? 0 : 1))
+                        }
+                        .buttonStyle(.pressable)
+                        .accessibilityAddTraits(selected ? .isSelected : [])
+                    }
+                }
+                .reveal(3)
+
+                Label("We’ll give it 90 days. You can change that anytime.", systemImage: "calendar")
+                    .font(.footnote)
+                    .foregroundStyle(Color.inkSecondary)
+                    .reveal(4)
+            }
+            .padding(.horizontal, 28)
+            .padding(.bottom, 24)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollIndicators(.hidden)
+        .scrollDismissesKeyboard(.interactively)
+        .sensoryFeedback(.selection, trigger: title)
+    }
+}
+
+/// Wraps its children onto new lines, like words in a paragraph.
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        var x: CGFloat = 0, y: CGFloat = 0, rowHeight: CGFloat = 0, width: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > 0 && x + size.width > maxWidth {
+                x = 0
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+            width = max(width, x - spacing)
+        }
+        return CGSize(width: width, height: y + rowHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX, y = bounds.minY, rowHeight: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > bounds.minX && x + size.width > bounds.maxX {
+                x = bounds.minX
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            subview.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+        }
+    }
+}
+
+// MARK: - 6. Rhythm (reminders)
+
+struct RhythmStep: View {
+    var name: String
+    @Binding var morningOn: Bool
+    @Binding var morning: Date
+    @Binding var eveningOn: Bool
+    @Binding var evening: Date
+
+    @State private var dropped = false
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 26) {
+                VStack(alignment: .leading, spacing: 12) {
+                    StepHeadline(text: String(localized: "A gentle nudge,\ntwice a day."))
+                    StepBody(text: String(localized: "A note to plan in the morning, and one to look back at night. Nothing else, ever."))
+                }
+                .padding(.top, 8)
+
+                NotificationPreview(name: name)
+                    .offset(y: dropped ? 0 : -24)
+                    .opacity(dropped ? 1 : 0)
+                    .scaleEffect(dropped ? 1 : 0.96)
+
+                VStack(spacing: 0) {
+                    reminderRow(title: String(localized: "Morning plan"), symbol: "sun.max", accent: .marigold,
+                                isOn: $morningOn, time: $morning)
+                    Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, 64)
+                    reminderRow(title: String(localized: "Evening review"), symbol: "moon", accent: .plum,
+                                isOn: $eveningOn, time: $evening)
+                }
+                .surface(cornerRadius: 22, padding: 0)
+                .reveal(3)
+            }
+            .padding(.horizontal, 28)
+            .padding(.bottom, 24)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .scrollIndicators(.hidden)
+        .task {
+            try? await Task.sleep(for: .milliseconds(450))
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.72)) { dropped = true }
+        }
+        .sensoryFeedback(.impact(weight: .light), trigger: dropped)
+    }
+
+    private func reminderRow(title: String, symbol: String, accent: Accent,
+                             isOn: Binding<Bool>, time: Binding<Date>) -> some View {
+        HStack(spacing: 12) {
+            IconTile(symbol: symbol, accent: accent, size: 38)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.body).foregroundStyle(Color.ink)
+                DatePicker(title, selection: time, displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                    .scaleEffect(0.92, anchor: .leading)
+                    .disabled(!isOn.wrappedValue)
+                    .opacity(isOn.wrappedValue ? 1 : 0.35)
+            }
+            Spacer(minLength: 0)
+            Toggle(title, isOn: isOn.animation(.smooth))
+                .labelsHidden()
+                .tint(accent.color)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+    }
+}
+
+/// What the morning notification will actually look like.
+private struct NotificationPreview: View {
+    var name: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            OwlMark(size: 22, blinks: false)
+                .frame(width: 38, height: 38)
+                .background(Color.canvas, in: .rect(cornerRadius: 9, style: .continuous))
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text("Sova").font(.footnote.weight(.semibold)).foregroundStyle(Color.inkSecondary)
+                    Spacer()
+                    Text("now").font(.footnote).foregroundStyle(Color.inkSecondary)
+                }
+                Text("Good morning")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.ink)
+                Text("Your day is ready. Take a minute to plan it.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(14)
+        .glassEffect(.regular, in: .rect(cornerRadius: 24, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Example notification: Good morning. Your day is ready. Take a minute to plan it.")
+    }
+}
+
+// MARK: - 7. Theme
 
 struct ThemeStep: View {
     @Binding var themeRaw: String
     var name: String
+    var rituals: [RitualOption]
+    var goalTitle: String
 
     private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
 
@@ -380,57 +603,31 @@ struct ThemeStep: View {
             VStack(alignment: .leading, spacing: 28) {
                 VStack(alignment: .leading, spacing: 12) {
                     StepHeadline(text: String(localized: "Make it\nyours."))
-                    StepBody(text: String(localized: "One color, used with restraint. Change it whenever the mood changes."))
+                    StepBody(text: String(localized: "One color, used with restraint. Here’s your day so far."))
                 }
                 .padding(.top, 8)
 
-                MiniToday(accent: theme.accent, name: name)
+                YourDayPreview(accent: theme.accent, name: name, rituals: rituals, goalTitle: goalTitle)
                     .reveal(2)
 
-                HStack(spacing: 0) {
-                    ForEach(SovaTheme.allCases) { option in
-                        Button {
-                            withAnimation(.smooth(duration: 0.6)) { themeRaw = option.rawValue }
-                        } label: {
-                            VStack(spacing: 10) {
-                                Circle()
-                                    .fill(option.accent.color)
-                                    .frame(width: 38, height: 38)
-                                    .overlay {
-                                        Circle()
-                                            .strokeBorder(Color.ink, lineWidth: 2)
-                                            .padding(-6)
-                                            .opacity(option == theme ? 1 : 0)
-                                            .scaleEffect(option == theme ? 1 : 0.85)
-                                    }
-                                Text(option.name)
-                                    .font(.caption.weight(option == theme ? .semibold : .regular))
-                                    .foregroundStyle(option == theme ? Color.ink : Color.inkSecondary)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 72)
-                            .contentShape(.rect)
-                        }
-                        .buttonStyle(.pressable)
-                        .accessibilityLabel(option.name)
-                        .accessibilityAddTraits(option == theme ? .isSelected : [])
-                    }
-                }
-                .animation(.spring(response: 0.4, dampingFraction: 0.7), value: themeRaw)
-                .reveal(3)
+                ThemeSwatches(themeRaw: $themeRaw)
+                    .reveal(3)
             }
             .padding(.horizontal, 28)
             .padding(.bottom, 24)
         }
         .scrollBounceBehavior(.basedOnSize)
         .scrollIndicators(.hidden)
-        .sensoryFeedback(.selection, trigger: themeRaw)
     }
 }
 
-/// A miniature of the Today screen that recolors live.
-private struct MiniToday: View {
+/// The user's real first day, built from their choices so far. It
+/// recolors live as they try themes.
+private struct YourDayPreview: View {
     var accent: Accent
     var name: String
+    var rituals: [RitualOption]
+    var goalTitle: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -438,42 +635,64 @@ private struct MiniToday: View {
                 Text(Date.now, format: .dateTime.weekday(.wide))
                     .font(.display(.title2))
                     .foregroundStyle(Color.ink)
-                Text(name.isEmpty ? String(localized: "Three things left today.")
-                                  : String(localized: "Three things left, \(name)."))
+                Text(name.isEmpty ? String(localized: "Your first day in Sova.") : String(localized: "Your first day, \(name)."))
                     .font(.footnote)
                     .foregroundStyle(Color.inkSecondary)
             }
-            DaySegments(done: 2, total: 5, color: accent.color)
-            VStack(spacing: 0) {
-                row("Morning pages", detail: "Routine", done: true)
-                Divider().overlay(Color.hairline).padding(.leading, 34)
-                row("Send the proposal", detail: "10:00 AM", done: true)
-                Divider().overlay(Color.hairline).padding(.leading, 34)
-                row("Call Mom", detail: "6:30 PM", done: false)
+            DaySegments(done: 0, total: max(rituals.count, 1), color: accent.color)
+
+            if rituals.isEmpty && goalTitle.isEmpty {
+                Text("Your tasks and routines will live here.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.inkSecondary)
+                    .padding(.vertical, 8)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(rituals.prefix(3).enumerated()), id: \.element.id) { index, ritual in
+                        if index > 0 { Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, 34) }
+                        HStack(spacing: 12) {
+                            Checkbox(isOn: false, color: accent.color, round: true, size: 20)
+                            Text(ritual.title).font(.subheadline.weight(.medium)).foregroundStyle(Color.ink)
+                            Spacer()
+                            Text(ritual.period.name).font(.caption).foregroundStyle(Color.inkSecondary)
+                        }
+                        .padding(.vertical, 10)
+                    }
+                    if rituals.count > 3 {
+                        Text("and \(rituals.count - 3) more")
+                            .font(.caption)
+                            .foregroundStyle(Color.inkSecondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 32)
+                            .padding(.bottom, 4)
+                    }
+                }
+                if !goalTitle.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(goalTitle).font(.subheadline.weight(.medium)).foregroundStyle(Color.ink)
+                            Spacer()
+                            Text("90 days").font(.caption).foregroundStyle(Color.inkSecondary)
+                        }
+                        ProgressLine(progress: 0, color: accent.color)
+                    }
+                    .padding(12)
+                    .background(accent.soft, in: .rect(cornerRadius: 14, style: .continuous))
+                }
             }
         }
         .surface(cornerRadius: 24, padding: 18)
-    }
-
-    private func row(_ title: String, detail: String, done: Bool) -> some View {
-        HStack(spacing: 12) {
-            Checkbox(isOn: done, color: accent.color, size: 20)
-            Text(title)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(done ? Color.inkSecondary : Color.ink)
-                .strikethrough(done, color: Color.inkTertiary)
-            Spacer()
-            Text(detail).font(.caption).foregroundStyle(Color.inkSecondary)
-        }
-        .padding(.vertical, 10)
+        .animation(.smooth(duration: 0.5), value: accent)
     }
 }
 
-// MARK: - 6. Finish
+// MARK: - 8. Finish
 
 struct FinishStep: View {
     var name: String
     var ritualCount: Int
+    var goalTitle: String
+    var remindersOn: Bool
     var theme: SovaTheme
     @State private var hop = 0
     @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 46
@@ -505,9 +724,17 @@ struct FinishStep: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .reveal(2)
 
-            HStack(spacing: 10) {
-                summaryChip(ritualCount == 1 ? String(localized: "1 ritual") : String(localized: "\(ritualCount) rituals"),
-                            color: Accent.lagoon.color)
+            FlowLayout(spacing: 8) {
+                if ritualCount > 0 {
+                    summaryChip(ritualCount == 1 ? String(localized: "1 ritual") : String(localized: "\(ritualCount) rituals"),
+                                color: Accent.lagoon.color)
+                }
+                if !goalTitle.isEmpty {
+                    summaryChip(goalTitle, color: Accent.plum.color)
+                }
+                if remindersOn {
+                    summaryChip(String(localized: "Reminders on"), color: Accent.marigold.color)
+                }
                 summaryChip(String(localized: "\(theme.name) theme"), color: theme.accent.color)
             }
             .padding(.top, 24)
@@ -527,7 +754,7 @@ struct FinishStep: View {
     private func summaryChip(_ text: String, color: Color) -> some View {
         HStack(spacing: 6) {
             Circle().fill(color).frame(width: 7, height: 7)
-            Text(text).font(.footnote.weight(.medium)).foregroundStyle(Color.ink)
+            Text(text).font(.footnote.weight(.medium)).foregroundStyle(Color.ink).lineLimit(1)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

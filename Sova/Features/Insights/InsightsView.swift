@@ -59,10 +59,17 @@ struct InsightsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 32) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("\(Text("\(weekTotal)").foregroundStyle(theme.accent.color)) things done this week.")
-                            .font(.display(.title))
-                            .foregroundStyle(Color.ink)
-                        Text("Tasks and routines, the last seven days.")
+                        Group {
+                            if weekTotal == 0 {
+                                Text("Your week starts here.")
+                            } else {
+                                Text("\(Text("\(weekTotal)").foregroundStyle(theme.accent.color)) things done this week.")
+                            }
+                        }
+                        .font(.display(.title))
+                        .foregroundStyle(Color.ink)
+                        Text(weekTotal == 0 ? "Finish a task or check in on a routine, and your progress shows up here."
+                                            : "Tasks and routines, the last seven days.")
                             .font(.subheadline)
                             .foregroundStyle(Color.inkSecondary)
                     }
@@ -116,9 +123,6 @@ struct InsightsView: View {
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
             .navigationTitle("Insights")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { SettingsMenu() }
-            }
         }
     }
 

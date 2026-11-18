@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 enum OnboardingStep: Int, CaseIterable, Comparable {
-    case hello, pillars, name, rituals, theme, finish
+    case hello, pillars, name, rituals, goal, rhythm, theme, finish
 
     static func < (a: Self, b: Self) -> Bool { a.rawValue < b.rawValue }
 
@@ -10,7 +10,7 @@ enum OnboardingStep: Int, CaseIterable, Comparable {
     var previous: OnboardingStep? { OnboardingStep(rawValue: rawValue - 1) }
 
     /// The steps that show in the progress indicator.
-    static let indicated: [OnboardingStep] = [.pillars, .name, .rituals, .theme]
+    static let indicated: [OnboardingStep] = [.pillars, .name, .rituals, .goal, .rhythm, .theme]
 }
 
 struct OnboardingView: View {
@@ -18,14 +18,27 @@ struct OnboardingView: View {
     @AppStorage("hasOnboarded") private var hasOnboarded = false
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
     @AppStorage("userName") private var userName = ""
+    @AppStorage("morningReminderOn") private var savedMorningOn = false
+    @AppStorage("morningReminderMinutes") private var savedMorningMinutes = 8 * 60
+    @AppStorage("eveningReminderOn") private var savedEveningOn = false
+    @AppStorage("eveningReminderMinutes") private var savedEveningMinutes = 21 * 60
 
     @State private var step: OnboardingStep = .hello
     @State private var name = ""
-    @State private var rituals: Set<String> = ["pages", "water", "read"]
+    @State private var rituals: Set<String> = []
+    @State private var goalTitle = ""
+    @State private var morningOn = true
+    @State private var morning = Reminders.time(hour: 8)
+    @State private var eveningOn = true
+    @State private var evening = Reminders.time(hour: 21)
+    @State private var remindersGranted = false
+    @State private var isRequesting = false
     @State private var look = CGSize(width: 0, height: 0.4)
 
     private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var trimmedGoal: String { goalTitle.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var chosenRituals: [RitualOption] { RitualOption.all.filter { rituals.contains($0.id) } }
 
     var body: some View {
         GeometryReader { geo in
@@ -58,7 +71,14 @@ struct OnboardingView: View {
                         let dy = (value.location.y - geo.size.height * 0.28) / (geo.size.height / 2)
                         look = CGSize(width: max(-1, min(1, dx)), height: max(-1, min(1, dy)))
                     }
-                    .onEnded { _ in look = CGSize(width: 0, height: 0.4) }
+                    .onEnded { value in
+                        look = CGSize(width: 0, height: 0.4)
+                        // Swipe right to go back, like a navigation stack.
+                        if step > .hello, step < .finish,
+                           value.translation.width > 90, abs(value.translation.height) < 70 {
+                            back()
+                        }
+                    }
             )
         }
         .tint(theme.accent.color)
@@ -72,10 +92,14 @@ struct OnboardingView: View {
         switch step {
         case .hello: HelloStep(look: look)
         case .pillars: PillarsStep()
-        case .name: NameStep(name: $name, onSubmit: advance)
+        case .name: NameStep(name: $name, onSubmit: primaryAction)
         case .rituals: RitualsStep(selection: $rituals)
-        case .theme: ThemeStep(themeRaw: $themeRaw, name: trimmedName)
-        case .finish: FinishStep(name: trimmedName, ritualCount: rituals.count, theme: theme)
+        case .goal: GoalStep(title: $goalTitle, onSubmit: primaryAction)
+        case .rhythm: RhythmStep(name: trimmedName, morningOn: $morningOn, morning: $morning,
+                                 eveningOn: $eveningOn, evening: $evening)
+        case .theme: ThemeStep(themeRaw: $themeRaw, name: trimmedName, rituals: chosenRituals, goalTitle: trimmedGoal)
+        case .finish: FinishStep(name: trimmedName, ritualCount: rituals.count, goalTitle: trimmedGoal,
+                                 remindersOn: remindersGranted, theme: theme)
         }
     }
 
@@ -116,6 +140,8 @@ struct OnboardingView: View {
         case .name: trimmedName.isEmpty ? String(localized: "Skip for now") : String(localized: "Continue")
         case .rituals: rituals.isEmpty ? String(localized: "Skip for now")
                                        : String(localized: "Start with \(rituals.count)")
+        case .goal: trimmedGoal.isEmpty ? String(localized: "Skip for now") : String(localized: "Set this goal")
+        case .rhythm: (morningOn || eveningOn) ? String(localized: "Turn on reminders") : String(localized: "Continue")
         case .finish: String(localized: "Open Sova")
         default: String(localized: "Continue")
         }
@@ -123,12 +149,29 @@ struct OnboardingView: View {
 
     private var bottomBar: some View {
         VStack(spacing: 14) {
-            Button(action: advance) {
-                Text(primaryTitle)
-                    .contentTransition(.numericText())
-                    .animation(.smooth(duration: 0.3), value: primaryTitle)
+            Button(action: primaryAction) {
+                ZStack {
+                    Text(primaryTitle)
+                        .contentTransition(.numericText())
+                        .animation(.smooth(duration: 0.3), value: primaryTitle)
+                        .opacity(isRequesting ? 0 : 1)
+                    if isRequesting { ProgressView().tint(Color.inkInverse) }
+                }
             }
             .buttonStyle(.ink)
+            .disabled(isRequesting)
+
+            if step == .rhythm && (morningOn || eveningOn) {
+                Button("Not now") {
+                    morningOn = false
+                    eveningOn = false
+                    advance()
+                }
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Color.inkSecondary)
+                .frame(minHeight: 32)
+                .transition(.opacity)
+            }
 
             if step == .hello {
                 Text("Takes a minute. Everything stays on your iPhone.")
@@ -144,6 +187,28 @@ struct OnboardingView: View {
 
     // MARK: Flow
 
+    private func primaryAction() {
+        guard step == .rhythm, morningOn || eveningOn else { return advance() }
+        isRequesting = true
+        let morningTime = morningOn ? morning : nil
+        let eveningTime = eveningOn ? evening : nil
+        Task {
+            let granted = await Reminders.enable(morning: morningTime, evening: eveningTime)
+            remindersGranted = granted
+            savedMorningOn = granted && morningOn
+            savedEveningOn = granted && eveningOn
+            savedMorningMinutes = minutes(of: morning)
+            savedEveningMinutes = minutes(of: evening)
+            isRequesting = false
+            advance()
+        }
+    }
+
+    private func minutes(of date: Date) -> Int {
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+    }
+
     private func advance() {
         if step == .name { userName = trimmedName }
         guard let next = step.next else { return finish() }
@@ -157,8 +222,7 @@ struct OnboardingView: View {
 
     private func finish() {
         userName = trimmedName
-        let chosen = RitualOption.all.filter { rituals.contains($0.id) }
-        StarterContent.install(rituals: chosen, theme: theme, in: context)
+        StarterContent.install(rituals: chosenRituals, goalTitle: trimmedGoal, theme: theme, in: context)
         withAnimation(.smooth(duration: 0.7)) { hasOnboarded = true }
     }
 }
@@ -196,6 +260,8 @@ struct OnboardingBackdrop: View {
         case .pillars: [.tide, .lagoon, .plum]
         case .name: [.rose, .plum, .marigold]
         case .rituals: [.moss, .marigold, .lagoon]
+        case .goal: [.plum, .tide, .ember]
+        case .rhythm: [.marigold, .plum, .tide]
         case .theme, .finish: [theme.accent, theme.companion, theme.accent]
         }
     }
@@ -206,6 +272,8 @@ struct OnboardingBackdrop: View {
         case .pillars: [UnitPoint(x: 0.9, y: 0.05), UnitPoint(x: 0.05, y: 0.5), UnitPoint(x: 0.75, y: 1.0)]
         case .name: [UnitPoint(x: 0.15, y: 0.15), UnitPoint(x: 0.95, y: 0.55), UnitPoint(x: 0.25, y: 1.05)]
         case .rituals: [UnitPoint(x: 0.95, y: 0.0), UnitPoint(x: 0.0, y: 0.38), UnitPoint(x: 0.8, y: 0.95)]
+        case .goal: [UnitPoint(x: 0.85, y: 0.12), UnitPoint(x: 0.1, y: 0.6), UnitPoint(x: 0.9, y: 1.0)]
+        case .rhythm: [UnitPoint(x: 0.05, y: 0.05), UnitPoint(x: 0.95, y: 0.9), UnitPoint(x: 0.5, y: 0.5)]
         case .theme: [UnitPoint(x: 0.05, y: 0.08), UnitPoint(x: 0.95, y: 0.42), UnitPoint(x: 0.4, y: 1.0)]
         case .finish: [UnitPoint(x: 0.3, y: 0.15), UnitPoint(x: 0.95, y: 0.7), UnitPoint(x: 0.05, y: 0.95)]
         }

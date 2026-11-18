@@ -94,24 +94,42 @@ struct EmptyState: View {
     }
 }
 
-/// Theme and app-level options, in the toolbar.
-struct SettingsMenu: View {
-    @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
-    @AppStorage("hasOnboarded") private var hasOnboarded = true
+/// The five themes as swatches. Used in onboarding and Settings.
+struct ThemeSwatches: View {
+    @Binding var themeRaw: String
+
+    private var selected: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
 
     var body: some View {
-        Menu {
-            Picker("Theme", selection: $themeRaw.animation(.smooth(duration: 0.6))) {
-                ForEach(SovaTheme.allCases) { theme in
-                    Text(theme.name).tag(theme.rawValue)
+        HStack(spacing: 0) {
+            ForEach(SovaTheme.allCases) { option in
+                Button {
+                    withAnimation(.smooth(duration: 0.6)) { themeRaw = option.rawValue }
+                } label: {
+                    VStack(spacing: 10) {
+                        Circle()
+                            .fill(option.accent.color)
+                            .frame(width: 36, height: 36)
+                            .overlay {
+                                Circle()
+                                    .strokeBorder(Color.ink, lineWidth: 2)
+                                    .padding(-6)
+                                    .opacity(option == selected ? 1 : 0)
+                                    .scaleEffect(option == selected ? 1 : 0.85)
+                            }
+                        Text(option.name)
+                            .font(.caption.weight(option == selected ? .semibold : .regular))
+                            .foregroundStyle(option == selected ? Color.ink : Color.inkSecondary)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 72)
+                    .contentShape(.rect)
                 }
+                .buttonStyle(.pressable)
+                .accessibilityLabel(option.name)
+                .accessibilityAddTraits(option == selected ? .isSelected : [])
             }
-            Divider()
-            Button("Replay Welcome", systemImage: "hand.wave") {
-                withAnimation(.smooth(duration: 0.6)) { hasOnboarded = false }
-            }
-        } label: {
-            Label("Settings", systemImage: "circle.lefthalf.filled")
         }
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: themeRaw)
+        .sensoryFeedback(.selection, trigger: themeRaw)
     }
 }

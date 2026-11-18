@@ -15,16 +15,25 @@ Sova draws on Apple's restraint and the warmth of the Browser Company. There are
 
 ## Onboarding
 
-Six steps, each with one idea and a staggered, blur-in reveal over drifting washes of color that change mood per step:
+Eight short steps. Each has one idea, a staggered blur-in reveal, and drifting washes of color that change mood per step. Swipe right to go back.
 
 1. **Hello.** An italic serif greeting; the owl's eyes follow your touch.
-2. **Three kinds of intention.** Fanned, slightly rotated cards for Today, Always and Someday. The task is live, so tick it.
-3. **Your name.** A big serif field with a live preview of your greeting.
-4. **Rituals.** Tactile tiles to pick starter routines, which become real routines.
-5. **Make it yours.** A miniature Today screen recolors live as you pick a theme.
-6. **All set.** The owl hops and smiles; Sova opens.
+2. **Three kinds of intention.** Fanned cards explain Today, Always and Someday. The example task is live, so tick it.
+3. **Your name**, with a live preview of your greeting.
+4. **Rituals.** Tactile tiles; each one you pick becomes a real routine.
+5. **One goal for this season.** Write your own or tap a suggestion. It's created with a 90-day horizon.
+6. **Reminders.** A preview of the real notification, then morning and evening times. The system permission prompt only appears after you choose "Turn on reminders".
+7. **Make it yours.** A preview of *your* first day (your rituals, your goal) recolors live as you pick a theme.
+8. **All set.** A summary of what was created; the owl hops and smiles.
 
-You can replay it from the settings menu on Today.
+Onboarding creates only what you choose; there is no sample or placeholder data. Inside the app, TipKit carries on teaching: first quick capture, then swiping.
+
+## Everyday UX
+
+- **Quick capture.** "New Task" opens a small sheet that reads natural language as you type: `Call Mom tomorrow 6pm !!` becomes a high-priority task due tomorrow at 6 PM. Return adds the task and keeps the field open for the next one.
+- **Swipe actions.** On Today, swipe right to finish a task, and swipe left to push it to tomorrow or delete it.
+- **Undo, everywhere.** Completing, moving or deleting a task shows a brief Undo bar in the Liquid Glass accessory above the tab bar.
+- **Settings.** Change your name, theme and reminder times, replay the welcome, or erase all data.
 
 ## Features
 
@@ -35,7 +44,7 @@ You can replay it from the settings menu on Today.
 | **Routines** | Habits grouped by Morning, Afternoon, Evening and Anytime. Each has a weekday schedule, a streak 🔥 and the last 7 days as dots. A week strip at the top shows a completion ring for each day |
 | **Insights** | Swift Charts for the last 7 days, tasks completed this week, your best streak, 30-day routine consistency and average goal progress |
 
-Data is stored on the device with **SwiftData**. Onboarding creates your chosen routines and two first tasks; SwiftUI previews use a fuller sample dataset.
+Data is stored only on the device, with **SwiftData**.
 
 ## Requirements
 
@@ -58,5 +67,6 @@ Sova/
   Models/       SwiftData models (TaskItem, Goal, Milestone, Routine), sample data
   Theme/        color tokens, accents, themes, typography, canvas, surfaces, button styles
   Components/   owl mark, checkbox, progress, grouped list, empty state, settings menu
-  Features/     Onboarding, Today, Goals, Routines, Insights, Editors
+  Support/      natural-language parsing, reminders, task actions with undo, TipKit tips
+  Features/     Onboarding, Capture, Today, Goals, Routines, Insights, Editors, Settings
 ```

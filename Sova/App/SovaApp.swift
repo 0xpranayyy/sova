@@ -5,6 +5,7 @@ import SwiftData
 struct SovaApp: App {
     init() {
         NavigationBarStyle.apply()
+        SovaTips.configure()
     }
 
     var body: some Scene {

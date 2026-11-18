@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import TipKit
 
 struct TodayView: View {
     @Environment(AppRouter.self) private var router
@@ -9,6 +10,10 @@ struct TodayView: View {
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
     @AppStorage("userName") private var userName = ""
     @State private var showCompleted = false
+    @State private var showSettings = false
+
+    private let captureTip = QuickCaptureTip()
+    private let swipeTip = SwipeTip()
 
     private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
 
@@ -54,26 +59,105 @@ struct TodayView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
-                    header
-                    if !todaysRoutines.isEmpty { routinesSection }
-                    tasksSection
-                    if let goal = focusGoal { focusSection(goal) }
-                    if !upcomingTasks.isEmpty { upcomingSection }
-                    if !completedToday.isEmpty { completedSection }
+            List {
+                Section {
+                    header.bareListRow()
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 4)
-                .padding(.bottom, 40)
-                .animation(.spring(response: 0.45, dampingFraction: 0.85), value: tasks.map(\.isDone))
+
+                if !todaysRoutines.isEmpty {
+                    Section {
+                        routinesScroller.bareListRow()
+                    } header: {
+                        SectionLabel(String(localized: "Routines"), trailing: "\(routinesDone) of \(todaysRoutines.count)")
+                    }
+                }
+
+                Section {
+                    if dueTasks.isEmpty {
+                        EmptyState(
+                            title: total == 0 ? String(localized: "A blank page") : String(localized: "All clear"),
+                            message: total == 0
+                                ? String(localized: "Add what matters today. Type it the way you'd say it.")
+                                : String(localized: "Nothing else due today. Enjoy the space."),
+                            actionTitle: String(localized: "New task")
+                        ) { router.sheet = .quickTask }
+                        .bareListRow()
+                    } else {
+                        ForEach(dueTasks) { task in
+                            TaskRow(task: task) { router.sheet = .task(task) }
+                                .surfaceListRow()
+                                .taskSwipeActions(task)
+                        }
+                    }
+                } header: {
+                    SectionLabel(String(localized: "Tasks"))
+                }
+
+                if let goal = focusGoal {
+                    Section {
+                        Button { router.tab = .goals } label: { GoalCard(goal: goal) }
+                            .buttonStyle(.pressable)
+                            .bareListRow()
+                    } header: {
+                        SectionLabel(String(localized: "In focus"))
+                    }
+                }
+
+                if !upcomingTasks.isEmpty {
+                    Section {
+                        ForEach(upcomingTasks.prefix(8)) { task in
+                            TaskRow(task: task) { router.sheet = .task(task) }
+                                .surfaceListRow()
+                                .taskSwipeActions(task)
+                        }
+                    } header: {
+                        SectionLabel(String(localized: "Coming up"), trailing: "\(upcomingTasks.count)")
+                    }
+                }
+
+                if !completedToday.isEmpty {
+                    Section {
+                        if showCompleted {
+                            ForEach(completedToday) { task in
+                                TaskRow(task: task) { router.sheet = .task(task) }
+                                    .surfaceListRow()
+                                    .taskSwipeActions(task)
+                            }
+                        }
+                    } header: {
+                        Button {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { showCompleted.toggle() }
+                        } label: {
+                            HStack(spacing: 6) {
+                                SectionLabel(String(localized: "Done today"), trailing: "\(completedToday.count)")
+                                Image(systemName: "chevron.right")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(Color.inkSecondary)
+                                    .rotationEffect(.degrees(showCompleted ? 90 : 0))
+                            }
+                            .contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint(showCompleted ? "Collapse" : "Expand")
+                    }
+                }
             }
-            .scrollIndicators(.hidden)
+            .listStyle(.insetGrouped)
+            .listSectionSpacing(26)
+            .scrollContentBackground(.hidden)
             .background { CanvasBackground() }
             .navigationTitle(Date.now.formatted(.dateTime.weekday(.wide)))
             .navigationSubtitle(Date.now.formatted(.dateTime.day().month(.wide)))
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { SettingsMenu() }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Settings", systemImage: "gearshape") { showSettings = true }
+                }
+            }
+            .sheet(isPresented: $showSettings) { SettingsView() }
+            .task {
+                for await status in captureTip.statusUpdates {
+                    if case .invalidated = status { SwipeTip.isReady = true }
+                }
             }
         }
     }
@@ -95,18 +179,24 @@ struct TodayView: View {
                     .contentTransition(.numericText())
             }
             .padding(.top, 4)
+
+            TipView(captureTip)
+                .tipBackground(Color.surface)
+                .padding(.top, 10)
+            if !dueTasks.isEmpty {
+                TipView(swipeTip)
+                    .tipBackground(Color.surface)
+                    .padding(.top, 10)
+            }
         }
         .padding(.horizontal, 4)
+        .padding(.top, 4)
     }
 
     private var summary: Text {
         let tasksLeft = dueTasks.count
-        if total == 0 {
-            return Text("Nothing planned. A rare, open day.")
-        }
-        if tasksLeft == 0 && routinesLeft == 0 {
-            return Text("Everything’s done. Go enjoy the rest of it.")
-        }
+        if total == 0 { return Text("Nothing planned yet.") }
+        if tasksLeft == 0 && routinesLeft == 0 { return Text("Everything’s done. Go enjoy the rest of it.") }
         let taskText = Text(tasksLeft == 1 ? String(localized: "1 task") : String(localized: "\(tasksLeft) tasks"))
             .foregroundStyle(Color.ink)
         let routineText = Text(routinesLeft == 1 ? String(localized: "1 routine") : String(localized: "\(routinesLeft) routines"))
@@ -116,82 +206,20 @@ struct TodayView: View {
         return Text("You have \(taskText) and \(routineText) left today.")
     }
 
-    private var routinesSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            SectionLabel(String(localized: "Routines"), trailing: "\(routinesDone) of \(todaysRoutines.count)")
-            ScrollView(.horizontal) {
-                HStack(alignment: .top, spacing: 8) {
-                    ForEach(todaysRoutines) { RoutineDial(routine: $0) }
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 4)
+    private var routinesScroller: some View {
+        ScrollView(.horizontal) {
+            HStack(alignment: .top, spacing: 8) {
+                ForEach(todaysRoutines) { RoutineDial(routine: $0) }
             }
-            .scrollIndicators(.hidden)
-            .padding(.horizontal, -20)
+            .padding(.vertical, 4)
         }
-    }
-
-    private var tasksSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionLabel(String(localized: "Tasks"))
-            if dueTasks.isEmpty {
-                EmptyState(title: String(localized: "All clear"),
-                           message: String(localized: "Nothing due today. Add something, or enjoy the space."),
-                           actionTitle: String(localized: "Add a task")) { router.sheet = .newTask(nil) }
-            } else {
-                GroupedList(items: dueTasks, inset: 52) { task in
-                    TaskRow(task: task) { router.sheet = .task(task) }
-                }
-            }
-        }
-    }
-
-    private func focusSection(_ goal: Goal) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionLabel(String(localized: "In focus"))
-            Button { router.tab = .goals } label: { GoalCard(goal: goal) }
-                .buttonStyle(.pressable)
-        }
-    }
-
-    private var upcomingSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionLabel(String(localized: "Coming up"), trailing: "\(upcomingTasks.count)")
-            GroupedList(items: Array(upcomingTasks.prefix(6)), inset: 52) { task in
-                TaskRow(task: task) { router.sheet = .task(task) }
-            }
-        }
-    }
-
-    private var completedSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Button {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { showCompleted.toggle() }
-            } label: {
-                HStack(spacing: 6) {
-                    SectionLabel(String(localized: "Done today"), trailing: "\(completedToday.count)")
-                    Image(systemName: "chevron.right")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(Color.inkSecondary)
-                        .rotationEffect(.degrees(showCompleted ? 90 : 0))
-                }
-                .contentShape(.rect)
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint(showCompleted ? "Collapse" : "Expand")
-
-            if showCompleted {
-                GroupedList(items: completedToday, inset: 52) { task in
-                    TaskRow(task: task) { router.sheet = .task(task) }
-                }
-                .transition(.opacity.combined(with: .offset(y: -8)))
-            }
-        }
+        .scrollIndicators(.hidden)
+        .scrollClipDisabled()
     }
 }
 
 #Preview {
     TodayView()
         .environment(AppRouter())
-        .modelContainer(SampleData.previewContainer)
+        .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }
