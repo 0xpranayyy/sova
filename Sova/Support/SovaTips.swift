@@ -26,6 +26,22 @@ struct SwipeTip: Tip {
     }
 }
 
+struct TasksTabTip: Tip {
+    var title: Text { Text("Every task lives here") }
+    var message: Text? {
+        Text("Tomorrow, next week or someday. Tap a day up top to see just that day, and pull down for an owl fact.")
+    }
+    var image: Image? { Image(systemName: "checklist") }
+}
+
+struct RitualCountTip: Tip {
+    var title: Text { Text("Count it up") }
+    var message: Text? {
+        Text("Rituals can have a daily goal, like 8 glasses of water. Open a ritual and choose how many times.")
+    }
+    var image: Image? { Image(systemName: "drop.fill") }
+}
+
 enum SovaTips {
     static func configure() {
         try? Tips.configure([.displayFrequency(.immediate)])

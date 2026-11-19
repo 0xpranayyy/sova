@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import TipKit
 
 struct RoutinesView: View {
     @Environment(AppRouter.self) private var router
@@ -28,6 +29,7 @@ struct RoutinesView: View {
                                    actionTitle: String(localized: "Add a ritual")) { router.sheet = router.newRoutineSheet }
                     } else {
                         WeekStage(routines: routines, done: doneToday, total: today.count)
+                        TipView(RitualCountTip())
 
                         if today.isEmpty {
                             RestDayCard()

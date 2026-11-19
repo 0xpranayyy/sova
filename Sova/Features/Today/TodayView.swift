@@ -177,6 +177,12 @@ struct TodayView: View {
             .background { CanvasBackground() }
             .toolbarVisibility(.hidden, for: .navigationBar)
             .sheet(isPresented: $showSettings) { SettingsView() }
+            .refreshable {
+                // Pull down and the owl says something nice about your day.
+                await MainActor.run { Haptics.owl() }
+                try? await Task.sleep(for: .milliseconds(450))
+                await MainActor.run { router.show(Toast(message: OwlMorningLines.random())) }
+            }
             .task {
                 for await status in captureTip.statusUpdates {
                     if case .invalidated = status { SwipeTip.isReady = true }
@@ -613,4 +619,18 @@ struct DayRow: View {
         .environment(AppRouter())
         .environment(WaveDirector())
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
+}
+
+/// Small, kind lines from the owl, for anyone who pulls down on Today.
+enum OwlMorningLines {
+    static let all = [
+        String(localized: "🦉 One thing at a time. You've got this."),
+        String(localized: "🦉 Tip: swipe a task right to finish it, left to move it."),
+        String(localized: "🦉 Hoo! Drink some water. The owl insists."),
+        String(localized: "🦉 Done is better than perfect."),
+        String(localized: "🦉 Tip: long-press the Sova icon for quick actions."),
+        String(localized: "🦉 Tip: type “every Monday” and a task repeats."),
+    ]
+
+    static func random() -> String { all.randomElement() ?? all[0] }
 }

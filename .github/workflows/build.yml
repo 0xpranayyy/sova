@@ -1,0 +1,43 @@
+name: Build
+
+# Builds Sova for the iOS Simulator on every push and pull request, so a
+# compile error shows up here even without a Mac at hand. No signing.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use the newest Xcode
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$XCODE" ]; then sudo xcode-select -s "$XCODE/Contents/Developer"; fi
+          xcodebuild -version
+
+      - name: Get the Metal Toolchain
+        run: xcodebuild -downloadComponent MetalToolchain || true
+
+      - name: Resolve packages
+        run: xcodebuild -resolvePackageDependencies -project Sova.xcodeproj -scheme Sova
+
+      - name: Build for the simulator
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Sova.xcodeproj \
+            -scheme Sova \
+            -destination 'generic/platform=iOS Simulator' \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify --renderer github-actions || exit 1

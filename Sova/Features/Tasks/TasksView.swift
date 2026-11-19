@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import TipKit
 
 /// Every task, wherever it falls. Today only shows today; this is where
 /// everything else lives.
@@ -44,6 +45,8 @@ struct TasksView: View {
                     }
                 }
                 .cardRow(top: 4, bottom: 14)
+
+                TipView(TasksTabTip()).cardRow(bottom: 10)
 
                 if open.isEmpty {
                     AllClear(hadTasks: !doneThisWeek.isEmpty, cheers: clearedCheers) { router.sheet = .newTask(nil) }
