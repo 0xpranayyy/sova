@@ -8,6 +8,7 @@ struct GoalDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var newMilestone = ""
     @State private var confirmDelete = false
+    @State private var cheers = 0
     @FocusState private var addFieldFocused: Bool
     @ScaledMetric(relativeTo: .largeTitle) private var percentSize: CGFloat = 88
 
@@ -57,7 +58,14 @@ struct GoalDetailView: View {
         } message: {
             Text("Its steps are deleted too. Linked tasks are kept.")
         }
-        .sovaFeedback(.success, trigger: goal.progress >= 1)
+        .onChange(of: goal.progress >= 1) { _, finished in
+            // The whole goal, done: sparkles and the full flourish.
+            if finished {
+                cheers += 1
+                Haptics.celebrate()
+            }
+        }
+        .onChange(of: goal.progress) { SovaRefresh.changed(context) }
     }
 
     private var hero: some View {
@@ -84,9 +92,26 @@ struct GoalDetailView: View {
             .padding(.top, 6)
             StepBar(progress: goal.progress, steps: goal.sortedMilestones.map(\.isDone), color: tone.deep, height: 16)
                 .padding(.top, 10)
+            HStack(spacing: 8) {
+                if let deadline = goal.deadline {
+                    TiltPill(text: "📅 " + deadline.formatted(.dateTime.month(.abbreviated).day()),
+                             tone: tone == .yellow ? .indigo : .yellow, tilt: -3, size: 12)
+                }
+                if !goal.steps.isEmpty {
+                    TiltPill(text: String(localized: "\(goal.completedMilestones) of \(goal.steps.count) steps"),
+                             tone: tone == .mint ? .pink : .mint, tilt: 3, size: 12)
+                }
+                if goal.progress >= 1 {
+                    TiltPill(text: String(localized: "Achieved 🏆"), tone: .pink, tilt: -2, size: 12)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .padding(.top, 14)
         }
         .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
         .block(tone, cornerRadius: 32, padding: 22)
+        .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 170, height: 140), count: 16) }
+        .animation(.spring(response: 0.5, dampingFraction: 0.75), value: goal.progress >= 1)
         .padding(.top, 8)
         .accessibilityElement(children: .combine)
     }
@@ -98,7 +123,7 @@ struct GoalDetailView: View {
                 Slider(value: $goal.manualProgress, in: 0...1, step: 0.01) {
                     Text("Progress")
                 }
-                .tint(SovaTheme.current.accent.color)
+                .tint(StickerTone(goal.accent) == .yellow ? StickerTone.yellow.deep : StickerTone(goal.accent).fill)
                 Text("No steps yet. Set progress here, or add steps below.")
                     .font(.allo(.footnote))
                     .foregroundStyle(Color.inkSecondary)
@@ -112,18 +137,42 @@ struct GoalDetailView: View {
             SectionLabel(String(localized: "Steps"),
                          trailing: goal.steps.isEmpty ? nil : "\(goal.completedMilestones) of \(goal.steps.count)")
             VStack(spacing: 0) {
-                ForEach(goal.sortedMilestones) { milestone in
-                    HStack(spacing: 4) {
-                        CheckButton(isOn: milestone.isDone, color: StickerTone(goal.accent).deep, round: true,
-                                    checkColor: StickerTone(goal.accent).fill, label: milestone.title) {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { milestone.isDone.toggle() }
+                ForEach(Array(goal.sortedMilestones.enumerated()), id: \.element.id) { index, milestone in
+                    let tone = StickerTone(goal.accent)
+                    HStack(spacing: 12) {
+                        Button {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { milestone.isDone.toggle() }
+                            if milestone.isDone { Haptics.success(); Sounds.play(.check) } else { Sounds.play(.uncheck) }
+                        } label: {
+                            ZStack {
+                                Circle().fill(milestone.isDone ? tone.fill : Color.well)
+                                if milestone.isDone {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 13, weight: .black))
+                                        .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+                                        .transition(.scale.combined(with: .opacity))
+                                } else {
+                                    Text("\(index + 1)")
+                                        .font(.allo(size: 14, weight: .heavy).monospacedDigit())
+                                        .foregroundStyle(Color.inkSecondary)
+                                }
+                            }
+                            .frame(width: 34, height: 34)
+                            .scaleEffect(milestone.isDone ? 1.05 : 1)
                         }
+                        .buttonStyle(.pressable)
+                        .accessibilityLabel(milestone.isDone ? String(localized: "Mark \(milestone.title) not done")
+                                                             : String(localized: "Mark \(milestone.title) done"))
                         Text(milestone.title)
+                            .font(.allo(size: 17, weight: .heavy, relativeTo: .body))
+                            .tracking(-0.3)
+                            .strikethrough(milestone.isDone, color: Color.inkTertiary)
                             .foregroundStyle(milestone.isDone ? Color.inkTertiary : Color.ink)
                         Spacer()
                     }
-                    .padding(.leading, 8)
-                    .padding(.vertical, 2)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .contentShape(.rect)
                     .contextMenu {
                         Button("Delete", systemImage: "trash", role: .destructive) {
                             withAnimation {
@@ -132,21 +181,24 @@ struct GoalDetailView: View {
                             }
                         }
                     }
-                    Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, 52)
+                    Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, 60)
                 }
 
-                HStack(spacing: 4) {
+                HStack(spacing: 12) {
                     Image(systemName: "plus")
-                        .font(.allo(.body, .medium))
-                        .foregroundStyle(Color.inkTertiary)
-                        .frame(width: 44, height: 44)
-                    TextField("Add a step", text: $newMilestone)
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(Color.inkSecondary)
+                        .frame(width: 34, height: 34)
+                        .background(Circle().strokeBorder(Color.inkTertiary, style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+                    TextField(goal.steps.isEmpty ? String(localized: "Add the first step") : String(localized: "Add a step"),
+                              text: $newMilestone)
+                        .font(.allo(size: 17, weight: .semibold, relativeTo: .body))
                         .focused($addFieldFocused)
                         .submitLabel(.done)
                         .onSubmit(addMilestone)
                 }
-                .padding(.leading, 8)
-                .padding(.vertical, 2)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
             }
             .surface(cornerRadius: 22, padding: 0)
         }
@@ -181,5 +233,6 @@ struct GoalDetailView: View {
         }
         newMilestone = ""
         addFieldFocused = true
+        Haptics.pop(0.5, sound: true)
     }
 }
