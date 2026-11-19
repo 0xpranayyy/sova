@@ -50,11 +50,17 @@ extension Routine {
 enum RitualStore {
     static var context: ModelContext { SovaStore.shared.mainContext }
 
-    static func all(in context: ModelContext = context) -> [Routine] {
+    // Overloads rather than default arguments: a default argument is
+    // evaluated outside the main actor, so it can't read `context`.
+    static func all() -> [Routine] { all(in: context) }
+
+    static func all(in context: ModelContext) -> [Routine] {
         (try? context.fetch(FetchDescriptor<Routine>(sortBy: [SortDescriptor(\.order)]))) ?? []
     }
 
-    static func find(_ id: String, in context: ModelContext = context) -> Routine? {
+    static func find(_ id: String) -> Routine? { find(id, in: context) }
+
+    static func find(_ id: String, in context: ModelContext) -> Routine? {
         all(in: context).first { $0.entityID == id }
     }
 }
