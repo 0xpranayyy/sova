@@ -65,7 +65,7 @@ struct GoalDetailView: View {
                 Haptics.celebrate()
             }
         }
-        .onChange(of: goal.progress) { SovaRefresh.changed(context) }
+        .onDisappear { SovaRefresh.changed(context) }
     }
 
     private var hero: some View {

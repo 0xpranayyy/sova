@@ -47,8 +47,13 @@ enum NotificationActions {
             case .snooze:
                 TaskAlerts.snooze(task, minutes: 60)
             case .tomorrow:
-                if let due = task.dueDate {
-                    task.dueDate = Calendar.current.date(byAdding: .day, value: 1, to: due)
+                let tomorrow = Date.now.startOfDay.adding(days: 1)
+                if task.hasTime, let due = task.dueDate {
+                    let parts = Calendar.current.dateComponents([.hour, .minute], from: due)
+                    task.dueDate = Calendar.current.date(bySettingHour: parts.hour ?? 9, minute: parts.minute ?? 0,
+                                                         second: 0, of: tomorrow)
+                } else {
+                    task.dueDate = tomorrow
                 }
                 TaskAlerts.schedule(task)
             default:

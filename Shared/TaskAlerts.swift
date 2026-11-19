@@ -58,13 +58,16 @@ enum TaskAlerts {
     /// at most 64 pending notifications, so only the soonest are scheduled.
     static func resync(in context: ModelContext) async {
         let pending = await center.pendingNotificationRequests()
-        center.removePendingNotificationRequests(withIdentifiers: pending.map(\.identifier).filter { $0.hasPrefix("sova.task.") })
+        // Snoozed alerts (a time-interval trigger) stay as they are.
+        let stale = pending.filter { $0.identifier.hasPrefix("sova.task.") && !($0.trigger is UNTimeIntervalNotificationTrigger) }
+        center.removePendingNotificationRequests(withIdentifiers: stale.map(\.identifier))
+        let snoozed = Set(pending.filter { $0.trigger is UNTimeIntervalNotificationTrigger }.map(\.identifier))
         let now = Date.now
         let descriptor = FetchDescriptor<TaskItem>(predicate: #Predicate<TaskItem> { !$0.isDone && $0.hasTime })
         let tasks = ((try? context.fetch(descriptor)) ?? [])
             .filter { ($0.dueDate ?? .distantPast) > now }
             .sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }
-        for task in tasks.prefix(50) { schedule(task) }
+        for task in tasks.prefix(50) where !snoozed.contains(task.alertID) { schedule(task) }
     }
 }
 

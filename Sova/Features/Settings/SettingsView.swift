@@ -451,5 +451,11 @@ struct SettingsView: View {
         try? context.delete(model: Goal.self)
         try? context.delete(model: Routine.self)
         try? context.save()
+        let center = UNUserNotificationCenter.current()
+        center.getPendingNotificationRequests { requests in
+            let ids = requests.map(\.identifier).filter { $0.hasPrefix("sova.task.") || $0.hasPrefix("sova.ritual.") }
+            center.removePendingNotificationRequests(withIdentifiers: ids)
+        }
+        SovaRefresh.changed(context)
     }
 }

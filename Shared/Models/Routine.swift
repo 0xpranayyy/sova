@@ -96,6 +96,7 @@ final class Routine {
             completions.append(date)
             return
         }
+        taps.removeAll { !$0.isSameDay(as: date) }
         taps.append(date)
         if taps.filter({ $0.isSameDay(as: date) }).count >= target {
             completions.append(date)
