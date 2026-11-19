@@ -221,7 +221,7 @@ struct DayWidgetView: View {
             stage
             list
         }
-        .containerBackground(for: .widget) { Color.canvas }
+        .containerBackground(for: .widget) { PaperBackground() }
     }
 
     // The indigo stage up top, with soft round bottom corners like a sticker.
@@ -302,8 +302,18 @@ struct DayWidgetView: View {
                 }
                 .frame(height: 34)
             } else {
-                ForEach(entry.tasks.prefix(maxRows)) { task in
-                    TaskLine(task: task)
+                VStack(spacing: 0) {
+                    ForEach(Array(entry.tasks.prefix(maxRows).enumerated()), id: \.element.id) { index, task in
+                        if index > 0 { Rectangle().fill(Color.hairline).frame(height: 1).padding(.leading, 40) }
+                        TaskLine(task: task)
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 2)
+                .background {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(fullColor ? Color.surface.shadow(.drop(color: Color.night.opacity(0.06), radius: 8, y: 4))
+                                        : Color.primary.opacity(0.06).shadow(.drop(color: .clear, radius: 0)))
                 }
             }
 
@@ -419,7 +429,7 @@ struct RitualsWidgetView: View {
                 .frame(maxHeight: .infinity)
             }
         }
-        .containerBackground(for: .widget) { Color.canvas }
+        .containerBackground(for: .widget) { PaperBackground() }
     }
 
     /// Stickers sit a little crooked, alternating.

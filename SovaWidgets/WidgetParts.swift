@@ -45,6 +45,43 @@ struct StageBackground: View {
                            center: UnitPoint(x: 0.18, y: -0.1), startRadius: 0, endRadius: 260)
             RadialGradient(colors: [Color(hex: 0x120840).opacity(0.55), .clear],
                            center: UnitPoint(x: 0.9, y: 1.15), startRadius: 0, endRadius: 220)
+            RadialGradient(colors: [StickerTone.pink.fill.opacity(0.16), .clear],
+                           center: UnitPoint(x: 1.05, y: 0.15), startRadius: 0, endRadius: 140)
+            RadialGradient(colors: [StickerTone.mint.fill.opacity(0.10), .clear],
+                           center: UnitPoint(x: -0.05, y: 0.95), startRadius: 0, endRadius: 150)
+        }
+    }
+}
+
+/// Warm paper with soft sticker-colored glows, like the app's pages.
+struct PaperBackground: View {
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        let dark = scheme == .dark
+        ZStack {
+            Color.canvas
+            RadialGradient(colors: [StickerTone.yellow.fill.opacity(dark ? 0.10 : 0.24), .clear],
+                           center: UnitPoint(x: 1.0, y: -0.05), startRadius: 0, endRadius: 220)
+            RadialGradient(colors: [StickerTone.lilac.fill.opacity(dark ? 0.16 : 0.30), .clear],
+                           center: UnitPoint(x: -0.1, y: 0.75), startRadius: 0, endRadius: 240)
+        }
+    }
+}
+
+/// A sticker's finish: its color, a soft shadow in a deeper shade, a sheen
+/// from the top and a bright top edge.
+struct StickerFinish<S: InsettableShape>: View {
+    let shape: S
+    let tone: StickerTone
+    var shadow: CGFloat = 6
+
+    var body: some View {
+        ZStack {
+            shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: shadow, y: shadow * 0.5)))
+            shape.fill(LinearGradient(colors: [Color.white.opacity(0.26), .clear], startPoint: .top, endPoint: .center))
+            shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.6), .clear],
+                                              startPoint: .top, endPoint: .center), lineWidth: 1)
         }
     }
 }
@@ -96,6 +133,12 @@ struct OwlRing: View {
                     .offset(y: -size / 2 + line / 2)
                     .rotationEffect(.degrees(360 * shown))
             }
+            if fullColor {
+                Circle()
+                    .fill(StickerTone.yellow.fill.opacity(happy ? 0.38 : 0.22))
+                    .frame(width: size * 0.62, height: size * 0.62)
+                    .blur(radius: size * 0.12)
+            }
             Image(happy ? "OwlHappy" : "Owl")
                 .resizable()
                 .widgetAccentedRenderingMode(.accentedDesaturated)
@@ -130,7 +173,13 @@ struct StickerPill: View {
         .lineLimit(1)
         .padding(.horizontal, size * 0.8)
         .padding(.vertical, size * 0.38)
-        .background(fullColor ? tone.fill : Color.white.opacity(0.16), in: .capsule)
+        .background {
+            if fullColor {
+                StickerFinish(shape: Capsule(), tone: tone, shadow: 4)
+            } else {
+                Capsule().fill(Color.white.opacity(0.16))
+            }
+        }
         .widgetAccentable()
         .rotationEffect(.degrees(tilt))
     }
@@ -289,8 +338,16 @@ struct RitualDot: View {
     var body: some View {
         Button(intent: ToggleRitualIntent(ritual: item.entity)) {
             ZStack(alignment: .bottomTrailing) {
-                Circle()
-                    .fill(fullColor ? item.tone.fill.opacity(item.done ? 1 : 0.32) : Color.primary.opacity(item.done ? 0.3 : 0.1))
+                Group {
+                    if fullColor && item.done {
+                        StickerFinish(shape: Circle(), tone: item.tone, shadow: 4)
+                    } else if fullColor {
+                        Circle().fill(item.tone.fill.opacity(0.3))
+                            .overlay(Circle().strokeBorder(item.tone.fill, style: StrokeStyle(lineWidth: 1.5, dash: [3, 3])))
+                    } else {
+                        Circle().fill(Color.primary.opacity(item.done ? 0.3 : 0.1))
+                    }
+                }
                     .overlay {
                         Image(systemName: item.symbol)
                             .font(.system(size: size * 0.4, weight: .bold))
@@ -359,8 +416,14 @@ struct RitualTile: View {
             .foregroundStyle(ink)
             .padding(10)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(fullColor ? item.tone.fill : Color.primary.opacity(item.done ? 0.22 : 0.1),
-                        in: .rect(cornerRadius: 18, style: .continuous))
+            .background {
+                if fullColor {
+                    StickerFinish(shape: RoundedRectangle(cornerRadius: 18, style: .continuous), tone: item.tone)
+                } else {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.primary.opacity(item.done ? 0.22 : 0.1))
+                }
+            }
             .saturation(item.done ? 0.85 : 1)
             .rotationEffect(.degrees(tilt))
             .widgetAccentable()
