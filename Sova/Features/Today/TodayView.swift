@@ -445,7 +445,7 @@ struct UpNextCard: View {
         switch entry.source {
         case .task(let t): TaskActions.toggle(t, router: router)
         case .routine(let r):
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { r.toggle(on: .now) }
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) { r.advance(on: .now) }
         }
     }
 }
@@ -467,10 +467,19 @@ struct RitualCard: View {
                 Image(systemName: routine.symbol)
                     .font(.system(size: 24, weight: .semibold))
                 Spacer()
-                CheckButton(isOn: done, color: tone.deep, round: true, size: 30, checkColor: tone.fill,
-                            label: routine.title) {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.toggle(on: .now) }
-                    if routine.isDone(on: .now) { wiggle += 1 }
+                Group {
+                    if routine.isCounted {
+                        CountCheck(routine: routine, ink: tone.deep, fill: tone.fill, size: 30) {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.advance(on: .now) }
+                            if routine.isDone(on: .now) { wiggle += 1 }
+                        }
+                    } else {
+                        CheckButton(isOn: done, color: tone.deep, round: true, size: 30, checkColor: tone.fill,
+                                    label: routine.title) {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.advance(on: .now) }
+                            if routine.isDone(on: .now) { wiggle += 1 }
+                        }
+                    }
                 }
                 .padding(-7)
             }
@@ -480,6 +489,12 @@ struct RitualCard: View {
                 .tracking(-0.4)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
+            if routine.isCounted && !done {
+                Text("\(routine.tally(on: .now)) / \(routine.target)")
+                    .font(.allo(size: 12, weight: .heavy).monospacedDigit())
+                    .opacity(0.7)
+                    .padding(.top, 2)
+            }
         }
         .foregroundStyle(ink)
         .padding(14)
@@ -503,7 +518,7 @@ struct RitualCard: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: done)
         .accessibilityElement(children: .combine)
         .accessibilityAction(named: done ? "Mark as not done" : "Mark as done") {
-            withAnimation { routine.toggle(on: .now) }
+            withAnimation { routine.advance(on: .now) }
         }
     }
 }

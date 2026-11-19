@@ -18,12 +18,14 @@ struct ToggleRitualIntent: AppIntent {
         guard let routine = RitualStore.find(ritual.id) else {
             return .result(dialog: "I couldn't find that ritual.")
         }
-        routine.toggle(on: .now)
+        routine.advance(on: .now)
         try? RitualStore.context.save()
         WidgetCenter.shared.reloadAllTimelines()
         let done = routine.isDone(on: .now)
+        let tally = routine.tally(on: .now)
         let message = done ? String(localized: "Nice! \(routine.title) is done. 🦉")
-                           : String(localized: "Okay, \(routine.title) is open again.")
+            : tally > 0 ? String(localized: "\(routine.title): \(tally) of \(routine.target).")
+            : String(localized: "Okay, \(routine.title) is open again.")
         return .result(dialog: "\(message)")
     }
 }
@@ -80,4 +82,24 @@ struct AddTaskIntent: AppIntent {
         let when = (task.dueDate ?? .now).relativeDayText(includingTime: task.hasTime)
         return .result(dialog: "Added “\(title)” for \(when).")
     }
+}
+
+/// Opens Sova straight into quick capture. Used by the Control Center and
+/// Lock Screen button, and by Shortcuts.
+struct OpenQuickCaptureIntent: AppIntent {
+    static let title: LocalizedStringResource = "New Task in Sova"
+    static let description = IntentDescription("Opens Sova ready to type a new task.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        SovaSettings.shared.set(LaunchAction.quickTask.rawValue, forKey: SovaSettings.Key.pendingAction)
+        return .result()
+    }
+}
+
+/// Something to do as soon as the app is on screen: from a Home Screen quick
+/// action, a control, or a notification.
+enum LaunchAction: String {
+    case quickTask, newRitual, today, tasks
 }

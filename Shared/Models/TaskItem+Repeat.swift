@@ -13,6 +13,7 @@ extension TaskItem {
         let next = TaskItem(title: title, notes: notes, dueDate: nextDue, hasTime: hasTime,
                             priority: priority, accent: accent, goal: goal)
         next.repeatRaw = repeatRaw
+        next.checklist = checklist.map { ChecklistItem(title: $0.title) }
         repeatRaw = RepeatRule.none.rawValue
         context.insert(next)
         TaskAlerts.schedule(next)

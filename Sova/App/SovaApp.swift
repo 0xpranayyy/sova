@@ -3,6 +3,7 @@ import SwiftData
 
 @main
 struct SovaApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     private let container = SovaStore.shared
     @State private var store = PlusStore()
 

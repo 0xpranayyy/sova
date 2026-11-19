@@ -9,6 +9,7 @@ struct SovaWidgetsBundle: WidgetBundle {
         TodayWidget()
         DayWidget()
         RitualsWidget()
+        NewTaskControl()
     }
 }
 

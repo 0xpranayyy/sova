@@ -36,6 +36,13 @@ final class Routine {
     var completions: [Date] = []
     var createdAt: Date = Date.now
     var order: Int = 0
+    /// How many times a day it counts as done: 1 for a plain check, 8 for
+    /// "Drink water 8 glasses".
+    var target: Int = 1
+    /// Each tap toward the target, for rituals with a target above 1.
+    var taps: [Date] = []
+    /// A daily reminder at this many minutes after midnight, or -1 for none.
+    var reminderMinutes: Int = -1
 
     init(
         title: String,
@@ -68,6 +75,32 @@ final class Routine {
     func isScheduled(on date: Date) -> Bool { weekdays.contains(date.weekday) }
 
     func isDone(on date: Date) -> Bool { completions.contains { $0.isSameDay(as: date) } }
+
+    /// How far along today's count is: 0…target.
+    func tally(on date: Date) -> Int {
+        if isDone(on: date) { return max(target, 1) }
+        return taps.filter { $0.isSameDay(as: date) }.count
+    }
+
+    var isCounted: Bool { target > 1 }
+
+    /// One tap on the ritual's check. Plain rituals flip; counted ones add one
+    /// until the target is reached. A tap on a finished ritual undoes the day.
+    func advance(on date: Date) {
+        if isDone(on: date) {
+            completions.removeAll { $0.isSameDay(as: date) }
+            taps.removeAll { $0.isSameDay(as: date) }
+            return
+        }
+        guard isCounted else {
+            completions.append(date)
+            return
+        }
+        taps.append(date)
+        if taps.filter({ $0.isSameDay(as: date) }).count >= target {
+            completions.append(date)
+        }
+    }
 
     func toggle(on date: Date) {
         if isDone(on: date) {

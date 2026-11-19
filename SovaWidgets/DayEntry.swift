@@ -9,6 +9,8 @@ struct RitualItem: Identifiable {
     let tone: StickerTone
     let done: Bool
     let entity: RitualEntity
+    var tally: Int = 0
+    var target: Int = 1
 }
 
 struct TaskRowItem: Identifiable {
@@ -71,7 +73,9 @@ struct DayEntry: TimelineEntry {
             date: today, done: 4, total: 7,
             next: NextItem(title: String(localized: "Call Mom"), time: at(18)),
             rituals: [
-                ritual(1, String(localized: "Drink water"), "drop", .cyan, true),
+                RitualItem(id: "sample-1", title: String(localized: "Drink water"), symbol: "drop", tone: .cyan,
+                           done: false, entity: RitualEntity(id: "sample-1", title: String(localized: "Drink water"), symbol: "drop"),
+                           tally: 5, target: 8),
                 ritual(2, String(localized: "Read"), "book.closed", .yellow, true),
                 ritual(3, String(localized: "Morning walk"), "figure.walk", .orange, false),
                 ritual(4, String(localized: "Stretch"), "figure.flexibility", .lilac, false),
@@ -135,7 +139,7 @@ enum DaySnapshot {
         let rituals = todays.map { routine in
             RitualItem(id: routine.entityID, title: routine.title, symbol: routine.symbol,
                        tone: StickerTone(routine.accent), done: routine.isDone(on: now),
-                       entity: RitualEntity(routine))
+                       entity: RitualEntity(routine), tally: routine.tally(on: now), target: routine.target)
         }
 
         let week: [Double?] = (0..<7).reversed().map { offset in

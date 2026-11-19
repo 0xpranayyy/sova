@@ -17,6 +17,8 @@ enum SovaSettings {
         static let lastReviewPrompt = "lastReviewPrompt"
         static let activeDays = "activeDays"
         static let dayCompleteShown = "dayCompleteShown"
+        static let pendingAction = "pendingAction"     // a LaunchAction to run on open
+        static let pendingTask = "pendingTask"         // a task's alertID to open
         static let userName = "userName"           // mirrored to the App Group for widgets
     }
 

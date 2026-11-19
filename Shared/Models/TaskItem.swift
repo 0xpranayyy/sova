@@ -81,6 +81,13 @@ enum RepeatRule: String, CaseIterable, Identifiable {
     }
 }
 
+/// One line of a task's checklist.
+struct ChecklistItem: Codable, Hashable, Identifiable {
+    var id = UUID()
+    var title: String
+    var done = false
+}
+
 @Model
 final class TaskItem {
     var title: String = ""
@@ -94,6 +101,8 @@ final class TaskItem {
     var createdAt: Date = Date.now
     var repeatRaw: String = RepeatRule.none.rawValue
     var goal: Goal?
+    /// Small steps inside the task, like "passport, charger" for "Pack".
+    var checklist: [ChecklistItem] = []
 
     init(
         title: String,
@@ -141,6 +150,8 @@ final class TaskItem {
         guard let dueDate else { return true } // undated tasks live in Today
         return dueDate < Date.now.endOfDay
     }
+
+    var checklistDone: Int { checklist.filter(\.done).count }
 
     func toggle() {
         isDone.toggle()

@@ -329,7 +329,13 @@ struct RitualTile: View {
                     Image(systemName: item.symbol)
                         .font(.system(size: titleSize + 3, weight: .bold))
                     Spacer(minLength: 2)
-                    if item.done {
+                    if item.target > 1 && !item.done {
+                        Text("\(item.tally)/\(item.target)")
+                            .font(.allo(size: 11, weight: .heavy).monospacedDigit())
+                            .padding(.horizontal, 6)
+                            .frame(height: 20)
+                            .background(ink.opacity(0.14), in: .capsule)
+                    } else if item.done {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 20, weight: .bold))
                             .symbolRenderingMode(.palette)

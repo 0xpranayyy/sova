@@ -22,8 +22,24 @@ enum TaskAlerts {
             : String(localized: "Coming up at \(time).")
         content.sound = .default
         content.threadIdentifier = "sova.tasks"
+        content.categoryIdentifier = NotificationActions.taskCategory
+        content.userInfo = ["taskID": task.alertID]
         let parts = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fire)
         let trigger = UNCalendarNotificationTrigger(dateMatching: parts, repeats: false)
+        center.add(UNNotificationRequest(identifier: task.alertID, content: content, trigger: trigger))
+    }
+
+    /// The same alert again in a while, without moving the task.
+    static func snooze(_ task: TaskItem, minutes: Int) {
+        cancel(task)
+        let content = UNMutableNotificationContent()
+        content.title = task.title
+        content.body = String(localized: "Snoozed reminder. Ready now?")
+        content.sound = .default
+        content.threadIdentifier = "sova.tasks"
+        content.categoryIdentifier = NotificationActions.taskCategory
+        content.userInfo = ["taskID": task.alertID]
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: Double(minutes) * 60, repeats: false)
         center.add(UNNotificationRequest(identifier: task.alertID, content: content, trigger: trigger))
     }
 

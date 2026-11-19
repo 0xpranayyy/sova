@@ -16,6 +16,10 @@ struct RoutineEditor: View {
     @State private var accent: Accent
     @State private var period: DayPeriod
     @State private var weekdays: [Int]
+    @State private var target: Int
+    @State private var reminderOn: Bool
+    @State private var reminderTime: Date
+    @State private var shareImage: Image?
     @State private var confirmDelete = false
     @State private var wiggle = 0
     @FocusState private var nameFocused: Bool
@@ -27,6 +31,11 @@ struct RoutineEditor: View {
         _accent = State(initialValue: routine?.accent ?? .tide)
         _period = State(initialValue: routine?.period ?? .morning)
         _weekdays = State(initialValue: routine?.weekdays ?? Array(1...7))
+        _target = State(initialValue: routine?.target ?? 1)
+        let minutes = routine?.reminderMinutes ?? -1
+        _reminderOn = State(initialValue: minutes >= 0)
+        _reminderTime = State(initialValue: Reminders.time(hour: minutes >= 0 ? minutes / 60 : 8,
+                                                           minute: minutes >= 0 ? minutes % 60 : 0))
     }
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -80,6 +89,36 @@ struct RoutineEditor: View {
                                footer: weekdays.isEmpty ? String(localized: "Pick at least one day.")
                                                         : Weekdays.summary(for: weekdays)) {
                         ToneWeekdays(selection: $weekdays, tone: tone)
+                    }
+
+                    EditorCard(title: String(localized: "Each day"),
+                               footer: target == 1 ? String(localized: "Done with one tap.")
+                                                   : String(localized: "Tap \(target) times to finish it, like glasses of water or sets.")) {
+                        FlowChips(choices: [1, 2, 3, 4, 5, 6, 8, 10], selection: $target, tone: tone) { n in
+                            n == 1 ? String(localized: "Once") : "\(n)×"
+                        }
+                    }
+
+                    EditorCard(title: String(localized: "Reminder"),
+                               footer: reminderOn ? String(localized: "A nudge at \(reminderTime.formatted(date: .omitted, time: .shortened)) on the days it's due, with a Done button.")
+                                                  : String(localized: "No reminder.")) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Toggle(isOn: $reminderOn.animation(.spring(response: 0.4, dampingFraction: 0.8))) {
+                                Label(String(localized: "Remind me"), systemImage: "bell.badge.fill")
+                                    .font(.allo(size: 16, weight: .heavy, relativeTo: .body))
+                                    .foregroundStyle(Color.ink)
+                            }
+                            .tint(tone == .yellow || tone == .lime ? tone.deep : tone.fill)
+                            if reminderOn {
+                                DatePicker(String(localized: "Time"), selection: $reminderTime, displayedComponents: .hourAndMinute)
+                                    .datePickerStyle(.wheel)
+                                    .labelsHidden()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 140)
+                                    .clipped()
+                                    .transition(.opacity)
+                            }
+                        }
                     }
 
                     EditorCard(title: String(localized: "Color")) {
@@ -190,10 +229,31 @@ struct RoutineEditor: View {
     }
 
     private func stats(for routine: Routine) -> some View {
-        HStack(spacing: 10) {
-            stat(value: "\(routine.streak)", label: String(localized: "day streak"), tone: .pink, symbol: "flame.fill")
-            stat(value: routine.consistency(days: 30).formatted(.percent.precision(.fractionLength(0))),
-                 label: String(localized: "last 30 days"), tone: .mint, symbol: "chart.bar.fill")
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                stat(value: "\(routine.streak)", label: String(localized: "day streak"), tone: .pink, symbol: "flame.fill")
+                stat(value: routine.consistency(days: 30).formatted(.percent.precision(.fractionLength(0))),
+                     label: String(localized: "last 30 days"), tone: .mint, symbol: "chart.bar.fill")
+            }
+            if let shareImage, routine.streak > 0 {
+                ShareLink(item: shareImage,
+                          preview: SharePreview(String(localized: "My \(routine.title) streak"), image: shareImage)) {
+                    Label(String(localized: "Share my streak"), systemImage: "square.and.arrow.up")
+                        .font(.allo(size: 16, weight: .heavy, relativeTo: .body))
+                        .foregroundStyle(Color.ink)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(Color.surface, in: .capsule)
+                        .overlay(Capsule().strokeBorder(Color.hairline, lineWidth: 1.5))
+                }
+                .buttonStyle(.pressable)
+            }
+        }
+        .task {
+            // Draw the share card once, off the main render.
+            let renderer = ImageRenderer(content: StreakCard(title: routine.title, symbol: routine.symbol,
+                                                             tone: StickerTone(routine.accent), streak: routine.streak))
+            renderer.scale = 3
+            if let image = renderer.uiImage { shareImage = Image(uiImage: image) }
         }
     }
 
@@ -212,6 +272,12 @@ struct RoutineEditor: View {
 
     // MARK: Saving
 
+    private var reminderMinutes: Int {
+        guard reminderOn else { return -1 }
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: reminderTime)
+        return (parts.hour ?? 8) * 60 + (parts.minute ?? 0)
+    }
+
     private func save() {
         guard canSave else { return }
         if let routine {
@@ -220,12 +286,19 @@ struct RoutineEditor: View {
             routine.accent = accent
             routine.period = period
             routine.weekdays = weekdays.sorted()
+            routine.target = target
+            routine.reminderMinutes = reminderMinutes
+            RitualReminders.schedule(routine)
         } else {
             let new = Routine(title: trimmedTitle, symbol: symbol, accent: accent, period: period,
                               weekdays: weekdays.sorted(),
                               order: (routines.map(\.order).max() ?? -1) + 1)
+            new.target = target
+            new.reminderMinutes = reminderMinutes
             context.insert(new)
+            RitualReminders.schedule(new)
         }
+        if reminderOn { Task { await TaskAlerts.requestPermissionIfNeeded() } }
         try? context.save()
         SovaRefresh.changed(context)
         Haptics.success()
@@ -237,9 +310,57 @@ struct RoutineEditor: View {
 
     private func delete() {
         guard let routine else { return }
+        RitualReminders.cancel(routine)
         context.delete(routine)
         try? context.save()
         SovaRefresh.changed(context)
         dismiss()
+    }
+}
+
+/// A ritual's streak as a square sticker card, to share.
+struct StreakCard: View {
+    let title: String
+    let symbol: String
+    let tone: StickerTone
+    let streak: Int
+
+    var body: some View {
+        let ink = tone == .indigo ? Color.white : tone.deep
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Image(systemName: symbol)
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundStyle(ink)
+                    .frame(width: 64, height: 64)
+                    .background(ink.opacity(0.14), in: .rect(cornerRadius: 20, style: .continuous))
+                    .rotationEffect(.degrees(-6))
+                Spacer()
+                OwlMark(size: 70, happy: true, blinks: false, reactsToTap: false)
+                    .rotationEffect(.degrees(8))
+            }
+            Spacer()
+            Text("\(streak)")
+                .font(.hero(120, weight: .heavy))
+                .tracking(-6)
+            Text(streak == 1 ? String(localized: "day of") : String(localized: "days of"))
+                .font(.allo(size: 26, weight: .heavy))
+                .opacity(0.7)
+            Text(title)
+                .font(.allo(size: 34, weight: .heavy))
+                .tracking(-1)
+                .lineLimit(2)
+            Spacer()
+            HStack(spacing: 8) {
+                Image(systemName: "flame.fill")
+                Text(String(localized: "Kept with Sova"))
+            }
+            .font(.allo(size: 18, weight: .heavy))
+            .opacity(0.75)
+        }
+        .foregroundStyle(ink)
+        .padding(36)
+        .frame(width: 400, height: 500)
+        .background(tone.fill)
     }
 }

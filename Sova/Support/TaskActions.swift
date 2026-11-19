@@ -14,12 +14,14 @@ struct TaskSnapshot {
     let createdAt: Date
     let repeatRaw: String
     let goal: Goal?
+    let checklist: [ChecklistItem]
 
     init(_ task: TaskItem) {
         title = task.title; notes = task.notes; dueDate = task.dueDate; hasTime = task.hasTime
         priorityRaw = task.priorityRaw; accentRaw = task.accentRaw; isDone = task.isDone
         completedAt = task.completedAt; createdAt = task.createdAt; goal = task.goal
         repeatRaw = task.repeatRaw
+        checklist = task.checklist
     }
 
     func restore(in context: ModelContext) {
@@ -31,6 +33,7 @@ struct TaskSnapshot {
         task.createdAt = createdAt
         task.repeatRaw = repeatRaw
         task.goal = goal
+        task.checklist = checklist
         context.insert(task)
         TaskAlerts.schedule(task)
         SovaRefresh.changed(context)

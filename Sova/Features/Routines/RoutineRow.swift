@@ -46,7 +46,8 @@ struct RoutineRow: View {
                 }
                 HStack(spacing: 8) {
                     WeekTrack(routine: routine, color: ink)
-                    Text(Weekdays.summary(for: routine.weekdays))
+                    Text((routine.isCounted ? "\(routine.tally(on: .now))/\(routine.target) · " : "")
+                         + Weekdays.summary(for: routine.weekdays))
                         .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
                         .tracking(1.2)
                         .textCase(.uppercase)
@@ -56,8 +57,12 @@ struct RoutineRow: View {
             }
             Spacer(minLength: 0)
             if scheduled {
-                CheckButton(isOn: done, color: ink, round: true, size: 36, emphasized: true,
-                            checkColor: tone.fill, label: routine.title, action: toggle)
+                if routine.isCounted {
+                    CountCheck(routine: routine, ink: ink, fill: tone.fill, size: 36, action: toggle)
+                } else {
+                    CheckButton(isOn: done, color: ink, round: true, size: 36, emphasized: true,
+                                checkColor: tone.fill, label: routine.title, action: toggle)
+                }
             } else {
                 MonoCaps(String(localized: "Rest"), color: ink.opacity(0.6))
                     .frame(width: 44)
@@ -108,7 +113,7 @@ struct RoutineRow: View {
     }
 
     private func toggle() {
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.toggle(on: .now) }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.advance(on: .now) }
         SovaRefresh.changed(context)
         guard routine.isDone(on: .now) else { return }
         wiggle += 1

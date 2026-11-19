@@ -77,10 +77,12 @@ struct MainTabView: View {
             await TaskAlerts.resync(in: context)
             SovaRefresh.changed(context)
         }
-        .onChange(of: scenePhase) { _, phase in
+        .onChange(of: scenePhase, initial: true) { _, phase in
             // Leaving the app: make the widgets and the badge match what just changed.
             if phase == .background { SovaRefresh.changed(context) }
+            if phase == .active { runPendingAction() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .sovaPendingAction)) { _ in runPendingAction() }
         .sovaFeedback(.selection, trigger: router.tab)
         .onChange(of: router.tab) { previous, current in
             guard current == .create else { return }
@@ -97,6 +99,30 @@ struct MainTabView: View {
         }
         .tint(Color.ink)
         .environment(router)
+    }
+
+    /// Runs whatever a quick action, control or notification asked for.
+    private func runPendingAction() {
+        let defaults = SovaSettings.shared
+        if let taskID = defaults.string(forKey: SovaSettings.Key.pendingTask) {
+            defaults.removeObject(forKey: SovaSettings.Key.pendingTask)
+            let tasks = (try? context.fetch(FetchDescriptor<TaskItem>())) ?? []
+            if let task = tasks.first(where: { $0.alertID == taskID }) {
+                router.tab = .tasks
+                router.sheet = .task(task)
+            }
+        }
+        guard let raw = defaults.string(forKey: SovaSettings.Key.pendingAction),
+              let action = LaunchAction(rawValue: raw) else { return }
+        defaults.removeObject(forKey: SovaSettings.Key.pendingAction)
+        switch action {
+        case .quickTask: router.sheet = .quickTask
+        case .newRitual:
+            router.tab = .routines
+            router.sheet = router.newRoutineSheet
+        case .today: router.tab = .today
+        case .tasks: router.tab = .tasks
+        }
     }
 
     @ViewBuilder
