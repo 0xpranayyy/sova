@@ -36,7 +36,8 @@ struct TodayWidgetView: View {
         case .accessoryRectangular: rectangular
         case .accessoryInline:
             Label(entry.allDone ? String(localized: "Whole day done")
-                                : String(localized: "\(entry.done) of \(entry.total) done today"),
+                  : entry.total == 0 ? String(localized: "A clear day")
+                  : String(localized: "\(entry.done) of \(entry.total) done today"),
                   systemImage: entry.allDone ? "checkmark.seal.fill" : "circle.dashed")
                 .containerBackground(for: .widget) { Color.clear }
         case .systemMedium: medium
@@ -187,6 +188,7 @@ struct TodayWidgetView: View {
     }
 
     private var lockSubtitle: String {
+        if entry.total == 0 { return String(localized: "Nothing planned") }
         if let time = entry.next?.time, !entry.allDone {
             return time.formatted(date: .omitted, time: .shortened) + " · " + String(localized: "\(entry.done) of \(entry.total)")
         }
@@ -247,7 +249,7 @@ struct DayWidgetView: View {
                 }
                 .padding(.top, 9)
                 Spacer(minLength: 8)
-                WeekBars(week: entry.week, today: entry.progress, height: 22)
+                WeekBars(week: entry.week, today: (entry.week.last ?? nil) ?? 0, height: 22, end: entry.date)
             }
             Spacer(minLength: 0)
         }

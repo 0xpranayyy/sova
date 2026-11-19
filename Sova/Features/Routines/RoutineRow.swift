@@ -100,6 +100,7 @@ struct RoutineRow: View {
         .confirmationDialog(String(localized: "Delete this ritual and its history?"), isPresented: $confirmDelete,
                             titleVisibility: .visible) {
             Button(String(localized: "Delete Ritual"), role: .destructive) {
+                RitualReminders.cancel(routine)
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { context.delete(routine) }
                 SovaRefresh.changed(context)
             }

@@ -30,13 +30,13 @@ struct RitualEntity: AppEntity {
 struct RitualQuery: EntityQuery {
     func entities(for identifiers: [RitualEntity.ID]) async throws -> [RitualEntity] {
         await MainActor.run {
-            RitualStore.all().filter { identifiers.contains($0.entityID) }.map { RitualEntity($0) }
+            RitualStore.all(in: SovaStore.workContext()).filter { identifiers.contains($0.entityID) }.map { RitualEntity($0) }
         }
     }
 
     func suggestedEntities() async throws -> [RitualEntity] {
         await MainActor.run {
-            RitualStore.all().filter { $0.isScheduled(on: .now) }.map { RitualEntity($0) }
+            RitualStore.all(in: SovaStore.workContext()).filter { $0.isScheduled(on: .now) }.map { RitualEntity($0) }
         }
     }
 }
@@ -50,11 +50,11 @@ extension Routine {
 enum RitualStore {
     static var context: ModelContext { SovaStore.shared.mainContext }
 
-    static func all() -> [Routine] {
+    static func all(in context: ModelContext = context) -> [Routine] {
         (try? context.fetch(FetchDescriptor<Routine>(sortBy: [SortDescriptor(\.order)]))) ?? []
     }
 
-    static func find(_ id: String) -> Routine? {
-        all().first { $0.entityID == id }
+    static func find(_ id: String, in context: ModelContext = context) -> Routine? {
+        all(in: context).first { $0.entityID == id }
     }
 }

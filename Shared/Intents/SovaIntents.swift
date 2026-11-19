@@ -15,12 +15,12 @@ struct ToggleRitualIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let routine = RitualStore.find(ritual.id) else {
+        let context = SovaStore.workContext()
+        guard let routine = RitualStore.find(ritual.id, in: context) else {
             return .result(dialog: "I couldn't find that ritual.")
         }
         routine.advance(on: .now)
-        try? RitualStore.context.save()
-        WidgetCenter.shared.reloadAllTimelines()
+        SovaRefresh.changed(context)
         let done = routine.isDone(on: .now)
         let tally = routine.tally(on: .now)
         let message = done ? String(localized: "Nice! \(routine.title) is done. 🦉")
@@ -43,13 +43,28 @@ struct ToggleTaskIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        let context = SovaStore.shared.mainContext
+        let context = SovaStore.workContext()
         let tasks = (try? context.fetch(FetchDescriptor<TaskItem>())) ?? []
         guard let task = tasks.first(where: { $0.alertID == taskID }) else { return .result() }
-        task.toggle()
-        if task.isDone { task.spawnNextOccurrence() }
+        if task.isDone {
+            // Unticking: take back the next occurrence that ticking created,
+            // and hand its repeat back, the same as Undo in the app.
+            if task.repeatRule == .none, let finished = task.completedAt,
+               let spawned = tasks.first(where: { other in
+                   !other.isDone && other !== task && other.repeatRule != .none
+                       && other.title == task.title && other.goal == task.goal
+                       && other.createdAt >= finished.addingTimeInterval(-2)
+               }) {
+                task.repeatRaw = spawned.repeatRaw
+                TaskAlerts.cancel(spawned)
+                context.delete(spawned)
+            }
+            task.toggle()
+        } else {
+            task.toggle()
+            task.spawnNextOccurrence()
+        }
         TaskAlerts.schedule(task)
-        try? context.save()
         SovaRefresh.changed(context)
         return .result()
     }
@@ -74,7 +89,7 @@ struct AddTaskIntent: AppIntent {
                             hasTime: parsed.dueDate != nil && parsed.hasTime,
                             priority: parsed.priority, accent: SovaTheme.current.accent)
         task.repeatRule = parsed.repeatRule
-        let context = SovaStore.shared.mainContext
+        let context = SovaStore.workContext()
         context.insert(task)
         try? context.save()
         TaskAlerts.schedule(task)

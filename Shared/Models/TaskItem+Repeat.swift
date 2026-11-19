@@ -8,7 +8,7 @@ extension TaskItem {
     @discardableResult
     func spawnNextOccurrence() -> TaskItem? {
         let rule = repeatRule
-        guard rule != .none, let due = dueDate, let nextDue = rule.next(after: due),
+        guard rule != .none, let due = dueDate, let nextDue = rule.next(after: due, hasTime: hasTime),
               let context = modelContext else { return nil }
         let next = TaskItem(title: title, notes: notes, dueDate: nextDue, hasTime: hasTime,
                             priority: priority, accent: accent, goal: goal)

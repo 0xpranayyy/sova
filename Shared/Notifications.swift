@@ -54,6 +54,7 @@ enum NotificationActions {
                                                          second: 0, of: tomorrow)
                 } else {
                     task.dueDate = tomorrow
+                    task.hasTime = false
                 }
                 TaskAlerts.schedule(task)
             default:
@@ -73,36 +74,65 @@ enum NotificationActions {
     }
 }
 
-/// A daily nudge for a ritual, on the days it's scheduled.
+/// A nudge for a ritual at its time, on the days it's due. Reminders are
+/// one-off and cover the next few days, so a ritual already done today stays
+/// quiet; they're rebuilt after every change and each time Sova opens.
+/// iOS keeps at most 64 pending notifications, so rituals share a budget
+/// with task alerts.
 enum RitualReminders {
+    static let daysAhead = 3
+    static let budget = 24
+
+    private static func dayKey(_ day: Date) -> Int { Int(day.startOfDay.timeIntervalSinceReferenceDate / 86_400) }
+
     private static func ids(_ routine: Routine) -> [String] {
-        (1...7).map { "sova.ritual.\(routine.entityID).\($0)" }
+        let today = Date.now.startOfDay
+        // The days ahead, plus the weekday ids an earlier version used.
+        return (-1...daysAhead).map { "sova.ritual.\(routine.entityID).d\(dayKey(today.adding(days: $0)))" }
+            + (1...7).map { "sova.ritual.\(routine.entityID).\($0)" }
     }
 
     static func cancel(_ routine: Routine) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids(routine))
     }
 
-    static func schedule(_ routine: Routine) {
+    /// Schedules up to `limit` reminders; returns how many it added.
+    @discardableResult
+    static func schedule(_ routine: Routine, limit: Int = daysAhead) -> Int {
         cancel(routine)
-        guard routine.reminderMinutes >= 0 else { return }
-        let content = UNMutableNotificationContent()
-        content.title = routine.title
-        content.body = routine.isCounted
-            ? String(localized: "Time for your ritual. Goal today: \(routine.target).")
-            : String(localized: "Time for your ritual. Keep the streak going! 🔥")
-        content.sound = .default
-        content.threadIdentifier = "sova.rituals"
-        content.categoryIdentifier = NotificationActions.ritualCategory
-        content.userInfo = ["ritualID": routine.entityID]
-        for weekday in routine.weekdays {
-            var parts = DateComponents()
-            parts.weekday = weekday
-            parts.hour = routine.reminderMinutes / 60
-            parts.minute = routine.reminderMinutes % 60
-            let trigger = UNCalendarNotificationTrigger(dateMatching: parts, repeats: true)
-            UNUserNotificationCenter.current().add(
-                UNNotificationRequest(identifier: "sova.ritual.\(routine.entityID).\(weekday)", content: content, trigger: trigger))
+        guard routine.reminderMinutes >= 0, limit > 0 else { return 0 }
+        let center = UNUserNotificationCenter.current()
+        let today = Date.now.startOfDay
+        var added = 0
+        for offset in 0..<daysAhead where added < limit {
+            let day = today.adding(days: offset)
+            guard routine.isScheduled(on: day), !(offset == 0 && routine.isDone(on: day)),
+                  let fire = Calendar.current.date(bySettingHour: routine.reminderMinutes / 60,
+                                                   minute: routine.reminderMinutes % 60, second: 0, of: day),
+                  fire > .now else { continue }
+            let content = UNMutableNotificationContent()
+            content.title = routine.title
+            content.body = routine.isCounted
+                ? String(localized: "Time for your ritual. Goal today: \(routine.target).")
+                : String(localized: "Time for your ritual. Keep the streak going! 🔥")
+            content.sound = .default
+            content.threadIdentifier = "sova.rituals"
+            content.categoryIdentifier = NotificationActions.ritualCategory
+            content.userInfo = ["ritualID": routine.entityID]
+            let parts = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fire)
+            center.add(UNNotificationRequest(identifier: "sova.ritual.\(routine.entityID).d\(dayKey(day))",
+                                             content: content,
+                                             trigger: UNCalendarNotificationTrigger(dateMatching: parts, repeats: false)))
+            added += 1
         }
+        return added
+    }
+
+    /// Rebuilds every ritual's reminders within the shared budget.
+    static func resync(in context: ModelContext) {
+        let routines = (try? context.fetch(FetchDescriptor<Routine>(
+            predicate: #Predicate { $0.reminderMinutes >= 0 }, sortBy: [SortDescriptor(\.order)]))) ?? []
+        var left = budget
+        for routine in routines { left -= schedule(routine, limit: left) }
     }
 }

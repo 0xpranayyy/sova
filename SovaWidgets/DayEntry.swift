@@ -102,12 +102,12 @@ enum DaySnapshot {
     @MainActor
     static func make() -> DayEntry {
         let now = Date.now
-        let context = SovaStore.shared.mainContext
+        let context = SovaStore.workContext()
         let tasks = (try? context.fetch(FetchDescriptor<TaskItem>())) ?? []
         let relevant = tasks.filter { task in
             task.isDone ? (task.completedAt?.isSameDay(as: now) ?? false) : task.isDueTodayOrEarlier
         }
-        let routines = RitualStore.all()
+        let routines = RitualStore.all(in: context)
         let todays = routines.filter { $0.isScheduled(on: now) }
 
         let done = relevant.filter(\.isDone).count + todays.filter { $0.isDone(on: now) }.count

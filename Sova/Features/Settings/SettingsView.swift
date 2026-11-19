@@ -20,10 +20,10 @@ struct SettingsView: View {
     @AppStorage("eveningReminderOn") private var eveningOn = false
     @AppStorage("eveningReminderMinutes") private var eveningMinutes = 21 * 60
     @AppStorage(SovaSettings.Key.weekStart, store: SovaSettings.shared) private var weekStart = 0
-    @AppStorage(SovaSettings.Key.alertOffset) private var alertOffset = 0
-    @AppStorage(SovaSettings.Key.badgeOverdue) private var badgeOverdue = true
+    @AppStorage(SovaSettings.Key.alertOffset, store: SovaSettings.shared) private var alertOffset = 0
+    @AppStorage(SovaSettings.Key.badgeOverdue, store: SovaSettings.shared) private var badgeOverdue = true
     @AppStorage(SovaSettings.Key.haptics) private var hapticsOn = true
-    @AppStorage(SovaSettings.Key.iCloudSync) private var iCloudSync = false
+    @AppStorage(SovaSettings.Key.iCloudSync, store: SovaSettings.shared) private var iCloudSync = false
     @State private var showSyncNote = false
 
     @State private var notificationsDenied = false

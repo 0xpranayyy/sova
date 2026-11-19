@@ -174,6 +174,8 @@ struct WeekBars: View {
     let week: [Double?]
     let today: Double
     var height: CGFloat = 26
+    /// The day the entry is for; the bars end on it.
+    var end: Date = .now
 
     var body: some View {
         let days = week.count == 7 ? week : Array(repeating: nil, count: 7)
@@ -181,7 +183,7 @@ struct WeekBars: View {
             ForEach(0..<7, id: \.self) { index in
                 let isToday = index == 6
                 let value = isToday ? today : (days[index] ?? 0)
-                let date = Date.now.startOfDay.adding(days: index - 6)
+                let date = end.startOfDay.adding(days: index - 6)
                 VStack(spacing: 3) {
                     ZStack(alignment: .bottom) {
                         Capsule().fill(Color.white.opacity(0.12))

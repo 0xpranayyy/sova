@@ -58,16 +58,20 @@ enum TaskAlerts {
     /// at most 64 pending notifications, so only the soonest are scheduled.
     static func resync(in context: ModelContext) async {
         let pending = await center.pendingNotificationRequests()
-        // Snoozed alerts (a time-interval trigger) stay as they are.
-        let stale = pending.filter { $0.identifier.hasPrefix("sova.task.") && !($0.trigger is UNTimeIntervalNotificationTrigger) }
-        center.removePendingNotificationRequests(withIdentifiers: stale.map(\.identifier))
-        let snoozed = Set(pending.filter { $0.trigger is UNTimeIntervalNotificationTrigger }.map(\.identifier))
+        // Snoozed alerts (a time-interval trigger) stay, but only while their
+        // task is still open; everything else is rebuilt below.
+        let open = Set(((try? context.fetch(FetchDescriptor<TaskItem>(predicate: #Predicate { !$0.isDone }))) ?? []).map(\.alertID))
+        let ours = pending.filter { $0.identifier.hasPrefix("sova.task.") }
+        let snoozed = Set(ours.filter { $0.trigger is UNTimeIntervalNotificationTrigger && open.contains($0.identifier) }
+            .map(\.identifier))
+        center.removePendingNotificationRequests(withIdentifiers: ours.map(\.identifier).filter { !snoozed.contains($0) })
         let now = Date.now
         let descriptor = FetchDescriptor<TaskItem>(predicate: #Predicate<TaskItem> { !$0.isDone && $0.hasTime })
         let tasks = ((try? context.fetch(descriptor)) ?? [])
             .filter { ($0.dueDate ?? .distantPast) > now }
             .sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }
-        for task in tasks.prefix(50) where !snoozed.contains(task.alertID) { schedule(task) }
+        // Rituals keep a share of iOS's 64 pending notifications.
+        for task in tasks.prefix(64 - RitualReminders.budget - 4) where !snoozed.contains(task.alertID) { schedule(task) }
     }
 }
 
@@ -78,6 +82,7 @@ enum SovaRefresh {
     static func changed(_ context: ModelContext?) {
         if let context, context.hasChanges { try? context.save() }
         WidgetCenter.shared.reloadAllTimelines()
+        if let context { RitualReminders.resync(in: context) }
         updateBadge(context)
     }
 

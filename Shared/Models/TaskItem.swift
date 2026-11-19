@@ -70,12 +70,16 @@ enum RepeatRule: String, CaseIterable, Identifiable {
 
     /// The first occurrence after `date` that lands today or later, so a
     /// repeating task finished late doesn't come back already overdue.
-    func next(after date: Date) -> Date? {
+    /// For a task with a time, the next occurrence after now; otherwise the
+    /// next one from today on.
+    func next(after date: Date, hasTime: Bool = false) -> Date? {
         guard var next = step(date) else { return nil }
-        let today = Date.now.startOfDay
-        for _ in 0..<800 where next < today {
+        let floor = hasTime ? Date.now : Date.now.startOfDay
+        var guardrail = 0
+        while next < floor && guardrail < 2000 {
             guard let n = step(next) else { break }
             next = n
+            guardrail += 1
         }
         return next
     }
