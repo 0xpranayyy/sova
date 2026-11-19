@@ -284,6 +284,7 @@ struct WeekStage: View {
             }
         }
         .clipShape(.rect(cornerRadius: 34, style: .continuous))
+        .shadow(color: StickerTone.indigo.shadow, radius: 18, y: 10)
         .onChange(of: done) { old, new in
             if total > 0, new == total, old < total {
                 cheers += 1

@@ -72,7 +72,13 @@ struct RoutineRow: View {
         .padding(.leading, 14)
         .padding(.trailing, 8)
         .padding(.vertical, 14)
-        .background(tone.fill, in: .rect(cornerRadius: 28, style: .continuous))
+        .background {
+            let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
+            shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
+            shape.fill(LinearGradient(colors: [Color.white.opacity(0.2), .clear], startPoint: .top, endPoint: .center))
+            shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.5), .clear],
+                                              startPoint: .top, endPoint: .center), lineWidth: 1.2)
+        }
         .opacity(done ? 0.78 : 1)
         .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { view, t in
             view.scaleEffect(1 + abs(t) * 0.01).rotationEffect(.degrees(t * 0.6))

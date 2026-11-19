@@ -12,17 +12,26 @@ extension View {
         return self
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(tint ?? Color.surface, in: shape)
+            .background((tint ?? Color.surface).shadow(.drop(color: Color.night.opacity(0.06), radius: 14, y: 7)), in: shape)
             .overlay(shape.strokeBorder(Color.hairline, lineWidth: tint == nil ? 1.5 : 0))
     }
 
     /// A flat block in one Allo tone.
     func block(_ tone: StickerTone, cornerRadius: CGFloat = 30, padding: CGFloat = 20) -> some View {
-        self
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        return self
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
-            .background(tone.fill, in: .rect(cornerRadius: cornerRadius, style: .continuous))
+            .background {
+                // A sticker: its color, a soft shadow in a deeper shade of
+                // itself, a gentle sheen from the top, and a bright top edge.
+                shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 16, y: 9)))
+                shape.fill(LinearGradient(colors: [Color.white.opacity(0.22), .clear, Color.black.opacity(0.04)],
+                                          startPoint: .top, endPoint: .bottom))
+                shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.55), .clear],
+                                                  startPoint: .top, endPoint: .center), lineWidth: 1.2)
+            }
     }
 }
 
@@ -45,16 +54,30 @@ struct BigButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
+        let pressed = configuration.isPressed
+        let lip: CGFloat = 4
         configuration.label
             .font(.allo(size: height >= 58 ? 18 : 16, weight: .heavy, relativeTo: .headline))
             .tracking(-0.3)
             .foregroundStyle(tone.deep)
             .padding(.horizontal, 22)
             .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: height)
-            .background(tone.fill, in: .capsule)
+            .background {
+                Capsule().fill(tone.fill)
+                Capsule().fill(LinearGradient(colors: [Color.white.opacity(0.28), .clear],
+                                              startPoint: .top, endPoint: .center))
+                    .padding(2)
+            }
+            .offset(y: pressed ? lip : 0)
+            // The lip underneath: a darker shade the button sinks onto.
+            .background {
+                Capsule().fill(tone.lip)
+                    .offset(y: lip)
+                    .shadow(color: tone.shadow, radius: pressed ? 4 : 10, y: pressed ? 3 : 7)
+            }
+            .padding(.bottom, lip)
             .opacity(isEnabled ? 1 : 0.4)
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .brightness(configuration.isPressed ? -0.03 : 0)
+            .scaleEffect(pressed ? 0.985 : 1)
             .animation(.spring(response: 0.22, dampingFraction: 0.6), value: configuration.isPressed)
             .sovaFeedback(.impact(flexibility: .soft, intensity: 0.55), trigger: configuration.isPressed) { _, pressed in pressed }
     }

@@ -349,6 +349,7 @@ private struct WeekAheadStage: View {
             }
         }
         .clipShape(.rect(cornerRadius: 34, style: .continuous))
+        .shadow(color: StickerTone.indigo.shadow, radius: 18, y: 10)
         .overlay { SparkleBurst(trigger: secret, radius: CGSize(width: 160, height: 120), count: 16) }
         .onAppear {
             withAnimation(reduceMotion ? nil : .spring(response: 0.7, dampingFraction: 0.72).delay(0.05)) { grown = true }

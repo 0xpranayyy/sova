@@ -186,7 +186,8 @@ struct InsightsView: View {
             }
         }
         .padding(20)
-        .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 34, style: .continuous))
+        .background(StickerTone.indigo.fill.shadow(.drop(color: StickerTone.indigo.shadow, radius: 18, y: 10)),
+                    in: .rect(cornerRadius: 34, style: .continuous))
         .overlay(alignment: .topLeading) {
             SparkleDot(color: StickerTone.pink.fill, size: 14)
                 .padding(.leading, 236)

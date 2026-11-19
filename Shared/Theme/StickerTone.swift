@@ -32,6 +32,25 @@ enum StickerTone: String, CaseIterable {
         }
     }
 
+    /// A soft shadow in a deeper shade of the tone.
+    var shadow: Color {
+        self == .indigo ? Color(hex: 0x120840).opacity(0.35) : deep.opacity(0.22)
+    }
+
+    /// The darker edge a chunky button sits on.
+    var lip: Color {
+        switch self {
+        case .yellow: Color(hex: 0xE3C620)
+        case .mint: Color(hex: 0x25C98C)
+        case .lilac: Color(hex: 0xB3A2F2)
+        case .pink: Color(hex: 0xE03D76)
+        case .orange: Color(hex: 0xE07F17)
+        case .cyan: Color(hex: 0x16A6DB)
+        case .lime: Color(hex: 0x9CD11A)
+        case .indigo: Color(hex: 0x1A0B4F)
+        }
+    }
+
     var border: Color { self == .indigo ? Color(light: 0x1A0B4F, dark: 0x5A45C8) : deep }
 
     /// A stable tone for an item's stored accent.

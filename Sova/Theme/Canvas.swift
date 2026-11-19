@@ -1,13 +1,56 @@
 import SwiftUI
 
-/// Warm cream paper.
+/// Warm cream paper with two soft glows of sticker color in the corners
+/// and a faint dotted grain, so the page feels printed rather than flat.
+/// Drawn once and flattened, so it costs nothing while scrolling.
 struct CanvasBackground: View {
     var glow: Double = 0
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        Color.canvas
-            .ignoresSafeArea()
-            .accessibilityHidden(true)
+        let dark = scheme == .dark
+        ZStack {
+            Color.canvas
+            RadialGradient(colors: [StickerTone.yellow.fill.opacity(dark ? 0.10 : 0.22), .clear],
+                           center: UnitPoint(x: 0.95, y: -0.02), startRadius: 0, endRadius: 360)
+            RadialGradient(colors: [StickerTone.lilac.fill.opacity(dark ? 0.16 : 0.30), .clear],
+                           center: UnitPoint(x: -0.1, y: 0.42), startRadius: 0, endRadius: 380)
+            RadialGradient(colors: [StickerTone.mint.fill.opacity(dark ? 0.06 : 0.14), .clear],
+                           center: UnitPoint(x: 1.1, y: 1.0), startRadius: 0, endRadius: 340)
+            PaperGrain(color: dark ? .white : Color(hex: 0x15102E), opacity: dark ? 0.035 : 0.045)
+        }
+        .drawingGroup()
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
+}
+
+/// A faint, even scatter of tiny dots, like the tooth of good paper.
+private struct PaperGrain: View {
+    let color: Color
+    let opacity: Double
+
+    var body: some View {
+        Canvas { context, size in
+            var seed: UInt64 = 0x5A0A
+            func next() -> Double {
+                seed = seed &* 6364136223846793005 &+ 1442695040888963407
+                return Double(seed >> 33) / Double(UInt64(1) << 31)
+            }
+            let step: CGFloat = 14
+            var y: CGFloat = 0
+            while y < size.height {
+                var x: CGFloat = 0
+                while x < size.width {
+                    let dx = CGFloat(next()) * step, dy = CGFloat(next()) * step
+                    let r = 0.6 + CGFloat(next()) * 0.7
+                    context.fill(Path(ellipseIn: CGRect(x: x + dx, y: y + dy, width: r, height: r)),
+                                 with: .color(color.opacity(opacity * (0.5 + next()))))
+                    x += step
+                }
+                y += step
+            }
+        }
     }
 }
 

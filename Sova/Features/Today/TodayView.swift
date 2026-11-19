@@ -112,7 +112,8 @@ struct TodayView: View {
 
                 if !todaysRituals.isEmpty {
                     HStack {
-                        SectionLabel(String(localized: "Rituals · \(ritualsDone) of \(todaysRituals.count)"))
+                        StickerHeader(title: String(localized: "Rituals"), symbol: "repeat", tone: .mint,
+                                      count: todaysRituals.count - ritualsDone)
                     }
                     .cardRow(top: 18, bottom: 10)
 
@@ -134,13 +135,14 @@ struct TodayView: View {
                 }
 
                 if !overdue.isEmpty {
-                    SectionLabel(String(localized: "Overdue"), trailing: "\(overdue.count)", color: .ember)
+                    StickerHeader(title: String(localized: "Overdue"), symbol: "exclamationmark.circle.fill",
+                                  tone: .pink, count: overdue.count, titleColor: .ember)
                         .cardRow(top: 18, bottom: 10)
                     ForEach(overdue) { row($0) }
                 }
 
                 if !later.isEmpty {
-                    SectionLabel(String(localized: "Tasks"), trailing: "\(later.count)")
+                    StickerHeader(title: String(localized: "Tasks"), symbol: "checklist", tone: .yellow, count: later.count)
                         .cardRow(top: 18, bottom: 10)
                     ForEach(later) { row($0) }
                 }
@@ -328,6 +330,7 @@ struct DayStage: View {
         }
         .frame(height: 250)
         .clipShape(.rect(cornerRadius: 36, style: .continuous))
+        .shadow(color: StickerTone.indigo.shadow, radius: 18, y: 10)
         .onChange(of: done) { old, new in
             // The last thing of the day: the owl hops, sparkles burst, and a
             // rolling haptic plays.
@@ -508,7 +511,13 @@ struct RitualCard: View {
         .foregroundStyle(ink)
         .padding(14)
         .frame(width: 132, height: 132, alignment: .topLeading)
-        .background(tone.fill, in: .rect(cornerRadius: 30, style: .continuous))
+        .background {
+            let shape = RoundedRectangle(cornerRadius: 30, style: .continuous)
+            shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
+            shape.fill(LinearGradient(colors: [Color.white.opacity(0.24), .clear], startPoint: .top, endPoint: .center))
+            shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.55), .clear],
+                                              startPoint: .top, endPoint: .center), lineWidth: 1.2)
+        }
         .opacity(done ? 0.6 : 1)
         // A happy wiggle when checked: a quick swell and a shake that settles.
         .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { view, t in
@@ -587,7 +596,8 @@ struct DayRow: View {
             .padding(.leading, 14)
             .padding(.trailing, 14)
             .padding(.vertical, 9)
-            .background(Color.surface, in: .rect(cornerRadius: 26, style: .continuous))
+            .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.05), radius: 10, y: 5)),
+                        in: .rect(cornerRadius: 26, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
             .contentShape(.rect)
             .onTapGesture(perform: onOpen)

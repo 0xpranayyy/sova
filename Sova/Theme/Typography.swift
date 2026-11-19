@@ -62,12 +62,14 @@ struct ScreenTitle<Trailing: View>: View {
                 trailing
             }
             .frame(minHeight: 44)
-            Text(title + ".")
+            (Text(title).foregroundStyle(Color.ink)
+                + Text(".").foregroundStyle(SovaTheme.current.accent.color))
                 .font(.hero(58, weight: .heavy))
                 .tracking(-2.6)
-                .foregroundStyle(Color.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+                .accessibilityLabel(title)
+                .accessibilityAddTraits(.isHeader)
         }
         .padding(.horizontal, 4)
     }
@@ -85,10 +87,48 @@ struct CircleAction: View {
                 .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(Color.ink)
                 .frame(width: 44, height: 44)
-                .background(Color.surface, in: .circle)
+                .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.08), radius: 8, y: 4)), in: .circle)
                 .overlay(Circle().strokeBorder(Color.hairline, lineWidth: 1.5))
         }
         .buttonStyle(.pressable)
         .accessibilityLabel(label)
+    }
+}
+
+/// A section heading with a tilted sticker icon, a heavy title and a count
+/// badge, as used on Today and Tasks.
+struct StickerHeader: View {
+    let title: String
+    let symbol: String
+    let tone: StickerTone
+    var count: Int? = nil
+    var titleColor: Color = .ink
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: symbol)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+                .frame(width: 28, height: 28)
+                .background(tone.fill, in: .rect(cornerRadius: 9, style: .continuous))
+                .rotationEffect(.degrees(-6))
+            Text(title)
+                .font(.allo(size: 21, weight: .heavy, relativeTo: .title3))
+                .tracking(-0.6)
+                .foregroundStyle(titleColor)
+            Spacer(minLength: 6)
+            if let count {
+                Text("\(count)")
+                    .font(.allo(size: 13, weight: .heavy).monospacedDigit())
+                    .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+                    .padding(.horizontal, 9)
+                    .frame(minWidth: 26, minHeight: 24)
+                    .background(tone.fill.opacity(tone == .indigo ? 1 : 0.55), in: .capsule)
+                    .contentTransition(.numericText(value: Double(count)))
+            }
+        }
+        .padding(.horizontal, 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
     }
 }

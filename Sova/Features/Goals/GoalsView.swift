@@ -283,6 +283,7 @@ private struct SeasonStage: View {
             }
         }
         .clipShape(.rect(cornerRadius: 34, style: .continuous))
+        .shadow(color: StickerTone.indigo.shadow, radius: 18, y: 10)
         .onAppear {
             withAnimation(reduceMotion ? nil : .spring(response: 1.0, dampingFraction: 0.8).delay(0.1)) { grown = true }
         }
