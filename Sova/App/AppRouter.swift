@@ -19,6 +19,7 @@ enum EditorSheet: Identifiable {
     case goal(Goal)
     case routine(Routine)
     case plus(PlusReason)
+    case search
 
     var id: String {
         switch self {
@@ -30,6 +31,7 @@ enum EditorSheet: Identifiable {
         case .goal(let g): "goal-\(ObjectIdentifier(g).hashValue)"
         case .routine(let r): "routine-\(ObjectIdentifier(r).hashValue)"
         case .plus(let reason): "plus-\(reason.rawValue)"
+        case .search: "search"
         }
     }
 }

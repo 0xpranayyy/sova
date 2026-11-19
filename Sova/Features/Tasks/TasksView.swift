@@ -38,7 +38,10 @@ struct TasksView: View {
         NavigationStack {
             List {
                 ScreenTitle(title: String(localized: "Tasks"), subtitle: subtitle(overdue: overdue.count)) {
-                    CircleAction(symbol: "plus", label: String(localized: "New task")) { router.sheet = .newTask(nil) }
+                    HStack(spacing: 8) {
+                        CircleAction(symbol: "magnifyingglass", label: String(localized: "Search")) { router.sheet = .search }
+                        CircleAction(symbol: "plus", label: String(localized: "New task")) { router.sheet = .newTask(nil) }
+                    }
                 }
                 .cardRow(top: 4, bottom: 14)
 

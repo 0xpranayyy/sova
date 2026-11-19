@@ -82,7 +82,10 @@ struct TodayView: View {
             List {
                 ScreenTitle(title: String(localized: "Today"),
                             subtitle: Date.now.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())) {
-                    CircleAction(symbol: "gearshape", label: String(localized: "Settings")) { showSettings = true }
+                    HStack(spacing: 8) {
+                        CircleAction(symbol: "magnifyingglass", label: String(localized: "Search")) { router.sheet = .search }
+                        CircleAction(symbol: "gearshape", label: String(localized: "Settings")) { showSettings = true }
+                    }
                 }
                 .cardRow(top: 4, bottom: 14)
 
@@ -551,6 +554,15 @@ struct DayRow: View {
                         .lineLimit(1)
                 }
                 Spacer(minLength: 6)
+                if !t.checklist.isEmpty && !t.isDone {
+                    HStack(spacing: 3) {
+                        Image(systemName: "checklist")
+                        Text("\(t.checklistDone)/\(t.checklist.count)").monospacedDigit()
+                    }
+                    .font(.allo(size: 12, weight: .heavy))
+                    .foregroundStyle(t.checklistDone == t.checklist.count ? Color.positive : Color.inkTertiary)
+                    .accessibilityLabel(String(localized: "\(t.checklistDone) of \(t.checklist.count) steps"))
+                }
                 if t.repeatRule != .none && !t.isDone {
                     Image(systemName: "repeat")
                         .font(.system(size: 13, weight: .heavy))

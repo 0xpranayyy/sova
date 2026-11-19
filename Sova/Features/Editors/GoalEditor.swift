@@ -19,6 +19,7 @@ struct GoalEditor: View {
     @State private var stepDraft = ""
     @State private var newSteps: [String] = []
     @State private var wiggle = 0
+    @State private var suggesting = false
     @FocusState private var focus: Field?
 
     private enum Field: Hashable { case title, step, notes }
@@ -227,8 +228,53 @@ struct GoalEditor: View {
                 }
             }
             .frame(minHeight: 34)
+
+            if StepSuggester.isAvailable && !trimmedTitle.isEmpty {
+                Button(action: suggestSteps) {
+                    HStack(spacing: 8) {
+                        if suggesting {
+                            ProgressView().tint(StickerTone.indigo.deep)
+                        } else {
+                            Image(systemName: "sparkles").font(.system(size: 14, weight: .heavy))
+                        }
+                        Text(suggesting ? String(localized: "Thinking…") : String(localized: "Suggest steps"))
+                            .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
+                    }
+                    .foregroundStyle(StickerTone.indigo.deep)
+                    .padding(.horizontal, 16)
+                    .frame(height: 40)
+                    .background(StickerTone.indigo.fill, in: .capsule)
+                }
+                .buttonStyle(.pressable)
+                .disabled(suggesting)
+                .padding(.top, 6)
+                .accessibilityHint(String(localized: "Uses Apple Intelligence on your iPhone"))
+                .transition(.scale.combined(with: .opacity))
+            }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: trimmedDraft.isEmpty)
+    }
+
+    /// Asks the on-device model for first steps and adds them.
+    private func suggestSteps() {
+        guard !suggesting, !trimmedTitle.isEmpty else { return }
+        suggesting = true
+        Haptics.soft(0.5)
+        Task {
+            let steps = (try? await StepSuggester.suggest(for: trimmedTitle, notes: notes)) ?? []
+            suggesting = false
+            guard !steps.isEmpty else {
+                router.show(Toast(message: String(localized: "Couldn't think of steps right now. Try a clearer goal.")))
+                return
+            }
+            let existing = Set(newSteps.map { $0.lowercased() })
+            for (i, step) in steps.enumerated() where !existing.contains(step.lowercased()) {
+                try? await Task.sleep(for: .milliseconds(i == 0 ? 0 : 120))
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { newSteps.append(step) }
+                Haptics.pop(0.4)
+            }
+            Sounds.play(.pop)
+        }
     }
 
     private func addStep() {

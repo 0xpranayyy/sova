@@ -136,6 +136,7 @@ struct MainTabView: View {
         case .newRoutine: RoutineEditor(routine: nil)
         case .routine(let routine): RoutineEditor(routine: routine)
         case .plus(let reason): PlusView(reason: reason)
+        case .search: SearchView()
         }
     }
 }

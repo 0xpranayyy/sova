@@ -22,11 +22,13 @@ struct TaskEditor: View {
     @State private var accent: Accent
     @State private var goal: Goal?
     @State private var repeatRule: RepeatRule
+    @State private var checklist: [ChecklistItem]
+    @State private var checklistDraft = ""
     @State private var confirmDelete = false
     @State private var wiggle = 0
     @FocusState private var focus: Field?
 
-    private enum Field: Hashable { case title, notes }
+    private enum Field: Hashable { case title, notes, checklist }
 
     enum DayChoice: Hashable, CaseIterable {
         case today, tomorrow, weekend, nextWeek, custom, none
@@ -111,6 +113,7 @@ struct TaskEditor: View {
         _accent = State(initialValue: task?.accent ?? defaultGoal?.accent ?? .ember)
         _goal = State(initialValue: task?.goal ?? defaultGoal)
         _repeatRule = State(initialValue: task?.repeatRule ?? .none)
+        _checklist = State(initialValue: task?.checklist ?? [])
     }
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -177,6 +180,12 @@ struct TaskEditor: View {
                         if let parsed { understood(parsed) }
                     }
                     .animation(.spring(response: 0.35, dampingFraction: 0.85), value: parsed)
+
+                    EditorCard(title: String(localized: "Checklist"),
+                               footer: checklist.isEmpty ? String(localized: "Optional. Small steps inside this task.")
+                                                         : String(localized: "\(checklist.filter(\.done).count) of \(checklist.count) done")) {
+                        checklistEditor
+                    }
 
                     EditorCard(title: String(localized: "When"), footer: whenFooter) {
                         VStack(alignment: .leading, spacing: 14) {
@@ -271,6 +280,66 @@ struct TaskEditor: View {
             .onAppear { if task == nil { focus = .title } }
         }
         .tint(Color.ink)
+    }
+
+    private var checklistEditor: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach($checklist) { $item in
+                HStack(spacing: 12) {
+                    Button {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { item.done.toggle() }
+                        Sounds.play(item.done ? .check : .uncheck)
+                        Haptics.pop(0.5)
+                    } label: {
+                        Image(systemName: item.done ? "checkmark.circle.fill" : "circle")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(item.done ? (tone == .yellow || tone == .lime ? tone.deep : tone.fill) : Color.inkTertiary)
+                            .contentTransition(.symbolEffect(.replace))
+                    }
+                    .buttonStyle(.pressable)
+                    TextField(String(localized: "Step"), text: $item.title)
+                        .font(.allo(size: 16, weight: .semibold, relativeTo: .body))
+                        .strikethrough(item.done, color: Color.inkTertiary)
+                        .foregroundStyle(item.done ? Color.inkTertiary : Color.ink)
+                    Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            checklist.removeAll { $0.id == item.id }
+                        }
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 10, weight: .heavy))
+                            .foregroundStyle(Color.inkTertiary)
+                            .frame(width: 26, height: 26)
+                            .background(Color.well, in: .circle)
+                    }
+                    .buttonStyle(.pressable)
+                    .accessibilityLabel(String(localized: "Remove step"))
+                }
+                .frame(minHeight: 36)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            HStack(spacing: 12) {
+                Image(systemName: "plus.circle")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(Color.inkTertiary)
+                TextField(checklist.isEmpty ? String(localized: "Add a step") : String(localized: "Next step"),
+                          text: $checklistDraft)
+                    .font(.allo(size: 16, weight: .semibold, relativeTo: .body))
+                    .focused($focus, equals: .checklist)
+                    .submitLabel(.next)
+                    .onSubmit(addChecklistItem)
+            }
+            .frame(minHeight: 36)
+        }
+    }
+
+    private func addChecklistItem() {
+        let title = checklistDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { checklist.append(ChecklistItem(title: title)) }
+        checklistDraft = ""
+        focus = .checklist
+        Haptics.pop(0.4)
     }
 
     private var whenFooter: String? {
@@ -492,6 +561,10 @@ struct TaskEditor: View {
         target.accent = accent
         target.goal = goal
         target.repeatRule = chosenDay == nil ? .none : repeatRule
+        var steps = checklist.filter { !$0.title.trimmingCharacters(in: .whitespaces).isEmpty }
+        let draft = checklistDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !draft.isEmpty { steps.append(ChecklistItem(title: draft)) }
+        target.checklist = steps
         TaskAlerts.schedule(target)
         SovaRefresh.changed(context)
         Haptics.success()
