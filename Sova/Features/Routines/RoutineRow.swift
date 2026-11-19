@@ -8,6 +8,13 @@ struct RoutineRow: View {
     var onOpen: () -> Void
 
     @State private var wiggle = 0
+    @State private var cheers = 0
+    @Environment(AppRouter.self) private var router
+    @Environment(\.modelContext) private var context
+    @State private var confirmDelete = false
+
+    /// Streaks worth a little party.
+    private static let milestones: Set<Int> = [3, 7, 14, 21, 30, 50, 100, 200, 365]
 
     var body: some View {
         let tone = StickerTone(routine.accent)
@@ -28,7 +35,7 @@ struct RoutineRow: View {
                         .tracking(-0.4)
                         .lineLimit(2)
                     if routine.streak > 1 {
-                        Text("🔥 \(routine.streak)")
+                        Text("\(Image(systemName: "flame.fill")) \(routine.streak)")
                             .font(.allo(size: 12, weight: .heavy, relativeTo: .caption))
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
@@ -50,10 +57,7 @@ struct RoutineRow: View {
             Spacer(minLength: 0)
             if scheduled {
                 CheckButton(isOn: done, color: ink, round: true, size: 36, emphasized: true,
-                            checkColor: tone.fill, label: routine.title) {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.toggle(on: .now) }
-                    if routine.isDone(on: .now) { wiggle += 1 }
-                }
+                            checkColor: tone.fill, label: routine.title, action: toggle)
             } else {
                 MonoCaps(String(localized: "Rest"), color: ink.opacity(0.6))
                     .frame(width: 44)
@@ -76,13 +80,49 @@ struct RoutineRow: View {
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: done)
+        .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 150, height: 70), count: 12) }
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)
+        .contextMenu {
+            if scheduled {
+                Button(done ? String(localized: "Mark as Not Done") : String(localized: "Mark as Done"),
+                       systemImage: done ? "arrow.uturn.backward" : "checkmark.circle", action: toggle)
+            }
+            Button(String(localized: "Edit Ritual"), systemImage: "pencil", action: onOpen)
+            Divider()
+            Button(String(localized: "Delete Ritual"), systemImage: "trash", role: .destructive) { confirmDelete = true }
+        }
+        .confirmationDialog(String(localized: "Delete this ritual and its history?"), isPresented: $confirmDelete,
+                            titleVisibility: .visible) {
+            Button(String(localized: "Delete Ritual"), role: .destructive) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { context.delete(routine) }
+                SovaRefresh.changed(context)
+            }
+        }
         .accessibilityElement(children: .combine)
         .accessibilityHint(String(localized: "Opens the ritual"))
         .accessibilityAction(named: done ? String(localized: "Mark as not done") : String(localized: "Mark as done")) {
             guard scheduled else { return }
-            withAnimation { routine.toggle(on: .now) }
+            toggle()
+        }
+    }
+
+    private func toggle() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.toggle(on: .now) }
+        SovaRefresh.changed(context)
+        guard routine.isDone(on: .now) else { return }
+        wiggle += 1
+        let streak = routine.streak
+        // A streak milestone gets sparkles, the flourish and a cheer.
+        let key = "celebratedStreak-" + routine.entityID
+        let celebrated = UserDefaults.standard.integer(forKey: key)
+        if Self.milestones.contains(streak), streak != celebrated {
+            UserDefaults.standard.set(streak, forKey: key)
+            cheers += 1
+            Haptics.celebrate()
+            router.show(Toast(message: String(localized: "\(streak)-day streak on \(routine.title)! 🔥")))
+        } else if routine.title.lowercased().contains("owl") {
+            Haptics.owl()
         }
     }
 }
