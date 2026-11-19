@@ -145,7 +145,10 @@ struct TaskEditor: View {
     private var hasTime: Bool { chosenDay != nil && time != .none }
 
     /// What typing "tomorrow 6pm !!" understood, if anything, for a new task.
-    private var parsed: ParsedTask? {
+    /// Parsed once per edit of the title, not on every render.
+    @State private var parsed: ParsedTask? = nil
+
+    private func parse() -> ParsedTask? {
         guard task == nil, !trimmedTitle.isEmpty else { return nil }
         let result = QuickParse.parse(title)
         guard result.dateRange != nil || result.priorityRange != nil || result.repeatRange != nil,
@@ -278,6 +281,7 @@ struct TaskEditor: View {
                 if choice == .none { repeatRule = .none }
             }
             .onAppear { if task == nil { focus = .title } }
+            .onChange(of: title, initial: true) { parsed = parse() }
         }
         .tint(Color.ink)
     }
