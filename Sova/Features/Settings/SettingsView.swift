@@ -60,69 +60,54 @@ struct SettingsView: View {
 
                     Section {
                         Toggle(isOn: syncBinding) {
-                            Label {
-                                HStack(spacing: 6) {
-                                    Text("Sync with iCloud")
-                                    if !store.isPlus {
-                                        Image(systemName: "lock.fill")
-                                            .font(.caption2.weight(.heavy))
-                                            .foregroundStyle(Color.inkTertiary)
-                                    }
-                                }
-                            } icon: {
-                                Image(systemName: "icloud")
-                            }
+                            SettingsLabel(String(localized: "Sync with iCloud"), symbol: "icloud.fill", tone: .cyan,
+                                          locked: !store.isPlus)
                         }
                     } footer: {
                         Text("Keep your tasks, rituals and goals on all your devices, privately in your own iCloud.")
                     }
 
-                    Section("Your name") {
+                    Section(header: SettingsHeader(String(localized: "Your name"))) {
                         TextField("Used in your greeting", text: $userName)
                             .textContentType(.givenName)
                             .textInputAutocapitalization(.words)
                     }
 
-                    Section("Appearance") {
-                        Picker("Appearance", selection: $appearanceRaw) {
-                            ForEach(Appearance.allCases) { Text($0.name).tag($0.rawValue) }
-                        }
-                        .pickerStyle(.segmented)
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets())
-                        .sovaFeedback(.selection, trigger: appearanceRaw)
+                    Section(header: SettingsHeader(String(localized: "Appearance"))) {
+                        AppearanceTiles(selection: $appearanceRaw)
+                            .listRowInsets(EdgeInsets(top: 12, leading: 12, bottom: 12, trailing: 12))
                     }
 
-                    Section("Theme") {
+                    Section(header: SettingsHeader(String(localized: "Theme"))) {
                         ThemeSwatches(themeRaw: $themeRaw)
                             .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
                     }
 
-                    Section("App icon") {
+                    Section(header: SettingsHeader(String(localized: "App icon"))) {
                         iconPicker
                             .listRowInsets(EdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12))
                     }
 
                     Section {
                         Toggle(isOn: $soundsOn) {
-                            Label("Little sounds", systemImage: "speaker.wave.2")
+                            SettingsLabel(String(localized: "Little sounds"), symbol: "speaker.wave.2.fill", tone: .pink)
                         }
                         .onChange(of: soundsOn) { if soundsOn { Sounds.play(.tick) } }
                         Toggle(isOn: $hapticsOn) {
-                            Label("Haptics", systemImage: "hand.tap")
+                            SettingsLabel(String(localized: "Haptics"), symbol: "hand.tap.fill", tone: .orange)
                         }
                         .onChange(of: hapticsOn) { if hapticsOn { Haptics.pop(0.7) } }
                     } footer: {
                         Text("Soft taps and sounds when you check things off. Sounds follow your silent switch.")
                     }
 
-                    Section("Calendar & alerts") {
+                    Section(header: SettingsHeader(String(localized: "Calendar & alerts"))) {
                         Picker(selection: $weekStart) {
                             Text("System").tag(0)
                             Text("Sunday").tag(1)
                             Text("Monday").tag(2)
                         } label: {
-                            Label("Week starts on", systemImage: "calendar")
+                            SettingsLabel(String(localized: "Week starts on"), symbol: "calendar", tone: .lilac)
                         }
                         Picker(selection: $alertOffset) {
                             Text("At the time").tag(0)
@@ -131,22 +116,22 @@ struct SettingsView: View {
                             Text("30 min before").tag(30)
                             Text("1 hour before").tag(60)
                         } label: {
-                            Label("Task alerts", systemImage: "bell")
+                            SettingsLabel(String(localized: "Task alerts"), symbol: "bell.fill", tone: .yellow)
                         }
                         .onChange(of: alertOffset) { Task { await TaskAlerts.resync(in: context) } }
                         Toggle(isOn: $badgeOverdue) {
-                            Label("Overdue count on icon", systemImage: "app.badge")
+                            SettingsLabel(String(localized: "Overdue count on icon"), symbol: "app.badge.fill", tone: .pink)
                         }
                         .onChange(of: badgeOverdue) { SovaRefresh.updateBadge(context) }
                     }
 
                     Section {
-                        reminderRow(title: String(localized: "Morning plan"), symbol: "sun.max", accent: .marigold,
+                        reminderRow(title: String(localized: "Morning plan"), symbol: "sun.max.fill", accent: .marigold,
                                     isOn: $morningOn, minutes: $morningMinutes)
-                        reminderRow(title: String(localized: "Evening review"), symbol: "moon", accent: .plum,
+                        reminderRow(title: String(localized: "Evening review"), symbol: "moon.stars.fill", accent: .plum,
                                     isOn: $eveningOn, minutes: $eveningMinutes)
                     } header: {
-                        Text("Reminders")
+                        SettingsHeader(String(localized: "Reminders"))
                     } footer: {
                         if notificationsDenied {
                             VStack(alignment: .leading, spacing: 8) {
@@ -164,48 +149,62 @@ struct SettingsView: View {
                     Section {
                         if let backupURL {
                             ShareLink(item: backupURL) {
-                                Label("Export a backup", systemImage: "square.and.arrow.up")
+                                SettingsLabel(String(localized: "Export a backup"), symbol: "square.and.arrow.up", tone: .mint)
                             }
                             .foregroundStyle(Color.ink)
                         } else {
-                            Label("Preparing backup…", systemImage: "square.and.arrow.up")
+                            SettingsLabel(String(localized: "Preparing backup…"), symbol: "hourglass", tone: .mint)
                                 .foregroundStyle(Color.inkTertiary)
                         }
                     } header: {
-                        Text("Your data")
+                        SettingsHeader(String(localized: "Your data"))
                     } footer: {
                         Text("A readable file of all your tasks, rituals and goals. Save it to Files or send it anywhere.")
                     }
 
-                    Section("Help") {
-                        Button("Help & feedback", systemImage: "envelope") {
+                    Section(header: SettingsHeader(String(localized: "Help"))) {
+                        Button {
                             if Links.hasSupportEmail, let mail = URL(string: "mailto:\(Links.supportEmail)?subject=Sova%20feedback") {
                                 openURL(mail)
                             } else {
                                 openURL(Links.support)
                             }
+                        } label: {
+                            SettingsLabel(String(localized: "Help & feedback"), symbol: "envelope.fill", tone: .cyan)
                         }
-                        Button("Rate Sova", systemImage: "star") {
+                        Button {
                             if let url = Links.writeReview { openURL(url) } else { requestReview() }
+                        } label: {
+                            SettingsLabel(String(localized: "Rate Sova"), symbol: "star.fill", tone: .yellow)
                         }
-                        Button("Restore purchases", systemImage: "arrow.clockwise") {
+                        Button {
                             Task { await store.restore() }
+                        } label: {
+                            SettingsLabel(String(localized: "Restore purchases"), symbol: "arrow.clockwise", tone: .lime)
                         }
-                        Button("Privacy policy", systemImage: "hand.raised") { openURL(Links.privacy) }
-                        Button("Terms of use", systemImage: "doc.text") { openURL(Links.terms) }
+                        Button { openURL(Links.privacy) } label: {
+                            SettingsLabel(String(localized: "Privacy policy"), symbol: "hand.raised.fill", tone: .lilac)
+                        }
+                        Button { openURL(Links.terms) } label: {
+                            SettingsLabel(String(localized: "Terms of use"), symbol: "doc.text.fill", tone: .lilac)
+                        }
                     }
                     .foregroundStyle(Color.ink)
 
                     Section {
-                        Button("Replay Welcome", systemImage: "hand.wave") {
+                        Button {
                             dismiss()
                             withAnimation(.smooth(duration: 0.6)) { hasOnboarded = false }
+                        } label: {
+                            SettingsLabel(String(localized: "Replay Welcome"), symbol: "hand.wave.fill", tone: .orange)
                         }
                         .foregroundStyle(Color.ink)
                     }
 
                     Section {
-                        Button("Erase All Data", systemImage: "trash", role: .destructive) { confirmErase = true }
+                        Button(role: .destructive) { confirmErase = true } label: {
+                            SettingsLabel(String(localized: "Erase All Data"), symbol: "trash.fill", tone: .pink, titleColor: .ember)
+                        }
                     } footer: {
                         Text(iCloudSync && store.isPlus ? "This erases your data everywhere it syncs."
                                                         : "Everything you add stays on this iPhone.")
@@ -298,7 +297,8 @@ struct SettingsView: View {
             }
         }
         .padding(20)
-        .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 30, style: .continuous))
+        .background(StickerTone.indigo.fill.shadow(.drop(color: StickerTone.indigo.shadow, radius: 18, y: 10)),
+                    in: .rect(cornerRadius: 30, style: .continuous))
         .overlay(alignment: .topLeading) {
             SparkleDot(color: StickerTone.pink.fill, size: 13).padding(.leading, 210).padding(.top, 18)
         }
@@ -403,8 +403,9 @@ struct SettingsView: View {
     private func reminderRow(title: String, symbol: String, accent: Accent,
                              isOn: Binding<Bool>, minutes: Binding<Int>) -> some View {
         HStack(spacing: 12) {
-            IconTile(symbol: symbol, accent: accent, size: 32)
-            Toggle(title, isOn: isOn.animation(.smooth))
+            Toggle(isOn: isOn.animation(.smooth)) {
+                SettingsLabel(title, symbol: symbol, tone: StickerTone(accent))
+            }
             if isOn.wrappedValue {
                 DatePicker(title, selection: timeBinding(minutes), displayedComponents: .hourAndMinute)
                     .labelsHidden()
@@ -457,5 +458,125 @@ struct SettingsView: View {
             center.removePendingNotificationRequests(withIdentifiers: ids)
         }
         SovaRefresh.changed(context)
+    }
+}
+
+// MARK: - Pieces
+
+/// A settings row label with a small tilted sticker icon in Sova's colors.
+struct SettingsLabel: View {
+    let title: String
+    let symbol: String
+    let tone: StickerTone
+    var locked = false
+    var titleColor: Color = .ink
+
+    init(_ title: String, symbol: String, tone: StickerTone, locked: Bool = false, titleColor: Color = .ink) {
+        self.title = title
+        self.symbol = symbol
+        self.tone = tone
+        self.locked = locked
+        self.titleColor = titleColor
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
+                .frame(width: 32, height: 32)
+                .background(tone.fill.shadow(.drop(color: tone.shadow, radius: 4, y: 2)),
+                            in: .rect(cornerRadius: 10, style: .continuous))
+                .rotationEffect(.degrees(-4))
+            Text(title)
+                .font(.allo(size: 16, weight: .heavy, relativeTo: .body))
+                .tracking(-0.2)
+                .foregroundStyle(titleColor)
+            if locked {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 10, weight: .heavy))
+                    .foregroundStyle(StickerTone.indigo.deep)
+                    .padding(4)
+                    .background(StickerTone.indigo.fill, in: .circle)
+                    .accessibilityLabel(String(localized: "Sova Plus"))
+            }
+        }
+    }
+}
+
+/// A section header in Sova's caps voice.
+struct SettingsHeader: View {
+    let title: String
+    init(_ title: String) { self.title = title }
+
+    var body: some View {
+        MonoCaps(title)
+            .padding(.leading, -4)
+    }
+}
+
+/// System, Light or Dark, as three little screen previews.
+private struct AppearanceTiles: View {
+    @Binding var selection: String
+
+    var body: some View {
+        HStack(spacing: 10) {
+            ForEach(Appearance.allCases) { option in
+                let on = selection == option.rawValue
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) { selection = option.rawValue }
+                } label: {
+                    VStack(spacing: 8) {
+                        preview(option)
+                            .frame(height: 74)
+                            .clipShape(.rect(cornerRadius: 14, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                    .strokeBorder(on ? Color.ink : .clear, lineWidth: 2.5)
+                                    .padding(-4)
+                            }
+                            .scaleEffect(on ? 1 : 0.96)
+                        Text(option.name)
+                            .font(.allo(size: 13, weight: .heavy, relativeTo: .caption))
+                            .foregroundStyle(on ? Color.ink : Color.inkSecondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
+                }
+                .buttonStyle(.pressable)
+                .accessibilityLabel(option.name)
+                .accessibilityAddTraits(on ? .isSelected : [])
+            }
+        }
+        .sovaFeedback(.selection, trigger: selection)
+    }
+
+    @ViewBuilder
+    private func preview(_ option: Appearance) -> some View {
+        switch option.rawValue {
+        case Appearance.light.rawValue: mini(paper: Color(hex: 0xFCFCFA), card: .white, ink: Color(hex: 0x15102E))
+        case Appearance.dark.rawValue: mini(paper: Color(hex: 0x0E0B1F), card: Color(hex: 0x1B1636), ink: Color(hex: 0xF4F1FF))
+        default:
+            HStack(spacing: 0) {
+                mini(paper: Color(hex: 0xFCFCFA), card: .white, ink: Color(hex: 0x15102E))
+                mini(paper: Color(hex: 0x0E0B1F), card: Color(hex: 0x1B1636), ink: Color(hex: 0xF4F1FF))
+            }
+        }
+    }
+
+    /// A tiny Today screen: a title bar, the indigo stage and two cards.
+    private func mini(paper: Color, card: Color, ink: Color) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Capsule().fill(ink.opacity(0.8)).frame(width: 26, height: 5)
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(StickerTone.indigo.fill)
+                .frame(height: 22)
+                .overlay(Circle().fill(StickerTone.yellow.fill).frame(width: 10, height: 10))
+            RoundedRectangle(cornerRadius: 4, style: .continuous).fill(card).frame(height: 8)
+            RoundedRectangle(cornerRadius: 4, style: .continuous).fill(StickerTone.yellow.fill).frame(height: 8)
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(paper)
     }
 }

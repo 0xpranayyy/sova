@@ -106,7 +106,7 @@ struct ThemeSwatches: View {
                             .frame(width: 34, height: 34)
                             .overlay {
                                 Circle()
-                                    .strokeBorder(Color.black, lineWidth: 1.5)
+                                    .strokeBorder(Color.ink, lineWidth: 2)
                                     .padding(-6)
                                     .opacity(option == selected ? 1 : 0)
                                     .scaleEffect(option == selected ? 1 : 0.85)
