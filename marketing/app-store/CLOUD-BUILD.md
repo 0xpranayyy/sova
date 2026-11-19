@@ -148,4 +148,52 @@ Open the failed step in the Actions log. The error is near the bottom.
 | `Metal Toolchain` errors | Re-run; the workflow downloads it first |
 | A Swift compile error | Send me the error text and I'll fix it |
 
-**Why not Xcode Cloud?** It's Apple's own service, but setting it up the first time requires Xcode on a Mac. This GitHub route needs no Mac at any step.
+---
+
+# With a Mac: Xcode Cloud
+
+Xcode Cloud is Apple's own build service, set up once from Xcode. Your membership includes **25 build hours a month**. A Sova archive takes about 20–30 minutes, so that's plenty.
+
+The repo is already prepared:
+- `Package.resolved` pins the wave package, because Xcode Cloud won't download packages without it.
+- `ci_scripts/ci_post_clone.sh` installs the Metal Toolchain and gives every build a higher build number.
+
+**Before you start:**
+- Do steps 2 and 3 above (identifiers and the app record).
+- In Xcode, add your Apple ID under **Xcode → Settings → Accounts**.
+- Install the Metal Toolchain under **Xcode → Settings → Components**.
+
+### 1. Open the project
+1. In **Xcode → Integrate → Clone…**, paste `https://github.com/0xpranayyy/sova` and open **Sova.xcodeproj**.
+2. Click the project, choose the **Sova** target → **Signing & Capabilities** → **Team**: your team, with **Automatically manage signing** on. Do the same for **SovaWidgetsExtension**.
+3. Optional, but worth it: plug in your iPhone and press **Run (⌘R)** once to check that it builds and runs.
+
+### 2. Create the workflow
+1. Open the **Report navigator (⌘9) → Cloud** tab and click **Get Started**. You can also use **Integrate → Create Workflow…**.
+2. Pick the product **Sova**. Xcode links it to your App Store Connect app automatically, using the bundle ID.
+3. When it asks for access to the source code, click **Grant Access**. Your browser opens; install the **Xcode Cloud** GitHub app on `0xpranayyy/sova` and come back to Xcode.
+4. On the workflow page, set:
+   - **Name:** `TestFlight`
+   - **Start Conditions:** delete the default condition and add **Manual Start** (saves build hours). If you'd rather build on every push, use **Branch Changes → main** instead.
+   - **Environment:** Xcode **latest release** (26.x), macOS **latest**
+   - **Actions:** delete the default **Build** action, then **+ → Archive**:
+     - Platform: **iOS**
+     - Deployment Preparation: **TestFlight and App Store**
+   - **Post-Actions:** **+ → TestFlight Internal Testing**, then pick your tester group. Create one first in App Store Connect → TestFlight → **Internal Testing → +**.
+5. Click **Save**.
+
+### 3. Start a build
+1. In the **Cloud** tab, right-click the **TestFlight** workflow → **Start Build** → branch **main**.
+2. Watch it run in the **Cloud** tab. Errors open right in Xcode.
+3. When it's green, the build appears in **App Store Connect → TestFlight**. Your internal testers get it in the TestFlight app automatically.
+
+### 4. Submit
+Follow step 9 above: fill in the 1.0 page, pick this build and submit.
+
+### If Xcode Cloud fails
+| It says | Fix |
+| --- | --- |
+| Package resolution / `Package.resolved` | Open the project on the Mac, let Xcode resolve packages, then commit and push the updated `Package.resolved` |
+| Signing or provisioning errors | The identifiers from step 2 are missing, or a capability (App Groups, iCloud) isn't on the App ID |
+| `Metal Toolchain` | Check that `ci_scripts/ci_post_clone.sh` is in the repo (it is) and run again |
+| A Swift compile error | Screenshot it and send it to me |
