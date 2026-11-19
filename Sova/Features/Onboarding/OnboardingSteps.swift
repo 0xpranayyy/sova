@@ -7,12 +7,19 @@ private struct StepHeadline: View {
     let text: String
     var index = 0
     @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 44
+    @Environment(\.onboardingTone) private var tone
+
+    /// The headline, with its closing period or question mark in the step's color.
+    private var styled: Text {
+        guard let last = text.last, ".?!".contains(last) else { return Text(text).foregroundStyle(Color.ink) }
+        let dot = tone == .yellow || tone == .lime ? tone.lip : tone.fill
+        return Text(String(text.dropLast())).foregroundStyle(Color.ink) + Text(String(last)).foregroundStyle(dot)
+    }
 
     var body: some View {
-        Text(text)
+        styled
             .font(.hero(size, weight: .heavy))
             .tracking(-2)
-            .foregroundStyle(Color.ink)
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, alignment: .leading)
             .reveal(index)
@@ -126,6 +133,7 @@ private struct OwlStage: View {
         }
         .frame(height: 400)
         .clipShape(.rect(cornerRadius: 40, style: .continuous))
+        .shadow(color: StickerTone.indigo.shadow, radius: 22, y: 12)
         .task {
             // Say hello once the stickers have landed.
             try? await Task.sleep(for: .milliseconds(900))

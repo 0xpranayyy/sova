@@ -18,6 +18,26 @@ enum OnboardingStep: Int, CaseIterable, Comparable {
 
     /// The steps that show in the progress indicator.
     static let indicated: [OnboardingStep] = [.pillars, .name, .rituals, .goal, .rhythm]
+
+    /// Each step has its own sticker color: the glow behind it, the
+    /// progress bar and the end of its headline.
+    var tone: StickerTone {
+        switch self {
+        case .hello: .yellow
+        case .pillars: .mint
+        case .name: .lilac
+        case .rituals: .orange
+        case .goal: .pink
+        case .rhythm: .cyan
+        case .theme: .lime
+        case .finish: .yellow
+        }
+    }
+}
+
+extension EnvironmentValues {
+    /// The current onboarding step's color, for headlines to pick up.
+    @Entry var onboardingTone: StickerTone = .indigo
 }
 
 struct OnboardingView: View {
@@ -43,6 +63,8 @@ struct OnboardingView: View {
     @State private var look = CGSize(width: 0, height: 0.4)
     /// Where the main button sits on screen: the welcome wave rises from it.
     @State private var launchFrame: CGRect = .zero
+    /// Which way the last step change went, so steps slide the right way.
+    @State private var forward = true
     @Environment(WaveDirector.self) private var waves
 
     private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
@@ -63,12 +85,16 @@ struct OnboardingView: View {
                     ZStack {
                         stepView
                             .id(step)
+                            .environment(\.onboardingTone, step.tone)
                             .transition(.asymmetric(
-                                insertion: .opacity,
-                                removal: .opacity.combined(with: .scale(scale: 0.98)).animation(.smooth(duration: 0.25))
+                                insertion: .move(edge: forward ? .trailing : .leading)
+                                    .combined(with: .opacity).combined(with: .scale(scale: 0.96)),
+                                removal: .move(edge: forward ? .leading : .trailing)
+                                    .combined(with: .opacity).combined(with: .scale(scale: 0.96))
                             ))
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .clipped()
 
                     bottomBar
                 }
@@ -124,16 +150,10 @@ struct OnboardingView: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.8)))
             }
             if indicated.contains(step) {
-                HStack(spacing: 4) {
-                    ForEach(0..<indicated.count, id: \.self) { i in
-                        Capsule()
-                            .fill(i <= position ? Color.ink : Color.ink.opacity(0.12))
-                            .frame(height: 6)
-                    }
-                }
-                .accessibilityElement()
-                .accessibilityLabel("Step \(position + 1) of \(indicated.count)")
-                .transition(.opacity)
+                OwlProgress(value: Double(position + 1) / Double(indicated.count), tone: step.tone)
+                    .accessibilityElement()
+                    .accessibilityLabel("Step \(position + 1) of \(indicated.count)")
+                    .transition(.opacity)
             }
             Spacer(minLength: 0)
         }
@@ -167,7 +187,7 @@ struct OnboardingView: View {
                     }
                 }
             }
-            .buttonStyle(.big)
+            .buttonStyle(.big(step == .finish ? .yellow : .indigo))
             .disabled(isRequesting)
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { launchFrame = $0 }
 
@@ -216,12 +236,14 @@ struct OnboardingView: View {
     private func advance() {
         if step == .name { userName = trimmedName }
         guard let next = step.next else { return finish() }
-        withAnimation(.smooth(duration: 0.5)) { step = next }
+        forward = true
+        withAnimation(.spring(response: 0.55, dampingFraction: 0.86)) { step = next }
     }
 
     private func back() {
         guard let previous = step.previous else { return }
-        withAnimation(.smooth(duration: 0.45)) { step = previous }
+        forward = false
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.88)) { step = previous }
     }
 
     private func finish() {
@@ -241,15 +263,70 @@ struct OnboardingView: View {
     }
 }
 
-/// Warm paper behind every step.
+/// Warm paper behind every step, with a big soft glow in the step's color
+/// that drifts and changes color as you move through the steps.
 struct OnboardingBackdrop: View {
     var step: OnboardingStep
     var theme: SovaTheme
+    @Environment(\.colorScheme) private var scheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        Color.canvas
-            .ignoresSafeArea()
-            .accessibilityHidden(true)
+        let strength = scheme == .dark ? 0.22 : 0.42
+        let next = step.next?.tone ?? .lilac
+        ZStack {
+            CanvasBackground()
+            GeometryReader { geo in
+                let w = geo.size.width, h = geo.size.height
+                Circle()
+                    .fill(step.tone.fill.opacity(strength))
+                    .frame(width: w * 1.1, height: w * 1.1)
+                    .blur(radius: 70)
+                    .position(x: w * 0.92, y: h * 0.12)
+                Circle()
+                    .fill(next.fill.opacity(strength * 0.6))
+                    .frame(width: w * 0.9, height: w * 0.9)
+                    .blur(radius: 80)
+                    .position(x: w * 0.02, y: h * 0.86)
+            }
+            .phaseAnimator(reduceMotion ? [0.0] : [0.0, 1.0]) { glow, phase in
+                glow.offset(x: phase * 18, y: phase * -14).scaleEffect(1 + phase * 0.04)
+            } animation: { _ in .easeInOut(duration: 6) }
+            .animation(.easeInOut(duration: 0.8), value: step)
+        }
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
+}
+
+/// The progress bar: a chunky track that fills in the step's color, with
+/// the owl riding along the end of it.
+struct OwlProgress: View {
+    var value: Double
+    var tone: StickerTone
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let filled = max(18, w * value)
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.ink.opacity(0.08))
+                Capsule()
+                    .fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 4, y: 2)))
+                    .overlay(alignment: .top) {
+                        Capsule().fill(Color.white.opacity(0.45)).frame(height: 3).padding(.horizontal, 5).padding(.top, 2)
+                    }
+                    .frame(width: filled)
+                OwlMark(size: 26, blinks: true, bodyColor: StickerTone.indigo.fill, eyeColor: StickerTone.yellow.fill,
+                        reactsToTap: false)
+                    .offset(x: filled - 17, y: -9)
+            }
+            .frame(height: 12)
+            .frame(maxHeight: .infinity)
+        }
+        .frame(height: 30)
+        .animation(.spring(response: 0.6, dampingFraction: 0.72), value: value)
+        .animation(.easeInOut(duration: 0.5), value: tone)
     }
 }
 
