@@ -160,16 +160,15 @@ todo,task,manager,reminder,routine,schedule,checklist,streak,productivity,widget
 | Copyright | `2026 0xpranayyy` |
 | Routing App Coverage File | leave empty |
 
-### Screenshots: iPhone 6.9" Display
-Upload in this order from `marketing/app-store/6.9-inch/`:
-1. `1-today.png`
-2. `2-capture.png`
-3. `3-rituals.png`
-4. `4-tasks.png`
-5. `5-goals.png`
-6. `6-insights.png`
+### Screenshots
+App Store Connect groups iPhones by display class. Upload to two tabs, in the order 1-today, 2-capture, 3-rituals, 4-tasks, 5-goals, 6-insights:
 
-App Store Connect scales them down for smaller iPhones automatically. If it asks for 6.7", use the same names from `marketing/app-store/6.7-inch/`.
+| Tab | Folder | Size |
+| --- | --- | --- |
+| **iPhone with Dynamic Island (medium display)**, required | `marketing/app-store/6.3-inch/` | 1206 × 2622 |
+| **iPhone with Dynamic Island (large display)**, recommended | `marketing/app-store/6.9-inch/` | 1320 × 2868 |
+
+Leave iPhone Duo, iPad and Apple Watch empty. `6.7-inch/` (1290 × 2796) also fits the large tab if you ever need it.
 
 **App Preview (optional):** record the six clips in `preview/PREVIEW.md`, then run `preview/make-preview.sh`. (`marketing/Sova-intro.mp4` is a marketing film for social media; App Previews must be footage of the app itself.)
 
