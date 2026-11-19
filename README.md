@@ -263,6 +263,7 @@ Everything for the App Store lives in [`marketing/app-store`](marketing/app-stor
 | :-- | :-- |
 | [`LISTING-PACK.md`](marketing/app-store/LISTING-PACK.md) | Every App Store Connect field, ready to paste |
 | [`PUBLISHING.md`](marketing/app-store/PUBLISHING.md) | The step-by-step checklist from accounts to Submit |
+| [`CLOUD-BUILD.md`](marketing/app-store/CLOUD-BUILD.md) | Build, sign and upload to TestFlight from GitHub, with no Mac |
 | [`GROWTH-PLAN.md`](marketing/app-store/GROWTH-PLAN.md) | Search ranking, featuring and the Apple Design Awards |
 | [`6.9-inch/`](marketing/app-store/6.9-inch) | App Store screenshots in upload order |
 
