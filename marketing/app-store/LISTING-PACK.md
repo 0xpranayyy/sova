@@ -246,6 +246,13 @@ Not shown for a first version. For 1.0 you can leave it empty.
 | Description (45) | `Everything in Plus, forever, no subscription` (44) |
 | Family Sharing | Off |
 
+**Promotional images (optional, 1024 × 1024, no text):** in `marketing/app-store/in-app-purchases/`, one per product:
+- `sova-plus-yearly.png`: the crowned owl inside a year of 12 sticker months, on indigo
+- `sova-plus-monthly.png`: a calendar month filling with ticks, on mint
+- `sova-plus-lifetime.png`: the night owl riding a glossy ∞, on yellow
+
+Upload each under the product → **App Store Promotion → Promotional Image**. Apple frames them and puts your app icon in the lower-left, which is why that corner is kept clear.
+
 **For all three products:**
 - **Review Screenshot:** a screenshot of the paywall from the real app (Settings → Sova Plus), taken in TestFlight or the simulator. 640×920 or larger works.
 - **Review Notes:** `Open Settings (gear on Today) → Sova Plus to see the paywall. Restore Purchases is in Settings → Help.`
