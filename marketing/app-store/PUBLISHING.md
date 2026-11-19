@@ -75,7 +75,7 @@ For each product:
 - The result shows "Data Not Collected". This matches the privacy manifest in the app.
 
 ## 9. Version 1.0 page
-- **Screenshots (6.9" display):** upload `marketing/app-store/6.9-inch/1-hero.png` … `6-done.png` in order. App Store Connect scales them for smaller iPhones. The `6.7-inch` set is there if it asks.
+- **Screenshots (6.9" display):** upload `marketing/app-store/6.9-inch/1-today.png` … `6-insights.png` in order. App Store Connect scales them for smaller iPhones. The `6.7-inch` set is there if it asks.
 - **App preview (optional):** `marketing/Sova-intro.mp4`. App Store previews have size and length rules, so trim it in iMovie or QuickTime if App Store Connect rejects it.
 - **Promotional text, description, keywords, What's New:** copy from `DESCRIPTION.md`.
 - **Build:** pick the uploaded build. Export compliance is already answered in the app (no non-exempt encryption).

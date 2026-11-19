@@ -74,7 +74,7 @@ Give a goal a deadline, break it into steps and link tasks to it. Every step you
 ## Screens
 
 <p align="center">
-  <img src=".github/readme/screens.jpg" width="100%" alt="Six Sova screens: Today, quick capture, Rituals, Goals, dark mode and a finished day">
+  <img src=".github/readme/screens.jpg" width="100%" alt="Six Sova screens: Today, quick capture, Rituals, Tasks, Goals and Insights">
 </p>
 
 <br>

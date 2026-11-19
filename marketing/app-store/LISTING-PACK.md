@@ -162,16 +162,16 @@ todo,task,manager,reminder,routine,schedule,checklist,streak,productivity,widget
 
 ### Screenshots: iPhone 6.9" Display
 Upload in this order from `marketing/app-store/6.9-inch/`:
-1. `1-hero.png`
+1. `1-today.png`
 2. `2-capture.png`
 3. `3-rituals.png`
-4. `4-goals.png`
-5. `5-dark.png`
-6. `6-done.png`
+4. `4-tasks.png`
+5. `5-goals.png`
+6. `6-insights.png`
 
 App Store Connect scales them down for smaller iPhones automatically. If it asks for 6.7", use the same names from `marketing/app-store/6.7-inch/`.
 
-**App Preview (optional):** `marketing/Sova-intro.mp4`. Apple allows 15–30 seconds; trim a second if it complains.
+**App Preview (optional):** record the six clips in `preview/PREVIEW.md`, then run `preview/make-preview.sh`. (`marketing/Sova-intro.mp4` is a marketing film for social media; App Previews must be footage of the app itself.)
 
 ### Build
 Choose the build uploaded from Xcode or the cloud build. Encryption is already declared in the app, so you won't be asked.
