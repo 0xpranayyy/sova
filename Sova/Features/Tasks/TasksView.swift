@@ -52,8 +52,7 @@ struct TasksView: View {
                     AllClear(hadTasks: !doneThisWeek.isEmpty, cheers: clearedCheers) { router.sheet = .newTask(nil) }
                         .cardRow(top: 4)
                 } else {
-                    WeekAheadStage(load: load, openCount: open.count, overdue: overdue.count,
-                                   doneThisWeek: doneThisWeek.count, selection: $focusDay)
+                    CalendarStrip(load: load, selection: $focusDay)
                         .cardRow(bottom: 12)
 
                     FilterChips(selection: $filter, counts: TaskFilter.counts(in: open))
@@ -283,160 +282,61 @@ struct DayLoad {
     func count(_ day: Date) -> Int { counts[day] ?? 0 }
 }
 
-private struct WeekAheadStage: View {
+// MARK: - Calendar strip
+
+/// The next seven days as calendar chips: weekday, a big date and a dot per
+/// task. Tap one to see just that day; tap it again for everything.
+private struct CalendarStrip: View {
     let load: DayLoad
-    let openCount: Int
-    let overdue: Int
-    let doneThisWeek: Int
     @Binding var selection: Date?
 
-    @State private var grown = false
-    @State private var owlTaps = 0
-    @State private var secret = 0
-    @Environment(AppRouter.self) private var router
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private var perch: Date { selection ?? load.days[0] }
-
     var body: some View {
-        let tone = StickerTone.indigo
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    MonoCaps(String(localized: "The week ahead"), color: tone.deep)
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text("\(openCount)")
-                            .font(.hero(44, weight: .heavy))
-                            .tracking(-2)
-                            .contentTransition(.numericText(value: Double(openCount)))
-                        Text(String(localized: "to do"))
-                            .font(.allo(size: 20, weight: .heavy, relativeTo: .title3))
-                            .opacity(0.7)
-                    }
-                    .foregroundStyle(Color.white)
-                    if overdue > 0 {
-                        TiltPill(text: String(localized: "\(overdue) overdue"), tone: .pink, tilt: -4, size: 13)
-                            .padding(.top, 2)
-                            .transition(.scale.combined(with: .opacity))
-                    }
-                }
-                Spacer(minLength: 0)
-                if doneThisWeek > 0 {
-                    Starburst(value: "\(doneThisWeek)", caption: String(localized: "done this week"),
-                              tone: .mint, size: 78, tilt: 10)
-                        .padding(.top, -6)
-                        .padding(.trailing, -6)
-                        .transition(.scale.combined(with: .opacity))
-                }
-            }
-
-            HStack(alignment: .bottom, spacing: 7) {
-                ForEach(Array(load.days.enumerated()), id: \.element) { index, day in
-                    column(day, index: index)
-                }
-            }
-        }
-        .padding(20)
-        .background {
-            ZStack {
-                tone.fill
-                SparkleDot(color: StickerTone.yellow.fill, size: 13)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .padding(.leading, 170).padding(.top, 22)
-                SparkleDot(color: StickerTone.pink.fill, size: 10)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .padding(.trailing, 110).padding(.top, 70)
-            }
-        }
-        .clipShape(.rect(cornerRadius: 34, style: .continuous))
-        .shadow(color: StickerTone.indigo.shadow, radius: 18, y: 10)
-        .overlay { SparkleBurst(trigger: secret, radius: CGSize(width: 160, height: 120), count: 16) }
-        .onAppear {
-            withAnimation(reduceMotion ? nil : .spring(response: 0.7, dampingFraction: 0.72).delay(0.05)) { grown = true }
-        }
-        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: overdue)
-        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: doneThisWeek)
-    }
-
-    private func column(_ day: Date, index: Int) -> some View {
-        let n = load.count(day)
-        let isToday = index == 0
-        let on = selection == day
-        let height: CGFloat = 86
-        let fill = n == 0 ? 0 : max(0.2, Double(n) / Double(load.busiest))
-        return Button {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.72)) {
-                selection = on ? nil : day
-            }
-            Sounds.play(.tick)
-        } label: {
-            VStack(spacing: 6) {
-                ZStack {
-                    if day == perch {
-                        OwlMark(size: 32, happy: overdue == 0 && n == 0 || owlTaps > 0,
-                                bodyColor: StickerTone.yellow.fill, eyeColor: Color(hex: 0x2B1677),
-                                pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
-                                celebrate: secret, reactsToTap: false)
-                            .matchedGeometryEffect(id: "owl", in: namespace)
-                            .onTapGesture(perform: pokeOwl)
-                            .transition(.identity)
-                    } else {
-                        Color.clear
-                    }
-                }
-                .frame(height: 32)
-
-                ZStack(alignment: .bottom) {
-                    Capsule().fill(Color.white.opacity(on ? 0.22 : 0.12))
-                    Capsule()
-                        .fill(on ? StickerTone.yellow.fill : (isToday ? StickerTone.yellow.fill.opacity(0.85) : StickerTone.lilac.fill))
-                        .frame(height: grown ? max(fill > 0 ? 22 : 0, height * fill) : 0)
-                        .overlay(alignment: .top) {
-                            if n > 0 {
-                                Text("\(n)")
-                                    .font(.allo(size: 12, weight: .heavy).monospacedDigit())
-                                    .foregroundStyle(StickerTone.indigo.fill)
-                                    .padding(.top, 4)
-                                    .contentTransition(.numericText(value: Double(n)))
-                            }
+        HStack(spacing: 6) {
+            ForEach(Array(load.days.enumerated()), id: \.element) { index, day in
+                let on = selection == day
+                let isToday = index == 0
+                let n = load.count(day)
+                Button {
+                    withAnimation(.spring(response: 0.38, dampingFraction: 0.75)) { selection = on ? nil : day }
+                    Sounds.play(.tick)
+                } label: {
+                    VStack(spacing: 3) {
+                        Text(isToday ? String(localized: "TODAY") : day.formatted(.dateTime.weekday(.abbreviated)).uppercased())
+                            .font(.allo(size: 9.5, weight: .heavy))
+                            .tracking(0.6)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .opacity(0.72)
+                        Text(day.formatted(.dateTime.day()))
+                            .font(.allo(size: 22, weight: .heavy).monospacedDigit())
+                            .tracking(-0.8)
+                        HStack(spacing: 2) {
+                            ForEach(0..<min(n, 3), id: \.self) { _ in Circle().frame(width: 5, height: 5) }
                         }
-                        .animation(.spring(response: 0.6, dampingFraction: 0.72).delay(Double(index) * 0.035), value: grown)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.75), value: n)
+                        .frame(height: 5)
+                        .opacity(0.75)
+                    }
+                    .foregroundStyle(on ? StickerTone.yellow.fill : (isToday ? StickerTone.indigo.fill : Color.ink))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 80)
+                    .background {
+                        let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        if on {
+                            shape.fill(StickerTone.indigo.fill.shadow(.drop(color: StickerTone.indigo.shadow, radius: 10, y: 6)))
+                        } else {
+                            shape.fill(Color.surface)
+                            shape.strokeBorder(isToday ? StickerTone.indigo.fill.opacity(0.35) : Color.hairline, lineWidth: 1.5)
+                        }
+                    }
+                    .scaleEffect(on ? 1.04 : 1)
                 }
-                .frame(height: height)
-                .overlay {
-                    if on { Capsule().strokeBorder(StickerTone.yellow.fill, lineWidth: 2.5) }
-                }
-                .scaleEffect(on ? 1.06 : 1, anchor: .bottom)
-
-                Text(isToday ? String(localized: "Today") : day.formatted(.dateTime.weekday(.narrow)))
-                    .font(.allo(size: isToday ? 10 : 12, weight: .heavy, relativeTo: .caption2))
-                    .foregroundStyle(on || isToday ? StickerTone.yellow.fill : Color.white.opacity(0.55))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                .buttonStyle(.pressable)
+                .accessibilityLabel(day.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+                .accessibilityValue(String(localized: "\(n) tasks"))
+                .accessibilityAddTraits(on ? .isSelected : [])
             }
-            .frame(maxWidth: .infinity)
-            .contentShape(.rect)
         }
-        .buttonStyle(.pressable)
-        .accessibilityLabel(day.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-        .accessibilityValue(String(localized: "\(n) tasks"))
-        .accessibilityAddTraits(on ? .isSelected : [])
-        .accessibilityHint(on ? String(localized: "Shows every day") : String(localized: "Shows only this day"))
-    }
-
-    @Namespace private var namespace
-
-    /// Another small secret: poke the owl five times.
-    private func pokeOwl() {
-        owlTaps += 1
-        Haptics.owl()
-        if owlTaps == 5 {
-            owlTaps = 0
-            secret += 1
-            Haptics.celebrate()
-            router.show(Toast(message: String(localized: "Hoo! You found the owl's hiding spot. 🦉")))
-        }
+        .sovaFeedback(.selection, trigger: selection)
     }
 }
 
@@ -543,44 +443,100 @@ private struct GroupHeader: View {
     let group: TaskGroup
     let onAction: () -> Void
 
+    /// The day this group is for, if it's one day.
+    private var day: Date? {
+        let today = Date.now.startOfDay
+        switch group.kind {
+        case .today: return today
+        case .tomorrow: return today.adding(days: 1)
+        case .day(let date): return date
+        default: return nil
+        }
+    }
+
     var body: some View {
-        HStack(alignment: .center, spacing: 10) {
-            Image(systemName: group.symbol)
-                .font(.system(size: 13, weight: .heavy))
-                .foregroundStyle(group.tone.deep)
-                .frame(width: 28, height: 28)
-                .background(group.tone.fill, in: .rect(cornerRadius: 9, style: .continuous))
-                .rotationEffect(.degrees(-6))
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text(group.title)
-                    .font(.allo(size: 21, weight: .heavy, relativeTo: .title3))
-                    .tracking(-0.6)
-                    .foregroundStyle(group.kind == .overdue ? Color.ember : Color.ink)
-                if let caption = group.caption {
-                    MonoCaps(caption)
+        if group.kind == .overdue {
+            overdueBanner
+        } else {
+            HStack(alignment: .center, spacing: 12) {
+                tile
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(group.title)
+                        .font(.allo(size: 21, weight: .heavy, relativeTo: .title3))
+                        .tracking(-0.6)
+                        .foregroundStyle(Color.ink)
+                    if let sub = subtitle { MonoCaps(sub) }
                 }
-            }
-            Spacer(minLength: 6)
-            if group.kind == .overdue {
-                Button(action: onAction) {
-                    Label(String(localized: "All to today"), systemImage: "arrow.uturn.forward")
-                        .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote))
-                        .foregroundStyle(StickerTone.pink.deep)
-                        .padding(.horizontal, 11)
-                        .frame(height: 30)
-                        .background(StickerTone.pink.fill, in: .capsule)
-                }
-                .buttonStyle(.pressable)
-            } else {
+                Spacer(minLength: 6)
                 Text("\(group.tasks.count)")
                     .font(.allo(size: 13, weight: .heavy).monospacedDigit())
-                    .foregroundStyle(group.tone.deep)
-                    .padding(.horizontal, 9)
-                    .frame(minWidth: 26, minHeight: 24)
-                    .background(group.tone.fill.opacity(0.55), in: .capsule)
+                    .foregroundStyle(Color.inkTertiary)
                     .contentTransition(.numericText(value: Double(group.tasks.count)))
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
         }
+    }
+
+    private var subtitle: String? {
+        switch group.kind {
+        case .today, .tomorrow: day?.formatted(.dateTime.weekday(.wide))
+        case .day(let date): date.formatted(.dateTime.month(.abbreviated).day())
+        default: group.caption
+        }
+    }
+
+    /// A tilted calendar tile with the weekday and date, or the group's icon.
+    @ViewBuilder
+    private var tile: some View {
+        let ink = group.tone == .indigo ? Color.white : group.tone.deep
+        Group {
+            if let day {
+                VStack(spacing: 0) {
+                    Text(day.formatted(.dateTime.weekday(.abbreviated)).uppercased())
+                        .font(.allo(size: 9, weight: .heavy))
+                        .tracking(0.8)
+                        .opacity(0.75)
+                    Text(day.formatted(.dateTime.day()))
+                        .font(.allo(size: 21, weight: .heavy).monospacedDigit())
+                        .tracking(-0.8)
+                }
+            } else {
+                Image(systemName: group.symbol)
+                    .font(.system(size: 18, weight: .heavy))
+            }
+        }
+        .foregroundStyle(ink)
+        .frame(width: 46, height: 50)
+        .background(group.tone.fill.shadow(.drop(color: group.tone.shadow, radius: 6, y: 4)),
+                    in: .rect(cornerRadius: 15, style: .continuous))
+        .rotationEffect(.degrees(-4))
+    }
+
+    /// Overdue work as one soft pink line, with the fix right there.
+    private var overdueBanner: some View {
+        HStack(spacing: 10) {
+            Text(group.tasks.count == 1 ? String(localized: "1 overdue") : String(localized: "\(group.tasks.count) overdue"))
+                .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
+                .foregroundStyle(Color(hex: 0xC21E5A))
+            Text(String(localized: "from earlier"))
+                .font(.allo(size: 13, weight: .bold, relativeTo: .footnote))
+                .foregroundStyle(Color.inkSecondary)
+            Spacer(minLength: 6)
+            Button(action: onAction) {
+                Text(String(localized: "All to today"))
+                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote))
+                    .foregroundStyle(StickerTone.pink.deep)
+                    .padding(.horizontal, 12)
+                    .frame(height: 32)
+                    .background(StickerTone.pink.fill, in: .capsule)
+            }
+            .buttonStyle(.pressable)
+        }
+        .padding(.leading, 14)
+        .padding(.trailing, 8)
+        .padding(.vertical, 8)
+        .background(StickerTone.pink.fill.opacity(0.16), in: .rect(cornerRadius: 20, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 }

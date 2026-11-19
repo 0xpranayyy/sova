@@ -204,71 +204,41 @@ private struct SeasonStage: View {
 
     var body: some View {
         let tone = StickerTone.indigo
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .center, spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    MonoCaps(String(localized: "This season"), color: tone.deep)
-                    HStack(alignment: .firstTextBaseline, spacing: 0) {
-                        Text(Int((average * 100).rounded()), format: .number)
-                            .font(.hero(60, weight: .heavy))
-                            .tracking(-3)
-                            .contentTransition(.numericText(value: average))
-                        Text("%").font(.hero(26, weight: .heavy)).opacity(0.6)
-                    }
-                    .foregroundStyle(tone.deep)
-                    Text(goals.count == 1 ? String(localized: "on your goal")
-                         : String(localized: "average across \(goals.count) goals"))
-                        .font(.allo(.subheadline, .heavy))
-                        .foregroundStyle(Color.white.opacity(0.7))
-                }
-                Spacer(minLength: 0)
-                GoalRings(goals: ringed, grown: grown, size: 128) {
-                    OwlMark(size: 46, happy: average >= 0.5 || owlTaps > 0,
-                            bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                            pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
-                            celebrate: secret, reactsToTap: false)
-                        .onTapGesture(perform: pokeOwl)
-                }
-                .overlay { SparkleBurst(trigger: secret, radius: CGSize(width: 120, height: 110), count: 14) }
+        HStack(alignment: .center, spacing: 16) {
+            GoalRings(goals: ringed, grown: grown, size: 112) {
+                OwlMark(size: 40, happy: average >= 0.5 || owlTaps > 0,
+                        bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
+                        celebrate: secret, reactsToTap: false)
+                    .onTapGesture(perform: pokeOwl)
             }
+            .overlay { SparkleBurst(trigger: secret, radius: CGSize(width: 120, height: 110), count: 14) }
 
-            HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 3) {
+                MonoCaps(String(localized: "This season"), color: tone.deep)
+                HStack(alignment: .firstTextBaseline, spacing: 0) {
+                    Text(Int((average * 100).rounded()), format: .number)
+                        .font(.hero(54, weight: .heavy))
+                        .tracking(-2.6)
+                        .contentTransition(.numericText(value: average))
+                    Text("%").font(.hero(24, weight: .heavy)).opacity(0.6)
+                }
+                .foregroundStyle(tone.deep)
+                Text(goals.count == 1 ? String(localized: "on your goal")
+                     : String(localized: "average across \(goals.count) goals"))
+                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote))
+                    .foregroundStyle(Color.white.opacity(0.7))
                 if let goal = nextDeadline, let text = goal.deadlineText {
                     TiltPill(text: "⏳ " + goal.title + " · " + text,
-                             tone: (goal.daysLeft ?? 99) <= 7 ? .pink : .yellow, tilt: -2, size: 12)
+                             tone: (goal.daysLeft ?? 99) <= 7 ? .pink : .yellow, tilt: -3, size: 12)
                         .lineLimit(1)
-                }
-                if achieved > 0 {
+                        .padding(.top, 6)
+                } else if achieved > 0 {
                     TiltPill(text: String(localized: "\(achieved) achieved 🏆"), tone: .mint, tilt: 3, size: 12)
+                        .padding(.top, 6)
                 }
-                Spacer(minLength: 0)
             }
-
-            if !ringed.isEmpty {
-                VStack(spacing: 7) {
-                    ForEach(ringed) { goal in
-                        let goalTone = StickerTone(goal.accent)
-                        HStack(spacing: 8) {
-                            Circle().fill(goalTone == .indigo ? StickerTone.lilac.fill : goalTone.fill)
-                                .frame(width: 9, height: 9)
-                            Image(systemName: goal.symbol)
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundStyle(Color.white.opacity(0.6))
-                            Text(goal.title)
-                                .font(.allo(size: 14, weight: .heavy, relativeTo: .subheadline))
-                                .foregroundStyle(Color.white)
-                                .lineLimit(1)
-                            Spacer(minLength: 6)
-                            Text(goal.progress, format: .percent.precision(.fractionLength(0)))
-                                .font(.allo(size: 13, weight: .heavy).monospacedDigit())
-                                .foregroundStyle(Color.white.opacity(0.7))
-                                .contentTransition(.numericText(value: goal.progress))
-                        }
-                    }
-                }
-                .padding(12)
-                .background(Color.white.opacity(0.08), in: .rect(cornerRadius: 18, style: .continuous))
-            }
+            Spacer(minLength: 0)
         }
         .padding(20)
         .background {
@@ -279,7 +249,7 @@ private struct SeasonStage: View {
                     .padding(.leading, 150).padding(.top, 22)
                 SparkleDot(color: StickerTone.mint.fill, size: 10)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                    .padding(.trailing, 26).padding(.bottom, 96)
+                    .padding(.trailing, 26).padding(.bottom, 22)
             }
         }
         .clipShape(.rect(cornerRadius: 34, style: .continuous))

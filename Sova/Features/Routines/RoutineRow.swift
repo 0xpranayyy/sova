@@ -18,15 +18,17 @@ struct RoutineRow: View {
 
     var body: some View {
         let tone = StickerTone(routine.accent)
-        let ink = tone == .indigo ? Color.white : tone.deep
         let done = routine.isDone(on: .now)
+        // Open rituals are a soft wash of their color; done ones fill in.
+        let ink = tone == .indigo ? (done ? Color.white : StickerTone.indigo.fill) : tone.deep
         let scheduled = routine.isScheduled(on: .now)
         HStack(spacing: 14) {
             Image(systemName: routine.symbol)
                 .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(ink)
+                .foregroundStyle(done ? ink : (tone == .indigo ? Color.white : tone.deep))
                 .frame(width: 48, height: 48)
-                .background(ink.opacity(0.12), in: .rect(cornerRadius: 16, style: .continuous))
+                .background(done ? AnyShapeStyle(Color.white.opacity(0.3)) : AnyShapeStyle(tone.fill.shadow(.drop(color: tone.shadow, radius: 5, y: 3))),
+                            in: .rect(cornerRadius: 16, style: .continuous))
                 .rotationEffect(.degrees(-6))
             VStack(alignment: .leading, spacing: 7) {
                 HStack(spacing: 6) {
@@ -74,12 +76,17 @@ struct RoutineRow: View {
         .padding(.vertical, 14)
         .background {
             let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
-            shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
-            shape.fill(LinearGradient(colors: [Color.white.opacity(0.2), .clear], startPoint: .top, endPoint: .center))
-            shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.5), .clear],
-                                              startPoint: .top, endPoint: .center), lineWidth: 1.2)
+            if done {
+                shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
+                shape.fill(LinearGradient(colors: [Color.white.opacity(0.2), .clear], startPoint: .top, endPoint: .center))
+                shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.5), .clear],
+                                                  startPoint: .top, endPoint: .center), lineWidth: 1.2)
+            } else {
+                shape.fill(Color.surface)
+                shape.fill(tone.fill.opacity(0.24))
+                shape.strokeBorder(tone.fill.opacity(0.65), lineWidth: 1.5)
+            }
         }
-        .opacity(done ? 0.78 : 1)
         .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { view, t in
             view.scaleEffect(1 + abs(t) * 0.01).rotationEffect(.degrees(t * 0.6))
         } keyframes: { _ in

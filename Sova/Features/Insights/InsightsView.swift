@@ -41,22 +41,16 @@ struct InsightsView: View {
 
                     stage(current: current, delta: delta, canCompare: canCompare, hasHistory: hasHistory, index: index)
 
-                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                        StatBlock(label: String(localized: "Tasks done"), value: "\(index.tasks(inLast: range.days))",
-                                  tone: .pink, symbol: "checkmark.circle.fill")
-                            .rotationEffect(.degrees(-1.5))
-                        StatBlock(label: String(localized: "Best streak"), value: "\(routines.map(\.streak).max() ?? 0)",
-                                  unit: String(localized: "d"), tone: .orange, symbol: "flame.fill")
-                            .rotationEffect(.degrees(1.2))
-                        StatBlock(label: String(localized: "Per day"),
-                                  value: index.perDay(inLast: range.days).formatted(.number.precision(.fractionLength(0...1))),
-                                  tone: .cyan, symbol: "bolt.fill")
-                            .rotationEffect(.degrees(1))
-                        StatBlock(label: String(localized: "Goals"),
-                                  value: "\(Int((goalAverage * 100).rounded()))", unit: "%", tone: .lime, symbol: "flag.fill")
-                            .rotationEffect(.degrees(-1.2))
-                    }
-                    .padding(.vertical, 2)
+                    StatStrip(items: [
+                        .init(value: "\(index.tasks(inLast: range.days))", unit: nil,
+                              label: String(localized: "Tasks done"), color: Color(hex: 0xC21E5A)),
+                        .init(value: "\(routines.map(\.streak).max() ?? 0)", unit: String(localized: "d"),
+                              label: String(localized: "Best streak"), color: Color(hex: 0xE07F17)),
+                        .init(value: index.perDay(inLast: range.days).formatted(.number.precision(.fractionLength(0...1))),
+                              unit: nil, label: String(localized: "Per day"), color: Color(hex: 0x16A6DB)),
+                        .init(value: "\(Int((goalAverage * 100).rounded()))", unit: "%",
+                              label: String(localized: "Goals"), color: Color(hex: 0x4E8A00)),
+                    ])
 
                     if hasHistory {
                         HStack(spacing: 10) {
@@ -474,33 +468,51 @@ private struct RangePicker: View {
 
 // MARK: - Pieces
 
-/// A big number on a block of color.
-private struct StatBlock: View {
-    let label: String
-    let value: String
-    var unit: String? = nil
-    let tone: StickerTone
-    var symbol: String? = nil
+/// The headline numbers side by side on one calm card, each in its own
+/// color, divided by fine lines.
+private struct StatStrip: View {
+    struct Item: Identifiable {
+        let value: String
+        let unit: String?
+        let label: String
+        let color: Color
+        var id: String { label }
+    }
+
+    let items: [Item]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                if let symbol { Image(systemName: symbol).font(.system(size: 12, weight: .heavy)) }
-                MonoCaps(label, color: tone.deep)
+        HStack(spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.element.id) { position, item in
+                if position > 0 {
+                    Rectangle().fill(Color.hairline).frame(width: 1.5).padding(.vertical, 6)
+                }
+                VStack(spacing: 4) {
+                    HStack(alignment: .firstTextBaseline, spacing: 0) {
+                        Text(item.value)
+                            .font(.hero(30, weight: .heavy))
+                            .tracking(-1.2)
+                            .contentTransition(.numericText())
+                        if let unit = item.unit {
+                            Text(unit).font(.hero(15, weight: .heavy)).opacity(0.6)
+                        }
+                    }
+                    .foregroundStyle(item.color)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    MonoCaps(item.label, size: 10)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .frame(maxWidth: .infinity)
+                .accessibilityElement(children: .combine)
             }
-            HStack(alignment: .firstTextBaseline, spacing: 0) {
-                Text(value)
-                    .font(.hero(44, weight: .heavy))
-                    .tracking(-2)
-                    .contentTransition(.numericText())
-                if let unit { Text(unit).font(.hero(22, weight: .heavy)) }
-            }
-            .lineLimit(1)
-            .minimumScaleFactor(0.6)
         }
-        .foregroundStyle(tone.deep)
-        .block(tone, cornerRadius: 28, padding: 16)
-        .accessibilityElement(children: .combine)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 4)
+        .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.06), radius: 12, y: 6)),
+                    in: .rect(cornerRadius: 26, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
     }
 }
 
