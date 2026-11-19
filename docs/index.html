@@ -854,6 +854,45 @@ html.lenis,html.lenis body{height:auto}
   .step{opacity:1}
 }
 
+/* ---------- v10: the app's paper, depth and new feature cards ---------- */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(900px 600px at 105% -5%, rgba(255,233,77,.26), transparent 60%),
+    radial-gradient(800px 700px at -10% 45%, rgba(217,206,255,.34), transparent 60%),
+    radial-gradient(700px 600px at 110% 105%, rgba(77,242,176,.16), transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .08  0 0 0 0 .06  0 0 0 0 .18  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.09'/></svg>")}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) body::before{opacity:.45}}
+:root[data-theme=dark] body::before{opacity:.45}
+.pdot{color:var(--pink)}
+.step .pdot,.story .pdot,.f-pink .pdot{color:inherit}
+.final .pdot,.film .pdot,.f-night .pdot{color:var(--pink)}
+.feat,.card,.tier,.compare,.qa{box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 18px 36px -24px rgba(21,16,46,.28)}
+.feat{transition:transform .35s var(--ease),box-shadow .35s}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) :is(.feat,.card,.tier,.compare,.qa){box-shadow:0 1px 0 rgba(255,255,255,.07) inset,0 18px 36px -24px rgba(0,0,0,.6)}}
+:root[data-theme=dark] :is(.feat,.card,.tier,.compare,.qa){box-shadow:0 1px 0 rgba(255,255,255,.07) inset,0 18px 36px -24px rgba(0,0,0,.6)}
+@media (hover:hover){.feat:hover{transform:translateY(-4px) rotate(-.4deg);box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 26px 44px -24px rgba(21,16,46,.34)}}
+.btn-big{background-image:linear-gradient(rgba(255,255,255,.18),transparent 55%)}
+.btn-big:active{transform:translateY(6px);box-shadow:0 2px 0 rgba(43,22,119,.22)}
+.v-count{display:flex;align-items:center;gap:16px}
+.cnt-ring{width:78px;height:78px;border-radius:50%;display:grid;place-content:center;text-align:center;
+  background:radial-gradient(closest-side,var(--surface) 76%,transparent 78% 100%),conic-gradient(var(--cyan) 0 62.5%,rgba(61,203,255,.18) 0);
+  color:var(--ink);line-height:1}
+.cnt-ring b{font-size:26px;font-weight:900;letter-spacing:-.04em}.cnt-ring small{font-size:11px;font-weight:800;color:var(--ink2)}
+.drops{display:grid;grid-template-columns:repeat(4,16px);gap:7px}
+.drops i{width:16px;height:20px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:rgba(61,203,255,.22);transform:rotate(180deg)}
+.drops i.on{background:var(--cyan);box-shadow:0 3px 8px -3px rgba(6,63,115,.5)}
+.v-actions{width:100%;max-width:280px;background:var(--surface);border-radius:18px;padding:10px;box-shadow:0 10px 24px -14px rgba(20,10,60,.45)}
+.va-n{display:flex;gap:9px;align-items:center}.va-n img{border-radius:7px}
+.va-n b{display:block;font-size:14px;font-weight:900}.va-n small{font-size:12px;color:var(--ink2);font-weight:700}
+.va-b{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}
+.va-b span{font-size:12px;font-weight:900;text-align:center;padding:7px 4px;border-radius:10px;background:var(--well)}
+.va-b span:first-child{background:#2B1677;color:#FFE94D}
+.v-ai{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:270px}
+.v-ai span{font-size:13px;font-weight:900;padding:7px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+.v-ai .g{background:var(--orange);color:var(--oD)}
+.v-ai .s{background:#2B1677;color:#FFE94D}
+.v-ai .st{background:var(--surface);color:var(--ink);box-shadow:0 6px 14px -10px rgba(20,10,60,.5)}
+
 .foot{border-top:1.5px solid var(--hair);margin-top:clamp(70px,9vw,120px);padding:56px 0 calc(40px + env(safe-area-inset-bottom));color:var(--ink2)}
 .foot .foot-grid{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:32px;justify-content:initial;text-align:left}
 .foot .brand{color:var(--ink);font-weight:900;font-size:24px;letter-spacing:-.04em;display:inline-flex;align-items:center;gap:10px}
@@ -895,7 +934,7 @@ html.lenis,html.lenis body{height:auto}
       <div class="hero-rays" aria-hidden="true"><svg viewBox="0 0 2000 2000"><path d="M2000.00 1000.00 L1593.89 1085.39 L1959.49 1281.73 L1545.78 1249.25 L1841.25 1540.64 L1453.45 1392.92 L1654.86 1755.75 L1324.38 1504.75 L1415.42 1909.63 L1169.04 1575.70 L1142.31 1989.82 L1000.00 1600.00 L857.69 1989.82 L830.96 1575.70 L584.58 1909.63 L675.62 1504.75 L345.14 1755.75 L546.55 1392.92 L158.75 1540.64 L454.22 1249.25 L40.51 1281.73 L406.11 1085.39 L0.00 1000.00 L406.11 914.61 L40.51 718.27 L454.22 750.75 L158.75 459.36 L546.55 607.08 L345.14 244.25 L675.62 495.25 L584.58 90.37 L830.96 424.30 L857.69 10.18 L1000.00 400.00 L1142.31 10.18 L1169.04 424.30 L1415.42 90.37 L1324.38 495.25 L1654.86 244.25 L1453.45 607.08 L1841.25 459.36 L1545.78 750.75 L1959.49 718.27 L1593.89 914.61Z" fill="#FFF2A0"/></svg></div>
       <div class="hero-grid">
         <div>
-          <h1 class="h-xl" aria-label="Your day, beautifully done."><span class="word" style="animation-delay:.05s">Your</span> <span class="word" style="animation-delay:.14s">day,</span> <span class="word" style="animation-delay:.23s">beautifully</span> <span class="word" style="animation-delay:.32s">done.</span></h1>
+          <h1 class="h-xl" aria-label="Your day, beautifully done."><span class="word" style="animation-delay:.05s">Your</span> <span class="word" style="animation-delay:.14s">day,</span> <span class="word" style="animation-delay:.23s">beautifully</span> <span class="word" style="animation-delay:.32s">done<span class="pdot">.</span></span></h1>
           <p class="lead">Tasks, habits and goals in one app for iPhone. Type a task the way you would say it, tick it off, and see your day come together.</p>
           <div class="hero-cta">
             <a class="btn btn-big js-store" href="#get"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>Download on the App Store</a>
@@ -929,7 +968,7 @@ html.lenis,html.lenis body{height:auto}
   <section class="wrap dayrun" id="dayrun" aria-label="A day getting done">
     <div class="panel">
       <div class="dr-copy">
-        <h2 class="h-lg">Watch a day get done.</h2>
+        <h2 class="h-lg">Watch a day get done<span class="pdot">.</span></h2>
         <p class="lead">Each task you tick fills the ring. Finish them all and the owl notices.</p>
         <div class="dr-count" aria-hidden="true"><span id="drPct">100</span><small>%</small></div>
       </div>
@@ -971,7 +1010,7 @@ html.lenis,html.lenis body{height:auto}
       <div class="story-grid">
         <div class="story-steps">
           <article class="step" data-screen="capture" data-theme="mint">
-            <h2 class="h-lg">Just type it. Sova gets it.</h2>
+            <h2 class="h-lg">Just type it. Sova gets it<span class="pdot">.</span></h2>
             <p class="lead">Write “Call Mom tomorrow 6pm !!” and Sova fills in the date, the time and the priority. “Every Monday” makes it repeat.</p>
             <div class="capture" aria-label="Example: Call Mom tomorrow 6pm, high priority">
               <small>NEW TASK</small>
@@ -981,7 +1020,7 @@ html.lenis,html.lenis body{height:auto}
             <div class="phone inline-phone"><img decoding="async" src="assets/screens/capture.webp" alt="Quick capture highlighting tomorrow 6pm" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="today" data-theme="yellow">
-            <h2 class="h-lg">One screen for today.</h2>
+            <h2 class="h-lg">One screen for today<span class="pdot">.</span></h2>
             <p class="lead">Today shows what is due, the rituals you planned and anything overdue. Up Next picks the one thing to do now. Swipe anything else to tomorrow.</p>
             <div class="ring-demo" aria-hidden="true">
               <div class="ring">
@@ -1002,12 +1041,12 @@ html.lenis,html.lenis body{height:auto}
             <div class="phone inline-phone"><img decoding="async" src="assets/screens/today.webp" alt="Today screen" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="rituals" data-theme="lilac">
-            <h2 class="h-lg">Habits, on a schedule.</h2>
+            <h2 class="h-lg">Habits, on a schedule<span class="pdot">.</span></h2>
             <p class="lead">Set which days a ritual happens and when: morning, afternoon or evening. Tick it off and the streak counts up. Rest days don’t break it.</p>
             <div class="phone inline-phone"><img decoding="async" src="assets/screens/rituals.webp" alt="Rituals with a 12 day streak" loading="lazy" width="760" height="1670"><span class="glare"></span></div>
           </article>
           <article class="step" data-screen="goals" data-theme="pink">
-            <h2 class="h-lg">Big goals, small steps.</h2>
+            <h2 class="h-lg">Big goals, small steps<span class="pdot">.</span></h2>
             <p class="lead">Give a goal a deadline and break it into steps. Each step you tick moves the percentage, and tasks can link to the goal they serve.</p>
             <div class="bars">
               <div class="bar"><div><span>Run a half marathon</span><span>80%</span></div><i><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span></i></div>
@@ -1036,7 +1075,7 @@ html.lenis,html.lenis body{height:auto}
   <!-- WALL -->
   <section class="wall-sec" aria-label="Sova screens">
     <div class="wrap wall-head">
-      <h2 class="h-lg">Every screen in Sova.</h2>
+      <h2 class="h-lg">Every screen in Sova<span class="pdot">.</span></h2>
       <p class="lead">Today, quick capture, rituals, goals and the night theme, all from the app itself.</p>
     </div>
     <div class="wall" aria-hidden="true"><div class="wall-tilt"><div class="col" style="--d:64s"><img decoding="async" loading="lazy" src="assets/screens/today.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/rituals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/dark.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/today.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/rituals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/dark.webp" alt="" width="760" height="1670"></div><div class="col down" style="--d:52s"><img decoding="async" loading="lazy" src="assets/screens/capture.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/goals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/done.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/capture.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/goals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/done.webp" alt="" width="760" height="1670"></div><div class="col" style="--d:72s"><img decoding="async" loading="lazy" src="assets/screens/rituals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/dark.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/today.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/rituals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/dark.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/today.webp" alt="" width="760" height="1670"></div><div class="col down" style="--d:58s"><img decoding="async" loading="lazy" src="assets/screens/goals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/done.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/capture.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/goals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/done.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/capture.webp" alt="" width="760" height="1670"></div><div class="col" style="--d:68s"><img decoding="async" loading="lazy" src="assets/screens/dark.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/today.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/goals.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/dark.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/today.webp" alt="" width="760" height="1670"><img decoding="async" loading="lazy" src="assets/screens/goals.webp" alt="" width="760" height="1670"></div></div></div>
@@ -1054,7 +1093,7 @@ html.lenis,html.lenis body{height:auto}
       <div class="feature-grid">
         <div class="stage"><div class="phone "><img decoding="async" src="assets/screens/dark.webp" alt="Sova in dark mode with a yellow night owl" loading="lazy" width="760" height="1670"><span class="glare"></span></div></div>
         <div class="feature-copy">
-          <h2 class="h-lg">Light by day. Indigo by night.</h2>
+          <h2 class="h-lg">Light by day. Indigo by night<span class="pdot">.</span></h2>
           <p class="lead">Dark mode follows your iPhone, or you can set it yourself. The owl turns yellow so it still stands out at night.</p>
         </div>
       </div>
@@ -1064,7 +1103,7 @@ html.lenis,html.lenis body{height:auto}
   <!-- ALSO -->
   <section class="wrap home-sec" id="widgets">
     <div class="wall-head">
-      <h2 class="h-lg">On your Home Screen, too.</h2>
+      <h2 class="h-lg">On your Home Screen, too<span class="pdot">.</span></h2>
       <p class="lead">Sova's widgets work without opening the app. Try it: tap a ritual.</p>
     </div>
 
@@ -1145,6 +1184,18 @@ html.lenis,html.lenis body{height:auto}
         <h3>Insights</h3><p>Your week at a glance, a 17-week activity calendar and your most consistent rituals.</p>
       </div>
       <div class="feat reveal">
+        <div class="fv"><div class="v-count"><div class="cnt-ring"><b>5</b><small>of 8</small></div><div class="drops"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div></div></div>
+        <h3>Count it up</h3><p>Some rituals take more than one tap: 8 glasses of water, 3 sets. The ring fills as you go.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="fv"><div class="v-actions"><div class="va-n"><img src="assets/icon.png" alt="" width="26" height="26"><div><b>Call Mom</b><small>It's 6:00 PM.</small></div></div><div class="va-b"><span>Done</span><span>In 1 hour</span><span>Tomorrow</span></div></div></div>
+        <h3>Act from the alert</h3><p>Finish, snooze or move a task right from its notification, without opening the app.</p>
+      </div>
+      <div class="feat reveal">
+        <div class="fv"><div class="v-ai"><span class="g">Run a 5K</span><span class="s"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" /><path d="M20 3v4" /><path d="M22 5h-4" /><path d="M4 17v2" /><path d="M5 18H3" /></svg>Suggest steps</span><span class="st">Buy running shoes</span><span class="st">Run 2 km, 3× a week</span></div></div>
+        <h3>Suggest steps</h3><p>Apple Intelligence breaks a goal into first steps, right on your iPhone. Nothing leaves it.</p>
+      </div>
+      <div class="feat reveal">
         <div class="fv"><div class="v-private"><span><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>On-device</span><span>No account</span><span>No ads</span><span>No tracking</span></div></div>
         <h3>Private</h3><p>Your data stays on your iPhone, or in your own iCloud with Plus.</p>
       </div>
@@ -1156,7 +1207,7 @@ html.lenis,html.lenis body{height:auto}
     <div class="panel film reveal">
       <div class="film-grid">
         <div>
-          <h2 class="h-lg">Meet Sova in 30 seconds.</h2>
+          <h2 class="h-lg">Meet Sova in 30 seconds<span class="pdot">.</span></h2>
           <p class="lead">A short film showing quick capture, Today, rituals, goals and dark mode.</p>
         </div>
         <div class="video" id="video">
@@ -1170,7 +1221,7 @@ html.lenis,html.lenis body{height:auto}
   <!-- PRICING -->
   <section class="wrap price-sec" id="plus">
     <div class="wall-head">
-      <h2 class="h-lg">Free, with Plus if you want more.</h2>
+      <h2 class="h-lg">Free, with Plus if you want more<span class="pdot">.</span></h2>
       <p class="lead">Tasks, widgets, Siri and dark mode are free. Plus adds unlimited rituals and goals, iCloud sync and app icons.</p>
     </div>
 
@@ -1246,8 +1297,8 @@ html.lenis,html.lenis body{height:auto}
         <thead><tr><th scope="col">Compare</th><th scope="col">Sova</th><th scope="col">Plus</th></tr></thead>
         <tbody>
           <tr><th scope="row">Tasks, alerts and repeats</th><td>Unlimited</td><td>Unlimited</td></tr>
-          <tr><th scope="row">Rituals</th><td>3</td><td>Unlimited</td></tr>
-          <tr><th scope="row">Active goals</th><td>1</td><td>Unlimited</td></tr>
+          <tr><th scope="row">Rituals</th><td>5</td><td>Unlimited</td></tr>
+          <tr><th scope="row">Active goals</th><td>3</td><td>Unlimited</td></tr>
           <tr><th scope="row">Widgets and Lock Screen</th><td><span class="ck"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span></td><td><span class="ck"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span></td></tr>
           <tr><th scope="row">Siri and Shortcuts</th><td><span class="ck"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span></td><td><span class="ck"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span></td></tr>
           <tr><th scope="row">Insights and dark mode</th><td><span class="ck"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span></td><td><span class="ck"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg></span></td></tr>
@@ -1315,7 +1366,7 @@ html.lenis,html.lenis body{height:auto}
       <div class="fin-grid">
         <div class="fin-copy">
           <img class="fin-icon" src="assets/icon.png" alt="" width="84" height="84">
-          <h2 class="h-xl">Start with today.</h2>
+          <h2 class="h-xl">Start with today<span class="pdot">.</span></h2>
           <p class="lead">Sova is free on iPhone. Add your first task in a few seconds, no account needed.</p>
           <div class="fin-cta">
             <a class="btn btn-big js-store" href="#get"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>Download on the App Store</a>
