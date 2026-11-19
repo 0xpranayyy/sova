@@ -31,6 +31,11 @@ struct SettingsView: View {
     @State private var plusReason: PlusReason?
     @State private var showManage = false
     @State private var iconName: String? = UIApplication.shared.alternateIconName
+    @State private var backupURL: URL?
+    @State private var versionTaps = 0
+    @State private var secret = 0
+    @Query private var allTasks: [TaskItem]
+    @Query private var allRoutines: [Routine]
 
     private var version: String {
         let info = Bundle.main.infoDictionary
@@ -44,14 +49,9 @@ struct SettingsView: View {
             Form {
                 Group {
                     Section {
-                        HStack(spacing: 16) {
-                            OwlMark(size: 44)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Sova").font(.display(.title2)).foregroundStyle(Color.ink)
-                                Text("Version \(version)").font(.allo(.footnote)).foregroundStyle(Color.inkSecondary)
-                            }
-                        }
-                        .padding(.vertical, 6)
+                        hero
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
                     }
 
                     Section {
@@ -161,6 +161,22 @@ struct SettingsView: View {
                         }
                     }
 
+                    Section {
+                        if let backupURL {
+                            ShareLink(item: backupURL) {
+                                Label("Export a backup", systemImage: "square.and.arrow.up")
+                            }
+                            .foregroundStyle(Color.ink)
+                        } else {
+                            Label("Preparing backup…", systemImage: "square.and.arrow.up")
+                                .foregroundStyle(Color.inkTertiary)
+                        }
+                    } header: {
+                        Text("Your data")
+                    } footer: {
+                        Text("A readable file of all your tasks, rituals and goals. Save it to Files or send it anywhere.")
+                    }
+
                     Section("Help") {
                         Button("Help & feedback", systemImage: "envelope") {
                             if Links.hasSupportEmail, let mail = URL(string: "mailto:\(Links.supportEmail)?subject=Sova%20feedback") {
@@ -222,9 +238,71 @@ struct SettingsView: View {
             .onChange(of: eveningOn) { applyReminders() }
             .onChange(of: morningMinutes) { applyReminders() }
             .onChange(of: eveningMinutes) { applyReminders() }
-            .task { await refreshPermission() }
+            .task {
+                await refreshPermission()
+                backupURL = try? Backup.write(from: context)
+            }
         }
         .tint((SovaTheme(rawValue: themeRaw) ?? .ember).accent.color)
+    }
+
+    // MARK: Hero
+
+    /// You and Sova at a glance: the owl, your name and a few numbers.
+    private var hero: some View {
+        let done = allTasks.filter(\.isDone).count
+        let streak = allRoutines.map(\.streak).max() ?? 0
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    MonoCaps(store.isPlus ? String(localized: "Sova Plus") : String(localized: "Sova"),
+                             color: StickerTone.indigo.deep)
+                    Text(userName.isEmpty ? String(localized: "Hello!") : String(localized: "Hi, \(userName)!"))
+                        .font(.hero(34, weight: .heavy))
+                        .tracking(-1.2)
+                        .foregroundStyle(Color.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    Button {
+                        versionTaps += 1
+                        Haptics.pop(0.4)
+                        if versionTaps == 7 {
+                            versionTaps = 0
+                            secret += 1
+                            Haptics.owl()
+                            Haptics.celebrate()
+                        }
+                    } label: {
+                        Text(secret > 0 ? String(localized: "🦉 Hoo! You found the owl's office.")
+                             : versionTaps >= 3 ? String(localized: "\(7 - versionTaps) more…")
+                             : String(localized: "Version \(version)"))
+                            .font(.allo(.footnote, .bold))
+                            .foregroundStyle(Color.white.opacity(0.6))
+                            .contentTransition(.numericText())
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer(minLength: 0)
+                OwlMark(size: 70, happy: versionTaps > 0 || streak > 1, bodyColor: StickerTone.yellow.fill,
+                        eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
+                        bellyColor: Color(hex: 0xFFF4A8), celebrate: secret)
+                    .rotationEffect(.degrees(8))
+                    .overlay { SparkleBurst(trigger: secret, radius: CGSize(width: 110, height: 90), count: 14) }
+            }
+            HStack(spacing: 8) {
+                TiltPill(text: String(localized: "\(done) tasks done"), tone: .yellow, tilt: -3, size: 12)
+                if streak > 1 {
+                    TiltPill(text: String(localized: "🔥 \(streak)-day streak"), tone: .mint, tilt: 3, size: 12)
+                }
+                TiltPill(text: String(localized: "\(allRoutines.count) rituals"), tone: .pink, tilt: -2, size: 12)
+            }
+        }
+        .padding(20)
+        .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 30, style: .continuous))
+        .overlay(alignment: .topLeading) {
+            SparkleDot(color: StickerTone.pink.fill, size: 13).padding(.leading, 210).padding(.top, 18)
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: versionTaps)
     }
 
     // MARK: Plus
