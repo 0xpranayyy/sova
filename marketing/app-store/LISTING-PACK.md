@@ -84,45 +84,54 @@ Sova is a to-do list, habit tracker and goal planner in one simple app for iPhon
 JUST TYPE IT
 Write the way you talk: "Call Mom tomorrow 6pm !!". Sova fills in the day, the time and the priority. Add "every Monday" and it repeats.
 
-ONE SCREEN FOR TODAY
-• Today shows what's due, the rituals you planned and anything overdue
-• Up Next picks the one thing to do right now
-• A progress ring fills as you finish your day
-• Swipe anything you can't do today to tomorrow
-• Tap Undo if you tick, move or delete something by mistake
+YOUR DAY, AT A GLANCE
+• Today shows your day as a timeline: morning, afternoon and evening, with a marker for right now
+• Up Next picks the one thing to do next
+• The owl's ring fills as you finish your day
+• Swipe anything you can't do today to tomorrow, and Undo any slip
 
-HABITS, ON A SCHEDULE
-• Add rituals like "Drink water", "Morning walk" or "Read 20 pages"
-• Choose morning, afternoon or evening, and the days of the week
-• Keep your streak going. Rest days don't break it.
+EVERY TASK HAS A HOME
+• The Tasks tab holds everything: overdue, today, tomorrow, the days ahead and someday
+• Tap a day in the week strip to see just that day
+• Move every overdue task to today with one tap
+• Add a checklist inside any task
+• Search tasks, rituals and goals in one place
+
+HABITS THAT STICK
+• Rituals like "Drink water", "Morning walk" or "Read 20 pages"
+• Count them up: 8 glasses of water, 3 sets
+• Choose morning, afternoon or evening and the days of the week
+• A reminder at your time, with a Done button right on it
+• Streaks that rest days don't break, with a cheer at milestones
 
 BIG GOALS, SMALL STEPS
 • Give a goal a deadline and break it into steps
-• Each step you tick moves the percentage
+• Suggest steps: Apple Intelligence plans the first steps for you, privately on your iPhone
 • Link tasks to the goal they serve
 
-ALERTS AND REPEATS
+ALERTS THAT DO THINGS
 • A notification at a task's time, or a few minutes before
+• Finish it, snooze it an hour or move it to tomorrow, right from the alert
 • Repeat daily, on weekdays, weekly, monthly or yearly
-• Optional morning and evening reminders to plan and look back
 
 WIDGETS AND SIRI
-• Today widget with your progress ring
-• Rituals widget: tick habits off right from the Home Screen
-• Lock Screen widgets for your progress and what's next
+• My Day widget: tick tasks and rituals off from the Home Screen
+• Today and Rituals widgets, plus Lock Screen widgets
+• A New Task button for Control Center and the Lock Screen
 • "Hey Siri, add a task in Sova", plus actions in Shortcuts
 
 INSIGHTS
-• Your week at a glance and a 17-week activity calendar
-• See which rituals you keep most often
+• Your week, month or quarter at a glance
+• Your power day and best time of day
+• A heatmap of every day, and badges to collect
 
 DESIGNED WITH CARE
 • A friendly owl that celebrates when you finish your day
-• Soft sounds and haptics when you check things off, both optional
+• Soft sounds and haptics, both optional
 • Light and dark mode, with a theme color you choose
 
 PRIVATE
-No account and no sign-up. No tracking, no ads. Your data stays on your iPhone, or in your own iCloud if you turn on sync.
+No account and no sign-up. No tracking, no ads. Your data stays on your iPhone, or in your own iCloud if you turn on sync. Export a backup anytime.
 
 SOVA PLUS
 Sova is free with unlimited tasks, 5 rituals and 3 active goals. Sova Plus adds:
@@ -184,10 +193,11 @@ Sova needs no account or sign-in. Everything works offline on the device.
 Free plan: unlimited tasks, up to 5 rituals and 3 active goals.
 Sova Plus (auto-renewable subscription: monthly, or yearly with a 1-week free trial; or a one-time lifetime purchase) unlocks unlimited rituals and goals, iCloud sync and an alternate app icon.
 
-To see the paywall: open Settings (gear icon on the Today tab) and tap Sova Plus, or try to add a 4th ritual on the Rituals tab. Restore Purchases is in Settings → Help and on the paywall. The Privacy Policy and Terms of Use (Apple standard EULA) are linked on the paywall and in the description.
+To see the paywall: open Settings (gear icon on the Today tab) and tap Sova Plus, or add a 6th ritual on the Rituals tab. Restore Purchases is in Settings > Help and on the paywall. The Privacy Policy and Terms of Use (Apple standard EULA) are linked on the paywall and in the description.
 
-Widgets: Today, Rituals (interactive) and Lock Screen widgets.
+Widgets: Today, My Day (interactive), Rituals (interactive) and Lock Screen widgets, plus a Control Center button.
 Siri: "Add a task in Sova".
+"Suggest steps" in the New Goal screen uses on-device Apple Intelligence (Foundation Models) and appears only on supported devices.
 ```
 
 ### Version Release
