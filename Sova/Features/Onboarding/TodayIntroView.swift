@@ -27,7 +27,7 @@ struct TodayIntroView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 14)
 
-                DayStage(greeting: TodayView.greeting(for: userName),
+                DayHeaderCard(greeting: TodayView.greeting(for: userName),
                          done: 0, total: todays.count, streak: 0)
                     .frame(width: inner)
 

@@ -11,7 +11,8 @@ struct TodayView: View {
     @Environment(WaveDirector.self) private var waves
     @Environment(\.requestReview) private var requestReview
     @State private var showSettings = false
-    @State private var showDone = false
+    /// Finished parts of the day you've unfolded again.
+    @State private var expanded: Set<DaySection> = []
 
     private let captureTip = QuickCaptureTip()
     private let swipeTip = SwipeTip()
@@ -70,11 +71,10 @@ struct TodayView: View {
         let todaysRituals = routines.filter { $0.isScheduled(on: .now) }
         let ritualsDone = todaysRituals.filter { $0.isDone(on: .now) }.count
         let taskEntries = entries.filter { !$0.isRoutine }
-        let openTasks = taskEntries.filter { !$0.isDone && $0.id != upNext?.id }
-        let overdue = openTasks.filter { $0.section == .overdue }
-        let later = openTasks.filter { $0.section != .overdue }
         let doneTasks = taskEntries.filter(\.isDone)
         let streak = routines.map(\.streak).max() ?? 0
+        let timeline = Self.timelineItems(taskEntries, expanded: expanded)
+        let openTaskCount = taskEntries.filter { !$0.isDone }.count
         let upcoming = tasks.filter { !$0.isDone && ($0.dueDate.map { $0 >= Date.now.endOfDay } ?? false) }
             .sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }
 
@@ -89,7 +89,7 @@ struct TodayView: View {
                 }
                 .cardRow(top: 4, bottom: 14)
 
-                DayStage(greeting: greeting, done: done.count, total: entries.count, streak: streak) { owl in
+                DayHeaderCard(greeting: greeting, done: done.count, total: entries.count, streak: streak) { owl in
                     dayComplete(from: owl, summary: DaySummary(tasks: doneTasks.count, rituals: ritualsDone,
                                                                streak: streak))
                 }
@@ -107,7 +107,7 @@ struct TodayView: View {
 
                 if let upNext {
                     UpNextCard(entry: upNext) { open(upNext) }
-                        .cardRow(top: 44, bottom: 6)
+                        .cardRow(top: 6, bottom: 6)
                 }
 
                 if !todaysRituals.isEmpty {
@@ -134,35 +134,28 @@ struct TodayView: View {
                     .listRowSeparator(.hidden)
                 }
 
-                if !overdue.isEmpty {
-                    StickerHeader(title: String(localized: "Overdue"), symbol: "exclamationmark.circle.fill",
-                                  tone: .pink, count: overdue.count, titleColor: .ember)
-                        .cardRow(top: 18, bottom: 10)
-                    ForEach(overdue) { row($0) }
-                }
+                if !timeline.isEmpty {
+                    StickerHeader(title: String(localized: "Your day"), symbol: "clock.fill", tone: .yellow,
+                                  count: openTaskCount)
+                        .cardRow(top: 18, bottom: 2)
 
-                if !later.isEmpty {
-                    StickerHeader(title: String(localized: "Tasks"), symbol: "checklist", tone: .yellow, count: later.count)
-                        .cardRow(top: 18, bottom: 10)
-                    ForEach(later) { row($0) }
-                }
-
-                if !doneTasks.isEmpty {
-                    Button {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { showDone.toggle() }
-                    } label: {
-                        HStack(spacing: 6) {
-                            SectionLabel(String(localized: "Done today"), trailing: "\(doneTasks.count)")
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.heavy))
-                                .foregroundStyle(Color.inkTertiary)
-                                .rotationEffect(.degrees(showDone ? 90 : 0))
+                    ForEach(timeline) { item in
+                        switch item {
+                        case .header(let section, let done, let total):
+                            TimelineSectionHeader(section: section, done: done, total: total)
+                                .cardRow(top: 14, bottom: 6)
+                        case .folded(let section, let count):
+                            FoldedSection(section: section, count: count) {
+                                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { _ = expanded.insert(section) }
+                                Haptics.soft(0.4)
+                            }
+                            .cardRow(top: 10, bottom: 2)
+                        case .now:
+                            NowMarker().cardRow(top: 8, bottom: 8)
+                        case .row(let entry):
+                            timelineRow(entry, isNext: entry.id == upNext?.id)
                         }
-                        .contentShape(.rect)
                     }
-                    .buttonStyle(.plain)
-                    .cardRow(top: 18, bottom: 10)
-                    if showDone { ForEach(doneTasks) { row($0) } }
                 }
 
                 if let first = upcoming.first {
@@ -191,6 +184,59 @@ struct TodayView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func timelineRow(_ entry: TimelineEntry, isNext: Bool) -> some View {
+        let base = TimelineRow(time: entry.dueTime, done: entry.isDone, isNext: isNext) {
+            DayRow(entry: entry, showsTime: false) { open(entry) }
+        }
+        .cardRow(top: 3, bottom: 3)
+        .transition(.opacity.combined(with: .move(edge: .top)))
+        if case .task(let task) = entry.source {
+            base.taskSwipeActions(task)
+        } else {
+            base
+        }
+    }
+
+    /// The day's tasks as a timeline: a header per part of the day, a Now
+    /// marker where you are, and finished past parts folded to one line.
+    static func timelineItems(_ entries: [TimelineEntry], expanded: Set<DaySection>) -> [TimelineItem] {
+        let now = Date.now
+        let current = DaySection.current
+        let present = DaySection.allCases.filter { section in entries.contains { $0.section == section } }
+        let timed: Set<DaySection> = [.morning, .afternoon, .evening]
+        let hasTimed = present.contains { timed.contains($0) }
+        var items: [TimelineItem] = []
+        var placedNow = !hasTimed
+        for section in present {
+            let rows = entries.filter { $0.section == section }
+            if !placedNow && (section == .anytime || (timed.contains(section) && section.rawValue > current.rawValue)) {
+                items.append(.now)
+                placedNow = true
+            }
+            let done = rows.filter(\.isDone).count
+            let finishedPast = done == rows.count && timed.contains(section) && section.rawValue < current.rawValue
+            if finishedPast && !expanded.contains(section) {
+                items.append(.folded(section, rows.count))
+                continue
+            }
+            items.append(.header(section, done, rows.count))
+            for row in rows {
+                if !placedNow && section == current, let time = row.dueTime, time > now {
+                    items.append(.now)
+                    placedNow = true
+                }
+                items.append(.row(row))
+            }
+            if !placedNow && section == current {
+                items.append(.now)
+                placedNow = true
+            }
+        }
+        if !placedNow { items.append(.now) }
+        return items
     }
 
     @ViewBuilder
@@ -353,8 +399,7 @@ struct DayStage: View {
     }
 }
 
-/// The one thing to do next: a yellow block with big buttons, and the owl
-/// perched on top pointing it out.
+/// The one thing to do next: a yellow block with big buttons.
 struct UpNextCard: View {
     let entry: TimelineEntry
     var onOpen: () -> Void
@@ -402,25 +447,6 @@ struct UpNextCard: View {
             .padding(.top, 16)
         }
         .block(tone, cornerRadius: 32)
-        .overlay(alignment: .topTrailing) {
-            HStack(alignment: .top, spacing: 6) {
-                Text("This one's next!")
-                    .font(.allo(size: 14, weight: .heavy, relativeTo: .subheadline))
-                    .tracking(-0.3)
-                    .foregroundStyle(StickerTone.lilac.deep)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(StickerTone.lilac.fill,
-                                in: UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18,
-                                                           bottomTrailingRadius: 6, topTrailingRadius: 18,
-                                                           style: .continuous))
-                    .padding(.top, 14)
-                OwlMark(size: 50, bodyColor: Color(hex: 0x2B1677), eyeColor: StickerTone.yellow.fill)
-                    .rotationEffect(.degrees(6))
-            }
-            .offset(x: -12, y: -58)
-            .allowsHitTesting(false)
-        }
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)
     }
@@ -544,6 +570,7 @@ struct RitualCard: View {
 /// A task as a white card.
 struct DayRow: View {
     let entry: TimelineEntry
+    var showsTime = true
     var onOpen: () -> Void
 
     @Environment(AppRouter.self) private var router
@@ -584,7 +611,7 @@ struct DayRow: View {
                         .foregroundStyle(Color.inkTertiary)
                         .accessibilityLabel(t.repeatRule.label)
                 }
-                if let time = time(t) {
+                if showsTime, let time = time(t) {
                     Text(time)
                         .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline).monospacedDigit())
                         .foregroundStyle(t.isOverdue ? Color.ember : Color.ink)
@@ -643,4 +670,21 @@ enum OwlMorningLines {
     ]
 
     static func random() -> String { all.randomElement() ?? all[0] }
+}
+
+/// One line of Today's timeline.
+enum TimelineItem: Identifiable {
+    case header(DaySection, Int, Int)
+    case folded(DaySection, Int)
+    case row(TimelineEntry)
+    case now
+
+    var id: String {
+        switch self {
+        case .header(let section, _, _): "h\(section.rawValue)"
+        case .folded(let section, _): "f\(section.rawValue)"
+        case .row(let entry): entry.id
+        case .now: "now"
+        }
+    }
 }
