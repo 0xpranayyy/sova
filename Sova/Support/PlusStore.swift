@@ -60,7 +60,7 @@ final class PlusStore {
 
     init() {
         updates = Task { [weak self] in
-            for await result in Transaction.updates {
+            for await result in StoreKit.Transaction.updates {
                 if case .verified(let transaction) = result {
                     await TrialReminder.scheduleIfNeeded(for: transaction)
                     await transaction.finish()
@@ -80,7 +80,7 @@ final class PlusStore {
     func refresh() async {
         var active = false
         var lifetime = false
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreKit.Transaction.currentEntitlements {
             guard case .verified(let transaction) = result,
                   transaction.revocationDate == nil,
                   !transaction.isUpgraded,
@@ -135,7 +135,7 @@ final class PlusStore {
             return true
         default:
             // Cancelled, pending (Ask to Buy) or unverified: nothing unlocks
-            // now; a pending purchase arrives later through Transaction.updates.
+            // now; a pending purchase arrives later through StoreKit.Transaction.updates.
             return false
         }
     }
@@ -199,7 +199,7 @@ final class PlusStore {
 enum TrialReminder {
     static let id = "sova.trial.reminder"
 
-    static func scheduleIfNeeded(for transaction: Transaction) async {
+    static func scheduleIfNeeded(for transaction: StoreKit.Transaction) async {
         guard transaction.offer?.type == .introductory,
               let end = transaction.expirationDate else { return }
         let fire = end.addingTimeInterval(-2 * 86_400)
