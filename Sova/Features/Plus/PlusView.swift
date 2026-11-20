@@ -62,6 +62,8 @@ struct PlusView: View {
             lifetime
             promise
         }
+        // Never wider than the screen, whatever a child asks for.
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, 18)
         .padding(.top, 8)
         .padding(.bottom, 4)
@@ -70,27 +72,9 @@ struct PlusView: View {
     // MARK: Stage
 
     private var stage: some View {
+        // The owl and title set the stage's size; every decoration sits in a
+        // background or overlay, so none of it can widen the page.
         ZStack {
-            StickerTone.indigo.fill
-            RadialGradient(colors: [Color(hex: 0x5B44D6).opacity(0.85), .clear],
-                           center: UnitPoint(x: 0.5, y: 0.32), startRadius: 0, endRadius: 230)
-
-            StarburstShape(points: 18)
-                .fill(Color.white.opacity(0.07))
-                .frame(width: 560, height: 560)
-                .rotationEffect(.degrees(spin ? 360 : 0))
-                .offset(y: -20)
-
-            SparkleDot(color: StickerTone.pink.fill, size: 18)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .padding(22)
-            SparkleDot(color: StickerTone.mint.fill, size: 14)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                .padding(24)
-            SparkleDot(color: StickerTone.yellow.fill, size: 11)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .padding(.top, 70).padding(.trailing, 40)
-
             VStack(spacing: 10) {
                 ZStack(alignment: .top) {
                     // A soft halo behind the owl.
@@ -142,22 +126,50 @@ struct PlusView: View {
                     .padding(.horizontal, 26)
             }
             .padding(.vertical, 24)
-
-            // Floating stickers, like the website hero.
-            TiltPill(text: "∞ rituals", tone: .mint, tilt: -9, size: 13)
-                .offset(y: float ? -3 : 3)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .padding(.top, 74).padding(.leading, 18)
-            TiltPill(text: "☁️ iCloud", tone: .cyan, tilt: 8, size: 13)
-                .offset(y: float ? 3 : -3)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .padding(.top, 112).padding(.trailing, 14)
-            TiltPill(text: "∞ goals", tone: .pink, tilt: 6, size: 12)
-                .offset(y: float ? -2 : 2)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                .padding(.bottom, 40).padding(.leading, 22)
         }
         .frame(maxWidth: .infinity)
+        .background {
+            ZStack {
+                StickerTone.indigo.fill
+                RadialGradient(colors: [Color(hex: 0x5B44D6).opacity(0.85), .clear],
+                               center: UnitPoint(x: 0.5, y: 0.32), startRadius: 0, endRadius: 230)
+                GeometryReader { proxy in
+                    let side = max(proxy.size.width, proxy.size.height) * 1.6
+                    StarburstShape(points: 18)
+                        .fill(Color.white.opacity(0.07))
+                        .frame(width: side, height: side)
+                        .rotationEffect(.degrees(spin ? 360 : 0))
+                        .position(x: proxy.size.width / 2, y: proxy.size.height / 2 - 20)
+                }
+                SparkleDot(color: StickerTone.pink.fill, size: 18)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(22)
+                SparkleDot(color: StickerTone.mint.fill, size: 14)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .padding(24)
+                SparkleDot(color: StickerTone.yellow.fill, size: 11)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(.top, 70).padding(.trailing, 40)
+            }
+        }
+        .overlay {
+            ZStack {
+                // Floating stickers, like the website hero.
+                TiltPill(text: "∞ rituals", tone: .mint, tilt: -9, size: 13)
+                    .offset(y: float ? -3 : 3)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.top, 74).padding(.leading, 18)
+                TiltPill(text: "☁️ iCloud", tone: .cyan, tilt: 8, size: 13)
+                    .offset(y: float ? 3 : -3)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(.top, 112).padding(.trailing, 14)
+                TiltPill(text: "∞ goals", tone: .pink, tilt: 6, size: 12)
+                    .offset(y: float ? -2 : 2)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                    .padding(.bottom, 40).padding(.leading, 22)
+            }
+            .allowsHitTesting(false)
+        }
         .clipShape(.rect(cornerRadius: 34, style: .continuous))
         .shadow(color: StickerTone.indigo.shadow, radius: 20, y: 12)
         .onAppear {
