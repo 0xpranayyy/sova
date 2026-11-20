@@ -266,15 +266,15 @@ private struct AddTaskButton: View {
     @Environment(WatchStore.self) private var store
 
     var body: some View {
-        TextFieldLink(prompt: Text("Call Mom tomorrow 6pm"), onSubmit: { text in
-            store.addTask(text)
-        }) {
+        TextFieldLink(prompt: Text("Call Mom tomorrow 6pm")) {
             Label("New task", systemImage: "plus")
                 .font(.sova(15, .heavy, relativeTo: .body))
                 .foregroundStyle(WatchTone.indigo.deep)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .background(WatchPalette.yellow.opacity(0.18), in: .capsule)
+        } onSubmit: { text in
+            store.addTask(text)
         }
         .buttonStyle(.plain)
     }
