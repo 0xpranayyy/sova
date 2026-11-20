@@ -38,7 +38,7 @@ Products don't load at all, not even in TestFlight, until **all of this** is don
 
 **5. First submission:** on the **1.0** version page, under **In-App Purchases and Subscriptions**, add all three, so they're reviewed together with the app. Apple requires this for an app's first purchases.
 
-The **review screenshot** is the same image for all three: the paywall from your TestFlight build (Settings → Sova Plus).
+The **review screenshot** is the same image for all three: the top of the paywall from your TestFlight build (Settings → Sova Plus), showing the three plans and the button.
 
 ---
 
@@ -58,17 +58,19 @@ Run each test and tick it off:
 | 2 | Add a 4th active goal | The paywall opens (goals) |
 | 3 | Settings → turn on iCloud sync | The paywall opens (sync) |
 | 4 | Settings → App icon → Sunny | The paywall opens (icons) |
-| 5 | Paywall, first time | The "How your free week works" timeline shows. The yearly plan shows **1 week free** |
-| 6 | Buy **Yearly** | Celebration, paywall closes; Settings shows "Active". You can add a 6th ritual and turn on sync |
+| 5 | Paywall, first time | Without scrolling: the three plans with prices. **Yearly** is selected, with **1 week free** and **SAVE 47%**; the button says **Start my free week** |
+| 6 | Tap **Start my free week** | Apple's sheet shows the free week. Celebration, paywall closes; Settings shows "Active". You can add a 6th ritual and turn on sync |
 | 7 | Wait for the trial to end at the fast rate | Still Plus; the yearly plan renews |
 | 8 | Manage Transactions → **Refund** the yearly purchase, then return to the app | Plus turns off, the Sunny icon switches back to Sova, and a 6th ritual is blocked again |
-| 9 | Open the paywall again | **No** free-week timeline (the trial is used up), and the yearly plan shows no free week |
-| 10 | Buy **Monthly** | Plus on |
-| 11 | Buy **Lifetime** (button below the plans) | Plus on; Settings shows **"Lifetime. Thank you!"** and tapping it does nothing |
+| 9 | Open the paywall again | No **1 week free** pill and no timeline (the trial is used up); the button says **Continue · $24.99/year** |
+| 10 | Tap the **Monthly** card, then **Continue · $3.99/month** | Plus on |
+| 11 | Tap the **Lifetime** card, then **Buy once · $49.99** | Plus on; Settings shows **"Lifetime. Thank you!"** and tapping it does nothing |
 | 12 | Delete the app, reinstall, Settings → **Restore purchases** | Plus comes back |
 | 13 | Turn on **Ask to Buy** (Debug → StoreKit → Ask to Buy), buy Monthly | Nothing unlocks yet. Approve it in Manage Transactions, and Plus turns on by itself |
 | 14 | In the `Sova.storekit` file, choose **Editor → Fail Transactions**, then buy | An error, nothing unlocks, the app keeps working |
-| 15 | Paywall: tap **Privacy Policy** and **Terms of Use** | Both open the Sova website pages |
+| 15 | Paywall: scroll to the bottom, tap **Privacy Policy** and **Terms of Use** | Privacy opens the Sova website; Terms opens Apple's standard terms |
+| 16 | Turn on airplane mode, open the paywall | "Couldn't reach the App Store" with **Try again**; turn the network back on and tap it, and the plans load |
+| 17 | Tap **Restore** at the top with no purchase | A "Nothing to restore" message |
 
 ---
 
