@@ -37,6 +37,7 @@ struct MainTabView: View {
     @State private var today = Date.now.startOfDay
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
     @AppStorage("userName") private var userName = ""
+    @Environment(PlusStore.self) private var plus
 
     private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
 
@@ -80,7 +81,10 @@ struct MainTabView: View {
         .onChange(of: scenePhase, initial: true) { _, phase in
             // Leaving the app: make the widgets and the badge match what just changed.
             if phase == .background { SovaRefresh.changed(context) }
-            if phase == .active { runPendingAction() }
+            if phase == .active {
+                runPendingAction()
+                Task { await plus.refresh() }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sovaPendingAction)) { _ in runPendingAction() }
         .sovaFeedback(.selection, trigger: router.tab)
@@ -183,6 +187,7 @@ struct ToastBar: View {
 #Preview("App") {
     MainTabView()
         .environment(WaveDirector())
+        .environment(PlusStore())
         .modelContainer(for: [TaskItem.self, Goal.self, Milestone.self, Routine.self], inMemory: true)
 }
 

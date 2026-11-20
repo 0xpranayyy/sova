@@ -14,6 +14,9 @@ struct PlusView: View {
     @State private var celebrating = false
     @State private var spin = false
     @State private var float = false
+    /// Only promise the free week to someone who can still get it.
+    @State private var trialEligible = false
+    @Environment(\.purchase) private var purchase
 
     var body: some View {
         SubscriptionStoreView(productIDs: PlusStore.subscriptionIDs) {
@@ -34,6 +37,9 @@ struct PlusView: View {
                 celebrating = true
                 if case .verified(let transaction) = verification {
                     await TrialReminder.scheduleIfNeeded(for: transaction)
+                    // With a custom completion handler, finishing the
+                    // transaction is ours to do.
+                    await transaction.finish()
                 }
                 await store.refresh()
                 Haptics.celebrate()
@@ -44,6 +50,7 @@ struct PlusView: View {
         }
         // Restoring an earlier purchase: close right away.
         .onChange(of: store.isPlus) { _, plus in if plus && !celebrating { dismiss() } }
+        .task { trialEligible = await store.isEligibleForTrial() }
     }
 
     private var marketing: some View {
@@ -51,7 +58,7 @@ struct PlusView: View {
             stage
             perks
             comparison
-            timeline
+            if trialEligible { timeline }
             lifetime
             promise
         }
@@ -327,7 +334,7 @@ struct PlusView: View {
             Button {
                 Task {
                     celebrating = true
-                    if await store.buyLifetime() {
+                    if await store.buyLifetime(using: purchase) {
                         Haptics.celebrate()
                         cheers += 1
                         try? await Task.sleep(for: .milliseconds(1100))

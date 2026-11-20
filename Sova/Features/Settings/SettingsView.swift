@@ -320,6 +320,7 @@ struct SettingsView: View {
 
     private var plusRow: some View {
         Button {
+            if store.isLifetime { return }
             if store.isPlus { showManage = true } else { plusReason = .general }
         } label: {
             HStack(spacing: 14) {
@@ -333,7 +334,8 @@ struct SettingsView: View {
                         Text("Sova").font(.display(.title3)).foregroundStyle(Color.ink)
                         TiltPill(text: "Plus", tone: .yellow, tilt: -5, size: 12)
                     }
-                    Text(store.isPlus ? String(localized: "Active. Thank you! 💛")
+                    Text(store.isLifetime ? String(localized: "Lifetime. Thank you! 💛")
+                         : store.isPlus ? String(localized: "Active. Tap to manage. 💛")
                                       : String(localized: "Unlimited rituals and goals, iCloud sync, app icons"))
                         .font(.allo(.footnote, .medium))
                         .foregroundStyle(Color.inkSecondary)

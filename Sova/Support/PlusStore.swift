@@ -1,6 +1,7 @@
 import StoreKit
 import Observation
 import UserNotifications
+import UIKit
 
 /// Why the paywall opened, so the owl can say something that fits.
 enum PlusReason: String, Hashable {
@@ -44,6 +45,8 @@ final class PlusStore {
     static let allIDs: Set<String> = [monthly, yearly, lifetime]
 
     private(set) var isPlus = SovaSettings.isPlus
+    /// Plus bought once, for good. There's no subscription to manage.
+    private(set) var isLifetime = false
     private(set) var lifetimeProduct: Product?
     private(set) var isPurchasing = false
     private var updates: Task<Void, Never>?
@@ -64,36 +67,60 @@ final class PlusStore {
         }
     }
 
-    /// Plus is active if any current entitlement is one of ours.
+    /// Plus is active if any current entitlement is one of ours: a live
+    /// subscription (including a free trial or billing grace period) or the
+    /// lifetime purchase, and not refunded.
     func refresh() async {
         var active = false
+        var lifetime = false
         for await result in Transaction.currentEntitlements {
-            if case .verified(let transaction) = result,
-               transaction.revocationDate == nil,
-               Self.allIDs.contains(transaction.productID) {
-                active = true
-            }
+            guard case .verified(let transaction) = result,
+                  transaction.revocationDate == nil,
+                  !transaction.isUpgraded,
+                  Self.allIDs.contains(transaction.productID) else { continue }
+            active = true
+            if transaction.productID == Self.lifetime { lifetime = true }
         }
         isPlus = active
+        isLifetime = lifetime
         SovaSettings.isPlus = active
+        // Plus ended (expired or refunded): put the regular icon back.
+        if !active, UIApplication.shared.supportsAlternateIcons, UIApplication.shared.alternateIconName != nil {
+            try? await UIApplication.shared.setAlternateIconName(nil)
+        }
+    }
+
+    /// Whether the yearly plan would start with the free week for this
+    /// Apple Account. False once someone has used a trial in this group.
+    func isEligibleForTrial() async -> Bool {
+        guard let product = try? await Product.products(for: [Self.yearly]).first,
+              let subscription = product.subscription,
+              subscription.introductoryOffer != nil else { return false }
+        return await subscription.isEligibleForIntroOffer
     }
 
     func loadProducts() async {
         lifetimeProduct = try? await Product.products(for: [Self.lifetime]).first
     }
 
+    /// Buys lifetime Plus through SwiftUI's purchase action, which shows
+    /// the App Store sheet in the right window.
     @discardableResult
-    func buyLifetime() async -> Bool {
+    func buyLifetime(using purchase: PurchaseAction) async -> Bool {
         guard let product = lifetimeProduct else { return false }
         isPurchasing = true
         defer { isPurchasing = false }
-        guard let result = try? await product.purchase() else { return false }
-        if case .success(.verified(let transaction)) = result {
+        guard let result = try? await purchase(product) else { return false }
+        switch result {
+        case .success(.verified(let transaction)):
             await transaction.finish()
             await refresh()
             return true
+        default:
+            // Cancelled, pending (Ask to Buy) or unverified: nothing unlocks
+            // now; a pending purchase arrives later through Transaction.updates.
+            return false
         }
-        return false
     }
 
     func restore() async {
