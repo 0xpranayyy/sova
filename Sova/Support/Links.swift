@@ -7,7 +7,7 @@ enum Links {
     static let terms = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
     /// Set this to your support address before submitting. While it's the
     /// placeholder, "Help & feedback" opens the support page instead.
-    static let supportEmail = "support@yourdomain.com"
+    static let supportEmail = "0xpranayy@gmail.com"
     static var hasSupportEmail: Bool { !supportEmail.contains("yourdomain") }
     /// Fill in once App Store Connect gives the app an id (digits only).
     static let appStoreID = ""
