@@ -125,6 +125,12 @@ INSIGHTS
 • Your power day and best time of day
 • A heatmap of every day, and badges to collect
 
+ON YOUR WRIST
+• Apple Watch app: your owl ring, Up Next, rituals and today's tasks. Tap to tick
+• Turn the Digital Crown to count rituals like glasses of water
+• Dictate a task and Sova sets the day and time
+• Complications that fill up as your day gets done
+
 DESIGNED WITH CARE
 • A friendly owl that celebrates when you finish your day
 • Soft sounds and haptics, both optional
@@ -137,7 +143,7 @@ SOVA PLUS
 Sova is free with unlimited tasks, 5 rituals and 3 active goals. Sova Plus adds:
 • Unlimited rituals and goals
 • iCloud sync across your devices
-• Extra app icons
+• 6 extra app icons: Sunny, Night Owl, Shades, Scholar, Party and Royal
 
 Sova Plus is available as a monthly or yearly auto-renewable subscription (the yearly plan starts with a 7-day free trial), or as a one-time lifetime purchase. Payment is charged to your Apple Account when you confirm the purchase. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period, and your account is charged for renewal within 24 hours before the period ends. Manage or cancel anytime in your Apple Account settings. Any unused part of a free trial ends when you buy a subscription.
 
@@ -168,7 +174,7 @@ App Store Connect groups iPhones by display class. Upload to two tabs, in the or
 | **iPhone with Dynamic Island (medium display)**, required | `marketing/app-store/6.3-inch/` | 1206 × 2622 |
 | **iPhone with Dynamic Island (large display)**, recommended | `marketing/app-store/6.9-inch/` | 1320 × 2868 |
 
-Leave iPhone Duo, iPad and Apple Watch empty. `6.7-inch/` (1290 × 2796) also fits the large tab if you ever need it.
+Also fill **iPad 13-inch** from `marketing/app-store/13-inch-iPad/` (2064 × 2752) and **Apple Watch** from `marketing/app-store/apple-watch/` (422 × 514). Leave iPhone Duo empty. `6.7-inch/` (1290 × 2796) also fits the large tab if you ever need it.
 
 **App Preview (optional):** record the six clips in `preview/PREVIEW.md`, then run `preview/make-preview.sh`. (`marketing/Sova-intro.mp4` is a marketing film for social media; App Previews must be footage of the app itself.)
 
@@ -190,12 +196,13 @@ Click **+** and add all three products from section 6, so they're reviewed toget
 Sova needs no account or sign-in. Everything works offline on the device.
 
 Free plan: unlimited tasks, up to 5 rituals and 3 active goals.
-Sova Plus (auto-renewable subscription: monthly, or yearly with a 1-week free trial; or a one-time lifetime purchase) unlocks unlimited rituals and goals, iCloud sync and an alternate app icon.
+Sova Plus (auto-renewable subscription: monthly, or yearly with a 1-week free trial; or a one-time lifetime purchase) unlocks unlimited rituals and goals, iCloud sync and 6 alternate app icons.
 
 To see the paywall: open Settings (gear icon on the Today tab) and tap Sova Plus, or add a 6th ritual on the Rituals tab. Restore Purchases is in Settings > Help and on the paywall. The Privacy Policy and Terms of Use (Apple standard EULA) are linked on the paywall and in the description.
 
 Widgets: Today, My Day (interactive), Rituals (interactive) and Lock Screen widgets, plus a Control Center button.
 Siri: "Add a task in Sova".
+Apple Watch: the Watch app shows today's tasks and rituals from the iPhone app. Open Sova on the paired iPhone once, then open Sova on the Watch.
 "Suggest steps" in the New Goal screen uses on-device Apple Intelligence (Foundation Models) and appears only on supported devices.
 ```
 
@@ -277,7 +284,7 @@ Upload each under the product → **App Store Promotion → Promotional Image**.
 
 ---
 
-## 10. Version 1.1: Apple Watch
+## 10. Apple Watch and new icons (now in 1.0)
 
 **What's New in This Version** (paste into the 1.1 version page):
 
