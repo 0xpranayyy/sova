@@ -125,7 +125,7 @@ struct TodayView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, 16)
+                        .readablePadding(16)
                         .padding(.vertical, 8)
                     }
                     .scrollIndicators(.hidden)
@@ -169,6 +169,7 @@ struct TodayView: View {
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
             .environment(\.defaultMinListRowHeight, 0)
+            .readableMargins()
             .background { CanvasBackground() }
             .toolbarVisibility(.hidden, for: .navigationBar)
             .sheet(isPresented: $showSettings) { SettingsView() }
@@ -261,10 +262,7 @@ struct TodayView: View {
 extension View {
     /// A List row with no chrome and standard side margins.
     func cardRow(top: CGFloat = 0, bottom: CGFloat = 0) -> some View {
-        self
-            .listRowInsets(EdgeInsets(top: top, leading: 16, bottom: bottom, trailing: 16))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
+        readableRow(top: top, bottom: bottom)
     }
 }
 
@@ -435,13 +433,9 @@ struct UpNextCard: View {
                     Button {
                         TaskActions.moveToTomorrow(t, router: router)
                     } label: {
-                        Text("Tomorrow")
-                            .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
-                            .foregroundStyle(tone.deep)
-                            .frame(maxWidth: .infinity, minHeight: 50)
-                            .background(tone.deep.opacity(0.12), in: .capsule)
+                        Label("Tomorrow", systemImage: "arrow.turn.up.right")
                     }
-                    .buttonStyle(.pressable)
+                    .buttonStyle(.tonal(tone))
                 }
             }
             .padding(.top, 16)

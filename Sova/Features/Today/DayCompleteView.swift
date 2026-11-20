@@ -90,6 +90,7 @@ struct DayCompleteView: View {
             .padding(.top, 8)
         }
         .padding(.horizontal, 24)
+        .frame(maxWidth: 520)
         .padding(.bottom, max(waves.insets.bottom, 16) + 8)
     }
 }

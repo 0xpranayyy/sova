@@ -38,6 +38,7 @@ struct MainTabView: View {
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
     @AppStorage("userName") private var userName = ""
     @Environment(PlusStore.self) private var plus
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     private var accent: Color { (SovaTheme(rawValue: themeRaw) ?? .ember).accent.color }
 
@@ -62,6 +63,8 @@ struct MainTabView: View {
                 Color.canvas
             }
         }
+        // iPad: a tab bar that can become a sidebar. iPhone: the floating bar.
+        .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
             today = Date.now.startOfDay
@@ -87,7 +90,6 @@ struct MainTabView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sovaPendingAction)) { _ in runPendingAction() }
-        .sovaFeedback(.selection, trigger: router.tab)
         .onChange(of: router.tab) { previous, current in
             guard current == .create else { return }
             router.tab = previous
@@ -95,8 +97,10 @@ struct MainTabView: View {
         }
         .overlay(alignment: .bottom) {
             ToastBar()
+                .frame(maxWidth: 520)
                 .padding(.horizontal, 16)
-                .padding(.bottom, 96)
+                // On iPad the tab bar sits at the top, so the toast can sit low.
+                .padding(.bottom, sizeClass == .regular ? 28 : 96)
         }
         .sheet(item: $router.sheet) { sheet in
             editor(for: sheet)

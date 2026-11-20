@@ -46,7 +46,9 @@ extension Glass {
 
 // MARK: - Buttons
 
-/// Big, pretty buttons: tall rounded blocks of one tone with heavy text.
+/// The main action on a screen: a tall capsule in one tone, heavy text, a
+/// soft sheen and a thin darker lip it sinks onto when pressed. One per
+/// screen; everything else is quiet, tonal or glass.
 struct BigButtonStyle: ButtonStyle {
     var tone: StickerTone = .indigo
     var height: CGFloat = 60
@@ -55,7 +57,7 @@ struct BigButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         let pressed = configuration.isPressed
-        let lip: CGFloat = 4
+        let lip: CGFloat = 2.5
         configuration.label
             .font(.allo(size: height >= 58 ? 18 : 16, weight: .heavy, relativeTo: .headline))
             .tracking(-0.3)
@@ -64,26 +66,27 @@ struct BigButtonStyle: ButtonStyle {
             .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: height)
             .background {
                 Capsule().fill(tone.fill)
-                Capsule().fill(LinearGradient(colors: [Color.white.opacity(0.28), .clear],
+                // Light from above, and a crisp highlight on the top edge.
+                Capsule().fill(LinearGradient(colors: [Color.white.opacity(0.2), .clear],
                                               startPoint: .top, endPoint: .center))
-                    .padding(2)
+                Capsule().strokeBorder(LinearGradient(colors: [Color.white.opacity(0.45), .clear],
+                                                      startPoint: .top, endPoint: .center), lineWidth: 1)
             }
             .offset(y: pressed ? lip : 0)
-            // The lip underneath: a darker shade the button sinks onto.
             .background {
                 Capsule().fill(tone.lip)
                     .offset(y: lip)
-                    .shadow(color: tone.shadow, radius: pressed ? 4 : 10, y: pressed ? 3 : 7)
+                    .shadow(color: tone.shadow.opacity(pressed ? 0.5 : 0.8), radius: pressed ? 3 : 8, y: pressed ? 2 : 5)
             }
             .padding(.bottom, lip)
             .opacity(isEnabled ? 1 : 0.4)
-            .scaleEffect(pressed ? 0.985 : 1)
-            .animation(.spring(response: 0.22, dampingFraction: 0.6), value: configuration.isPressed)
-            .sovaFeedback(.impact(flexibility: .soft, intensity: 0.55), trigger: configuration.isPressed) { _, pressed in pressed }
+            .contentShape(.hoverEffect, Capsule())
+            .hoverEffect(.highlight)
+            .animation(.spring(response: 0.2, dampingFraction: 0.7), value: pressed)
     }
 }
 
-/// The quiet partner of a big button: white with a soft ring.
+/// The quiet partner of a big button: a white capsule with a clear ring.
 struct QuietButtonStyle: ButtonStyle {
     var height: CGFloat = 50
 
@@ -93,21 +96,46 @@ struct QuietButtonStyle: ButtonStyle {
             .foregroundStyle(Color.ink)
             .padding(.horizontal, 20)
             .frame(minHeight: height)
-            .background(Color.surface, in: .capsule)
-            .overlay(Capsule().strokeBorder(Color.hairline, lineWidth: 1.5))
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
-            .animation(.spring(response: 0.22, dampingFraction: 0.6), value: configuration.isPressed)
-            .sovaFeedback(.impact(flexibility: .soft, intensity: 0.4), trigger: configuration.isPressed) { _, pressed in pressed }
+            .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.06), radius: 6, y: 3)), in: .capsule)
+            .overlay(Capsule().strokeBorder(Color.ink.opacity(0.12), lineWidth: 1.5))
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .contentShape(.hoverEffect, Capsule())
+            .hoverEffect(.highlight)
+            .animation(.spring(response: 0.22, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 
-/// Any custom tappable thing: a small, springy press.
+/// A second action that sits on a colored block: a frosted white capsule
+/// with the block's deep ink, so it reads as a button without competing
+/// with the main one.
+struct TonalButtonStyle: ButtonStyle {
+    var tone: StickerTone
+    var height: CGFloat = 50
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
+            .foregroundStyle(tone.deep)
+            .padding(.horizontal, 18)
+            .frame(maxWidth: .infinity, minHeight: height)
+            .background(Color.white.opacity(configuration.isPressed ? 0.5 : 0.62), in: .capsule)
+            .overlay(Capsule().strokeBorder(Color.white.opacity(0.9), lineWidth: 1))
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .contentShape(.hoverEffect, Capsule())
+            .hoverEffect(.highlight)
+            .animation(.spring(response: 0.22, dampingFraction: 0.7), value: configuration.isPressed)
+    }
+}
+
+/// Any custom tappable thing: a small, springy press, and a lift under an
+/// iPad pointer.
 struct PressableStyle: ButtonStyle {
     var scale: CGFloat = 0.97
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? scale : 1)
+            .hoverEffect(.lift)
             .animation(.spring(response: 0.25, dampingFraction: 0.65), value: configuration.isPressed)
     }
 }
@@ -134,6 +162,12 @@ extension ButtonStyle where Self == BigButtonStyle {
 
 extension ButtonStyle where Self == QuietButtonStyle {
     static var quiet: QuietButtonStyle { QuietButtonStyle() }
+}
+
+extension ButtonStyle where Self == TonalButtonStyle {
+    static func tonal(_ tone: StickerTone, height: CGFloat = 50) -> TonalButtonStyle {
+        TonalButtonStyle(tone: tone, height: height)
+    }
 }
 
 extension ButtonStyle where Self == PressableStyle {

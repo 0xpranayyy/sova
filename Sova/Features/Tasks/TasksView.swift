@@ -56,9 +56,7 @@ struct TasksView: View {
                         .cardRow(bottom: 12)
 
                     FilterChips(selection: $filter, counts: TaskFilter.counts(in: open))
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 4, trailing: 0))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
+                        .readableRow(bottom: 4, side: 0)
 
                     if groups.isEmpty {
                         NothingHere(isFiltered: filter != .all) {
@@ -94,6 +92,7 @@ struct TasksView: View {
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
             .environment(\.defaultMinListRowHeight, 0)
+            .readableMargins()
             .background { CanvasBackground() }
             .toolbarVisibility(.hidden, for: .navigationBar)
             .animation(.spring(response: 0.45, dampingFraction: 0.86), value: focusDay)

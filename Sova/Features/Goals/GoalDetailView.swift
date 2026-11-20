@@ -29,6 +29,7 @@ struct GoalDetailView: View {
                     }
                 }
             }
+            .readableColumn()
             .padding(.horizontal, 20)
             .padding(.bottom, 40)
         }

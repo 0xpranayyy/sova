@@ -17,7 +17,9 @@ struct TodayIntroView: View {
         let todays = routines.filter { $0.isScheduled(on: .now) }
         GeometryReader { geo in
             let width = geo.size.width
-            let inner = max(0, width - 32)
+            // Same column as the real Today, so the swap is invisible on iPad too.
+            let side = 16 + Layout.margin(for: width)
+            let inner = max(0, width - 2 * side)
             VStack(alignment: .leading, spacing: 0) {
                 ScreenTitle(title: String(localized: "Today"),
                             subtitle: Date.now.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())) {
@@ -47,7 +49,7 @@ struct TodayIntroView: View {
                 }
             }
             .padding(.top, waves.insets.top)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, side)
             .frame(width: width, height: geo.size.height, alignment: .topLeading)
             .clipped()
         }

@@ -212,6 +212,7 @@ struct PillarsStep: View {
                 }
                 .padding(.top, 26)
             }
+            .readableColumn()
             .padding(.horizontal, 24)
             .padding(.top, 8)
             .padding(.bottom, 24)
@@ -426,6 +427,7 @@ struct RitualsStep: View {
                         }
                     }
             }
+            .readableColumn()
             .padding(.horizontal, 20)
             .padding(.top, 8)
             .padding(.bottom, 28)
@@ -547,6 +549,7 @@ struct GoalStep: View {
                 .padding(.top, 20)
                 .reveal(3)
             }
+            .readableColumn()
             .padding(.horizontal, 20)
             .padding(.top, 8)
             .padding(.bottom, 24)
@@ -627,6 +630,7 @@ struct RhythmStep: View {
                 .padding(.top, 22)
                 .reveal(2)
             }
+            .readableColumn()
             .padding(.horizontal, 20)
             .padding(.top, 8)
             .padding(.bottom, 24)
@@ -723,6 +727,7 @@ struct ThemeStep: View {
                     .padding(.top, 22)
                     .reveal(3)
             }
+            .readableColumn()
             .padding(.horizontal, 24)
             .padding(.top, 8)
             .padding(.bottom, 24)

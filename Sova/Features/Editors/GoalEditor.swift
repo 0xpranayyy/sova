@@ -144,6 +144,7 @@ struct GoalEditor: View {
                         ToneSymbolGrid(selection: $symbol, tone: tone, symbols: SymbolPicker.goalSymbols)
                     }
                 }
+                .readableColumn()
                 .padding(.horizontal, 16)
                 .padding(.top, 4)
                 .padding(.bottom, 16)

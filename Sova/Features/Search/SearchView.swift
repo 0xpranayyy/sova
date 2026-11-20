@@ -94,6 +94,7 @@ struct SearchView: View {
                         }
                     }
                 }
+                .readableColumn()
                 .padding(.horizontal, 16)
                 .padding(.top, 4)
                 .padding(.bottom, 40)

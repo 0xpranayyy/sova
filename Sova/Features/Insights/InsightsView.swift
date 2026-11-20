@@ -90,6 +90,7 @@ struct InsightsView: View {
                                                                 : String(localized: "🔒 \(badge.title): \(badge.howTo)")))
                     }
                 }
+                .readableColumn()
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, 100)

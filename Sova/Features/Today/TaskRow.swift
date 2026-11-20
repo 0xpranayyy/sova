@@ -131,9 +131,6 @@ extension View {
 
     /// A row with no chrome, for timeline rows, headings and cards in a List.
     func bareListRow(top: CGFloat = 0, bottom: CGFloat = 0) -> some View {
-        self
-            .listRowInsets(EdgeInsets(top: top, leading: 16, bottom: bottom, trailing: 16))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
+        readableRow(top: top, bottom: bottom)
     }
 }

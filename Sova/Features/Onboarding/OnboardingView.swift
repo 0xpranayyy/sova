@@ -98,6 +98,9 @@ struct OnboardingView: View {
 
                     bottomBar
                 }
+                // On iPad the steps stay a comfortable column in the middle,
+                // while the glow fills the whole screen.
+                .readableColumn(620)
             }
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
