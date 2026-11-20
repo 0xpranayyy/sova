@@ -273,3 +273,24 @@ Upload each under the product → **App Store Promotion → Promotional Image**.
 - [ ] Replace `SUPPORT_EMAIL` in `docs/support.html`, and `supportEmail` in `Sova/Support/Links.swift`.
 - [ ] If iCloud sync stays in 1.0: deploy the CloudKit schema to Production in the CloudKit Console.
 - [ ] Test the build in TestFlight on your iPhone. Buy Plus with a Sandbox account (Settings → Developer → Sandbox Apple Account) and check that restore works.
+
+
+---
+
+## 10. Version 1.1: Apple Watch
+
+**What's New in This Version** (paste into the 1.1 version page):
+
+```
+Sova is on your wrist now. 🦉
+
+• A Watch app: your owl ring, what's next, rituals and today's tasks. Tap to tick.
+• Turn the Digital Crown to count rituals like glasses of water.
+• Dictate a task ("Call Mom tomorrow 6pm") and Sova sets the day and time.
+• Complications: an owl ring that fills as your day gets done, and Up Next on your watch face.
+• Finish everything and the owl celebrates with you, on your wrist too.
+```
+
+**Apple Watch screenshots:** `marketing/app-store/apple-watch/` (422 × 514, Apple Watch Ultra). Upload under 1.1 → App Previews and Screenshots → Apple Watch.
+
+**Review notes, add:** "The Apple Watch app shows today's tasks and rituals from the iPhone app. Open Sova on the paired iPhone once, then open Sova on the Watch."

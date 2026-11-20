@@ -209,7 +209,8 @@ Reduce Motion everywhere, VoiceOver labels on checks and cards, light and dark a
 ### Requirements
 
 - Xcode 26 or later, with the **Metal Toolchain** component (Xcode → Settings → Components)
-- iOS 26 or later
+- iPhone and iPad with iOS 26 or later
+- Apple Watch with watchOS 26 or later (optional, from version 1.1)
 
 ### Run
 
