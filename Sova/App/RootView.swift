@@ -63,8 +63,10 @@ struct MainTabView: View {
                 Color.canvas
             }
         }
-        // iPad: a tab bar that can become a sidebar. iPhone: the floating bar.
-        .tabViewStyle(.sidebarAdaptable)
+        // The default style: on iPhone, five tabs plus New as its own round +
+        // button (the search role); on iPad, the tab bar at the top. (The
+        // sidebar-adaptable style made New a sixth tab on iPhone, which
+        // pushed Rituals and Insights into a "More" list.)
         .tabBarMinimizeBehavior(.onScrollDown)
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
             today = Date.now.startOfDay
