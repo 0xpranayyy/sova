@@ -68,6 +68,7 @@ struct MainTabView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
             today = Date.now.startOfDay
+            WatchLink.shared.push()
         }
         .onChange(of: userName, initial: true) { _, name in
             // The widgets greet you by name too.
@@ -86,6 +87,7 @@ struct MainTabView: View {
             if phase == .background { SovaRefresh.changed(context) }
             if phase == .active {
                 runPendingAction()
+                WatchLink.shared.push()
                 Task { await plus.refresh() }
             }
         }

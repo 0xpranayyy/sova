@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         UNUserNotificationCenter.current().delegate = self
         NotificationActions.register()
         QuickActions.install()
+        WatchLink.shared.start()
         return true
     }
 

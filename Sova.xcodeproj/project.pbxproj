@@ -9,11 +9,15 @@
 /* Begin PBXFileReference section */
 		5A0000000000000000000001 /* Sova.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sova.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A0000000000000000000011 /* SovaWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SovaWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A0000000000000000000030 /* SovaWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SovaWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A0000000000000000000031 /* SovaWatchWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SovaWatchWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXBuildFile section */
 		5A000000000000000000001C /* SovaWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A0000000000000000000011 /* SovaWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5A0000000000000000000022 /* DistortionWavesKit in Frameworks */ = {isa = PBXBuildFile; productRef = 5A0000000000000000000021 /* DistortionWavesKit */; };
+		5A0000000000000000000037 /* SovaWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 5A0000000000000000000030 /* SovaWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5A0000000000000000000038 /* SovaWatchWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A0000000000000000000031 /* SovaWatchWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,6 +27,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 5A0000000000000000000014;
 			remoteInfo = SovaWidgetsExtension;
+		};
+		5A000000000000000000003B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5A0000000000000000000009 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A0000000000000000000040;
+			remoteInfo = SovaWatch;
+		};
+		5A000000000000000000003E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5A0000000000000000000009 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A0000000000000000000045;
+			remoteInfo = SovaWatchWidgetsExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -38,6 +56,28 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A0000000000000000000039 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				5A0000000000000000000037 /* SovaWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A000000000000000000003A /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5A0000000000000000000038 /* SovaWatchWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -47,6 +87,13 @@
 				Info.plist,
 			);
 			target = 5A0000000000000000000014 /* SovaWidgetsExtension */;
+		};
+		5A0000000000000000000036 /* Exceptions for "SovaWatchWidgets" folder in "SovaWatchWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5A0000000000000000000045 /* SovaWatchWidgetsExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -69,6 +116,29 @@
 			path = SovaWidgets;
 			sourceTree = "<group>";
 		};
+		5A0000000000000000000032 /* SovaWatch */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SovaWatch;
+			sourceTree = "<group>";
+		};
+		5A0000000000000000000033 /* WatchShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = WatchShared;
+			sourceTree = "<group>";
+		};
+		5A0000000000000000000034 /* WatchSync */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = WatchSync;
+			sourceTree = "<group>";
+		};
+		5A0000000000000000000035 /* SovaWatchWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5A0000000000000000000036 /* Exceptions for "SovaWatchWidgets" folder in "SovaWatchWidgetsExtension" target */,
+			);
+			path = SovaWatchWidgets;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +157,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A0000000000000000000042 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A0000000000000000000047 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -96,6 +180,10 @@
 				5A0000000000000000000002 /* Sova */,
 				5A0000000000000000000010 /* Shared */,
 				5A0000000000000000000012 /* SovaWidgets */,
+				5A0000000000000000000032 /* SovaWatch */,
+				5A0000000000000000000035 /* SovaWatchWidgets */,
+				5A0000000000000000000033 /* WatchShared */,
+				5A0000000000000000000034 /* WatchSync */,
 				5A0000000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -105,6 +193,8 @@
 			children = (
 				5A0000000000000000000001 /* Sova.app */,
 				5A0000000000000000000011 /* SovaWidgetsExtension.appex */,
+				5A0000000000000000000030 /* SovaWatch.app */,
+				5A0000000000000000000031 /* SovaWatchWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -120,15 +210,18 @@
 				5A0000000000000000000003 /* Frameworks */,
 				5A0000000000000000000008 /* Resources */,
 				5A000000000000000000001B /* Embed Foundation Extensions */,
+				5A0000000000000000000039 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				5A000000000000000000001E /* PBXTargetDependency */,
+				5A000000000000000000003D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				5A0000000000000000000002 /* Sova */,
 				5A0000000000000000000010 /* Shared */,
+				5A0000000000000000000034 /* WatchSync */,
 			);
 			name = Sova;
 			packageProductDependencies = (
@@ -161,6 +254,56 @@
 			productReference = 5A0000000000000000000011 /* SovaWidgetsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		5A0000000000000000000040 /* SovaWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A000000000000000000004A /* Build configuration list for PBXNativeTarget "SovaWatch" */;
+			buildPhases = (
+				5A0000000000000000000041 /* Sources */,
+				5A0000000000000000000042 /* Frameworks */,
+				5A0000000000000000000043 /* Resources */,
+				5A000000000000000000003A /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5A000000000000000000003F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5A0000000000000000000032 /* SovaWatch */,
+				5A0000000000000000000033 /* WatchShared */,
+				5A0000000000000000000034 /* WatchSync */,
+			);
+			name = SovaWatch;
+			packageProductDependencies = (
+			);
+			productName = SovaWatch;
+			productReference = 5A0000000000000000000030 /* SovaWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5A0000000000000000000045 /* SovaWatchWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A000000000000000000004B /* Build configuration list for PBXNativeTarget "SovaWatchWidgetsExtension" */;
+			buildPhases = (
+				5A0000000000000000000046 /* Sources */,
+				5A0000000000000000000047 /* Frameworks */,
+				5A0000000000000000000048 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5A0000000000000000000035 /* SovaWatchWidgets */,
+				5A0000000000000000000033 /* WatchShared */,
+				5A0000000000000000000034 /* WatchSync */,
+			);
+			name = SovaWatchWidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = SovaWatchWidgetsExtension;
+			productReference = 5A0000000000000000000031 /* SovaWatchWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -175,6 +318,12 @@
 						CreatedOnToolsVersion = 26.0;
 					};
 					5A0000000000000000000014 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					5A0000000000000000000040 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					5A0000000000000000000045 = {
 						CreatedOnToolsVersion = 26.0;
 					};
 				};
@@ -198,6 +347,8 @@
 			targets = (
 				5A0000000000000000000006 /* Sova */,
 				5A0000000000000000000014 /* SovaWidgetsExtension */,
+				5A0000000000000000000040 /* SovaWatch */,
+				5A0000000000000000000045 /* SovaWatchWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -211,6 +362,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		5A0000000000000000000017 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A0000000000000000000043 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A0000000000000000000048 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -234,6 +399,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A0000000000000000000041 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A0000000000000000000046 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -241,6 +420,16 @@
 			isa = PBXTargetDependency;
 			target = 5A0000000000000000000014 /* SovaWidgetsExtension */;
 			targetProxy = 5A000000000000000000001D /* PBXContainerItemProxy */;
+		};
+		5A000000000000000000003D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5A0000000000000000000040 /* SovaWatch */;
+			targetProxy = 5A000000000000000000003B /* PBXContainerItemProxy */;
+		};
+		5A000000000000000000003F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5A0000000000000000000045 /* SovaWatchWidgetsExtension */;
+			targetProxy = 5A000000000000000000003E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -315,7 +504,7 @@
 				CODE_SIGN_ENTITLEMENTS = Config/Sova.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 49BZ7S974W;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/Sova-Info.plist";
@@ -331,7 +520,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.sova.Sova;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -350,7 +539,7 @@
 				CODE_SIGN_ENTITLEMENTS = Config/Sova.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 49BZ7S974W;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/Sova-Info.plist";
@@ -366,7 +555,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.sova.Sova;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -382,7 +571,7 @@
 				CODE_SIGN_ENTITLEMENTS = Config/SovaWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 49BZ7S974W;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SovaWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Sova;
@@ -392,7 +581,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.sova.Sova.Widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -409,7 +598,7 @@
 				CODE_SIGN_ENTITLEMENTS = Config/SovaWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 49BZ7S974W;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SovaWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Sova;
@@ -419,7 +608,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.sova.Sova.Widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -427,6 +616,126 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5A000000000000000000004C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/SovaWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 49BZ7S974W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Sova;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 0xpranayyy";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = app.sova.Sova;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = app.sova.Sova.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		5A000000000000000000004D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Config/SovaWatch.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 49BZ7S974W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Sova;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 0xpranayyy";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = app.sova.Sova;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = app.sova.Sova.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		5A000000000000000000004E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/SovaWatchWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 49BZ7S974W;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SovaWatchWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Sova;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 0xpranayyy";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = app.sova.Sova.watchkitapp.Widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		5A000000000000000000004F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/SovaWatchWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = 49BZ7S974W;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SovaWatchWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Sova;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 0xpranayyy";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = app.sova.Sova.watchkitapp.Widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
 		};
@@ -456,6 +765,24 @@
 			buildConfigurations = (
 				5A0000000000000000000019 /* Debug */,
 				5A000000000000000000001A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5A000000000000000000004A /* Build configuration list for PBXNativeTarget "SovaWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A000000000000000000004C /* Debug */,
+				5A000000000000000000004D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5A000000000000000000004B /* Build configuration list for PBXNativeTarget "SovaWatchWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A000000000000000000004E /* Debug */,
+				5A000000000000000000004F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
