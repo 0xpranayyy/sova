@@ -289,6 +289,7 @@ Sova is on your wrist now. 🦉
 • Dictate a task ("Call Mom tomorrow 6pm") and Sova sets the day and time.
 • Complications: an owl ring that fills as your day gets done, and Up Next on your watch face.
 • Finish everything and the owl celebrates with you, on your wrist too.
+• 5 new app icons for Sova Plus: Night Owl, Shades, Scholar, Party and Royal.
 ```
 
 **Apple Watch screenshots:** `marketing/app-store/apple-watch/` (422 × 514, Apple Watch Ultra). Upload under 1.1 → App Previews and Screenshots → Apple Watch.

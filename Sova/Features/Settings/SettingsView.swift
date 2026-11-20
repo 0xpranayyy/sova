@@ -354,11 +354,20 @@ struct SettingsView: View {
     // MARK: App icon
 
     private var iconPicker: some View {
-        HStack(spacing: 18) {
-            iconTile(name: nil, preview: "IconPreview-Default", title: String(localized: "Sova"))
-            iconTile(name: "AppIcon-Indigo", preview: "IconPreview-Indigo", title: String(localized: "Sunny"))
-            Spacer()
+        ScrollView(.horizontal) {
+            HStack(spacing: 18) {
+                iconTile(name: nil, preview: "IconPreview-Default", title: String(localized: "Sova"))
+                iconTile(name: "AppIcon-Indigo", preview: "IconPreview-Indigo", title: String(localized: "Sunny"))
+                iconTile(name: "AppIcon-NightOwl", preview: "IconPreview-NightOwl", title: String(localized: "Night Owl"))
+                iconTile(name: "AppIcon-Shades", preview: "IconPreview-Shades", title: String(localized: "Shades"))
+                iconTile(name: "AppIcon-Scholar", preview: "IconPreview-Scholar", title: String(localized: "Scholar"))
+                iconTile(name: "AppIcon-Party", preview: "IconPreview-Party", title: String(localized: "Party"))
+                iconTile(name: "AppIcon-Royal", preview: "IconPreview-Royal", title: String(localized: "Royal"))
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 4)
         }
+        .scrollIndicators(.hidden)
     }
 
     private func iconTile(name: String?, preview: String, title: String) -> some View {

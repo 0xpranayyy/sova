@@ -90,7 +90,7 @@ struct PlusDetails: View {
             row(String(localized: "Active goals"), free: "\(PlusGate.freeGoals)", plus: "∞")
             row(String(localized: "Widgets & Siri"), free: "✓", plus: "✓")
             row(String(localized: "iCloud sync"), free: "–", plus: "✓")
-            row(String(localized: "App icons"), free: "1", plus: "2", last: true)
+            row(String(localized: "App icons"), free: "1", plus: "7", last: true)
         }
         .surface(cornerRadius: 24, padding: 16)
     }
