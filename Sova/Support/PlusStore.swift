@@ -1,4 +1,5 @@
 import StoreKit
+import SwiftUI
 import Observation
 import UserNotifications
 import UIKit
@@ -179,11 +180,11 @@ final class PlusStore {
     /// The trial's length in days, for the "how it works" timeline.
     static func days(in period: Product.SubscriptionPeriod) -> Int {
         switch period.unit {
-        case .day: period.value
-        case .week: period.value * 7
-        case .month: period.value * 30
-        case .year: period.value * 365
-        @unknown default: period.value
+        case .day: return period.value
+        case .week: return period.value * 7
+        case .month: return period.value * 30
+        case .year: return period.value * 365
+        @unknown default: return period.value
         }
     }
 

@@ -18,7 +18,7 @@ struct TodayIntroView: View {
         GeometryReader { geo in
             let width = geo.size.width
             // Same column as the real Today, so the swap is invisible on iPad too.
-            let side = 16 + Layout.margin(for: width)
+            let side = 16 + ReadableLayout.margin(for: width)
             let inner = max(0, width - 2 * side)
             VStack(alignment: .leading, spacing: 0) {
                 ScreenTitle(title: String(localized: "Today"),

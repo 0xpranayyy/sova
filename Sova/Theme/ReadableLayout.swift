@@ -4,7 +4,7 @@ import SwiftUI
 // Every screen keeps its cards in one comfortable column, centered, while
 // the canvas, glows and horizontal strips still run edge to edge.
 
-enum Layout {
+enum ReadableLayout {
     /// The widest a column of cards gets.
     static let readable: CGFloat = 700
 
@@ -27,7 +27,7 @@ private struct ReadableMargins: ViewModifier {
         content
             .environment(\.readableMargin, margin)
             .onGeometryChange(for: CGFloat.self) { proxy in
-                Layout.margin(for: proxy.size.width)
+                ReadableLayout.margin(for: proxy.size.width)
             } action: { newMargin in
                 if newMargin != margin { margin = newMargin }
             }
@@ -72,7 +72,9 @@ extension View {
     }
 
     /// Put on the content of a ScrollView: one centered, readable column.
-    func readableColumn(_ maxWidth: CGFloat = Layout.readable) -> some View {
-        frame(maxWidth: maxWidth).frame(maxWidth: .infinity)
+    /// The column keeps the content's own leading alignment, so nothing
+    /// shifts on iPhone; only the column itself is centered on wide screens.
+    func readableColumn(_ maxWidth: CGFloat = ReadableLayout.readable) -> some View {
+        frame(maxWidth: maxWidth, alignment: .leading).frame(maxWidth: .infinity)
     }
 }
