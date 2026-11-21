@@ -110,12 +110,12 @@
 
 ### Where the code is
 - **Platforms:** SwiftUI on iOS 26 (iPhone and iPad), SwiftUI on watchOS 26, and an HTML/JS film renderer for marketing videos (not in the app).
-- **The owl, iOS:** `Sova/Components/OwlMark.swift`. It's drawn in a 128 × 132 unit space (`OwlPart`), with wings hinged at the shoulders (20, 70) and (108, 70). Motion is state-driven (SwiftUI animations and tasks), not a frame clock:
-  - breathing is `repeatForever`, 1.7 s each way, 1.8% taller from the feet;
-  - blinks run in `blinkLoop` / `blinkOnce`: close 110 ms (ease-in-out), hold 40 ms, reopen 190 ms (ease-out), every 2.8–4.4 s, and 1 in 5 is a double blink;
-  - the gaze glides with ease-in-out `(0.77, 0, 0.175, 1)` over 500 ms and holds 1.2–2.2 s, with a blink on each look-away;
-  - the hop (poke and celebrate) is a `keyframeAnimator`: crouch 0.90, launch 1.08, apex, fall stretching 1.05, contact squash 0.83, one rebound 1.04, settle. The width is always `1 / height^0.6`;
-  - the wings flap with an ease-out open and an ease-in-out fold, the right wing trailing 40 ms; each also sways idly (left 1.55 s, right 1.85 s, out of phase).
+- **Engine:** `Sova/Support/Motion.swift` (and the same file in `WatchShared/`), from rossark-motion-skill (MIT): `track`, `flow`, `seg`, `wave`, `seeded`, the two curves, and `LoopClock` / `OneShotClock`.
+- **The owl, iOS:** `Sova/Components/OwlMark.swift`. One `TimelineView` clock per owl drives one `Canvas`, drawn in owl units (x −14…114, y −4…128; the feet pivot is (50, 119), the shoulders are (6, 66) and (94, 66)). It's paused off screen, outside the active scene, with Reduce Motion, and always for owls under 30 pt.
+  - **Idle loop, 9 s** (each owl phase-shifted by `seeded(size)`): two glances (500 ms glide, a 1.3 s hold), five blinks (on each glance, once between, and a double at the end of the loop), breathing 1.8% over 3.6 s, a tilt of ±1.5° over 4.7 s, and the wings swaying 2° / 1.6° on 3.1 s / 3.7 s.
+  - **Eyes:** the pupil and shine slide inside the disc. The lids are feathers clipped 2 units wider than the eye; the upper lid comes down while the lower one rises, and they meet at y 52, where a closed eye shows a curved line.
+  - **Happy** is a morph (260 ms ease-out): the pupils shrink away while the smile arc draws on from the middle, and the cheeks warm and grow 12%. It never swaps drawings.
+  - **The hop** (a tap or `celebrate`) is a 900 ms `flow`: crouch 0.90, launch 1.08, apex, fall stretching 1.05, contact 0.83, rebound 1.04, settle. The width is `1 / sy^0.6`. Wing beats open in 100 ms and fold in 150 ms; the right wing is 40 ms behind; there's 1 beat for a tap and 3 for a celebration.
 - **The owl, watchOS:** `WatchShared/WatchOwl.swift`. `WatchOwl` is a static `Canvas` drawing with `lid`, `wingLeft`, `wingRight` and `breath` inputs. `LiveWatchOwl` drives them from one `TimelineView` clock (30 fps), using `OwlMotion`: breath 1.2% over 3.6 s, wings 1.8° / 1.5° on 3.1 s / 3.7 s, and a 7.2 s blink loop (one blink, then a double). Complications use the static `WatchOwl`.
 - **The film owl:** `owl()` and `hopState()` in the film renderer (scratchpad, not committed). It uses the same tokens as the apps.
 

@@ -1,9 +1,14 @@
 import SwiftUI
 
 /// Sova's mascot. "Sova" means owl. A round little owl with a lighter
-/// belly, wings, orange feet, pink cheeks and a sparkle in each eye. It
-/// blinks now and then, can look toward a point, and closes its eyes in a
-/// smile when something's done.
+/// belly, wings, orange feet, pink cheeks and a sparkle in each eye.
+///
+/// It's alive on one clock (the Motion engine, see `Sova/Support/Motion.swift`
+/// and `Sova/Components/MOTION.md`): it breathes, glances around and blinks on
+/// each glance, sways its wings out of step, and tilts a little. Nothing ever
+/// swaps drawings: the pupils slide inside the eyes, the lids are feathers that
+/// lower and rise, and "happy" is the cheeks pushing up into a smiling squint.
+/// A celebration is acted: crouch, jump, wings out, land with a squash, settle.
 ///
 /// Drawn in a 128 × 132 unit space; `size` is the width of the body.
 struct OwlMark: View {
@@ -25,283 +30,235 @@ struct OwlMark: View {
     /// Whether tapping the owl gets a reaction. Off for tiny owls.
     var reactsToTap = true
 
-    @State private var blinking = false
-    @State private var breathing = false
-    @State private var idleLook: CGSize = .zero
-    @State private var flap = false
-    /// The right wing trails the left by a beat: wings never mirror.
-    @State private var flapRight = false
-    /// A tiny idle sway, each wing on its own period.
-    @State private var swayLeft = false
-    @State private var swayRight = false
-    @State private var bounce = 0
-    @State private var giggle = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var start = Date()
+    @State private var onScreen = false
+    /// A hop in progress, and how many wing flaps go with it.
+    @State private var hopAt: Date?
+    @State private var flaps = 0
+    /// Tapped: a short giggle, eyes squinting happily.
+    @State private var giggleUntil: Date?
+    /// When `happy` (or a giggle) last changed, to morph the eyes, never swap them.
+    @State private var happyFrom = 0.0
+    @State private var happyTo = 0.0
+    @State private var happyChangedAt = Date.distantPast
+    /// When the owl started or stopped following `look`.
+    @State private var lookActiveChangedAt = Date.distantPast
 
+    /// Tiny owls are decoration: they stay still (often seen, barely moves).
+    private var alive: Bool { size >= 30 }
     private var pupil: Color { pupilColor ?? bodyColor }
-    private var isHappy: Bool { happy || giggle }
-    private var gaze: CGSize { look == .zero ? idleLook : look }
-
-    /// Squash, stretch and hop, as one keyframed motion.
-    private struct Motion {
-        var scaleX = 1.0
-        var scaleY = 1.0
-        var lift = 0.0
-        var tilt = 0.0
-    }
 
     var body: some View {
-        let width = size * 1.28
-        let height = size * 1.32
-        figure(width: width, height: height)
-            // Breathing: a slow, tiny rise of the chest.
-            .scaleEffect(x: 1, y: breathing ? 1.018 : 1, anchor: .bottom)
-            // Lean a few degrees toward wherever it's looking.
-            .rotationEffect(.degrees(gaze.width * 3.5), anchor: .bottom)
-            .keyframeAnimator(initialValue: Motion(), trigger: bounce) { view, m in
-                view
-                    .scaleEffect(x: m.scaleX, y: m.scaleY, anchor: .bottom)
-                    .rotationEffect(.degrees(m.tilt), anchor: .bottom)
-                    .offset(y: m.lift)
-            } keyframes: { _ in
-                // Squash and stretch keep the volume: width = 1 / height^0.6.
-                KeyframeTrack(\.scaleY) {
-                    CubicKeyframe(0.90, duration: 0.10)   // crouch
-                    CubicKeyframe(1.08, duration: 0.12)   // launch
-                    CubicKeyframe(1.00, duration: 0.16)   // apex
-                    CubicKeyframe(1.05, duration: 0.14)   // fall, stretching
-                    LinearKeyframe(0.83, duration: 0.06)  // contact
-                    CubicKeyframe(1.04, duration: 0.14)   // one small rebound
-                    CubicKeyframe(1.00, duration: 0.18)   // settle
-                }
-                KeyframeTrack(\.scaleX) {
-                    CubicKeyframe(1.065, duration: 0.10)
-                    CubicKeyframe(0.955, duration: 0.12)
-                    CubicKeyframe(1.000, duration: 0.16)
-                    CubicKeyframe(0.971, duration: 0.14)
-                    LinearKeyframe(1.118, duration: 0.06)
-                    CubicKeyframe(0.977, duration: 0.14)
-                    CubicKeyframe(1.000, duration: 0.18)
-                }
-                KeyframeTrack(\.lift) {
-                    CubicKeyframe(0, duration: 0.10)
-                    CubicKeyframe(-size * 0.13, duration: 0.12)
-                    CubicKeyframe(-size * 0.2, duration: 0.16)
-                    CubicKeyframe(0, duration: 0.14)
-                    LinearKeyframe(0, duration: 0.38)
-                }
-                KeyframeTrack(\.tilt) {
-                    CubicKeyframe(-2, duration: 0.10)
-                    CubicKeyframe(3, duration: 0.12)
-                    CubicKeyframe(2, duration: 0.16)
-                    CubicKeyframe(0, duration: 0.20)
-                    CubicKeyframe(-1, duration: 0.14)
-                    CubicKeyframe(0, duration: 0.18)
-                }
-            }
-            .frame(width: width, height: height)
-            .contentShape(.rect)
-            .onTapGesture { if reactsToTap && size >= 40 { poke() } }
-            .onChange(of: celebrate) { cheer() }
-            .animation(.timingCurve(0.77, 0, 0.175, 1, duration: 0.5), value: gaze)
-            .animation(.spring(response: 0.4, dampingFraction: 0.6), value: isHappy)
-            .task(id: blinks) { await blinkLoop() }
-            .task { await idleLoop() }
-            .onAppear {
-                guard !reduceMotion, size >= 30 else { return }
-                withAnimation(.easeInOut(duration: 1.7).repeatForever(autoreverses: true)) { breathing = true }
-                withAnimation(.easeInOut(duration: 1.55).repeatForever(autoreverses: true)) { swayLeft = true }
-                withAnimation(.easeInOut(duration: 1.85).repeatForever(autoreverses: true).delay(0.4)) { swayRight = true }
-            }
-            .accessibilityHidden(true)
+        let still = reduceMotion || !onScreen || scenePhase != .active || !alive
+        let width = size * 1.28, height = size * 1.32
+        TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: still && hopAt == nil)) { context in
+            let now = context.date
+            Canvas { ctx, _ in draw(&ctx, at: now, still: still) }
+        }
+        .frame(width: width, height: height)
+        .contentShape(.rect)
+        .onTapGesture { if reactsToTap && size >= 40 { poke() } }
+        .onChange(of: celebrate) { cheer() }
+        .onChange(of: happy, initial: true) { _, isHappy in setHappy(isHappy ? 1 : 0) }
+        .onChange(of: look == .zero) { lookActiveChangedAt = Date() }
+        .onAppear { onScreen = true }
+        .onDisappear { onScreen = false }
+        .accessibilityHidden(true)
     }
+
+    // MARK: Choreography (ms)
+
+    /// One idle loop. Glances glide in ~500 ms and hold; the owl blinks on
+    /// each glance and once in between. Blinks close in 110 ms, hold 40 ms and
+    /// reopen in 190 ms with an ease-out.
+    private static let period = 9000.0
+    private static let lookX: Keys = [Key(0, 0), Key(1800, 0), Key(2300, -0.8), Key(3600, -0.8), Key(4100, 0),
+                                      Key(6000, 0), Key(6500, 0.7), Key(7600, 0.7), Key(8100, 0), Key(period, 0)]
+    private static let lookY: Keys = [Key(0, 0), Key(1800, 0), Key(2300, 0.25), Key(3600, 0.25), Key(4100, 0),
+                                      Key(6000, 0), Key(6500, -0.35), Key(7600, -0.35), Key(8100, 0), Key(period, 0)]
+    private static let lid: Keys = {
+        var keys: Keys = [Key(0, 0)]
+        for b in [1760.0, 4800.0, 5960.0, 8060.0, 8400.0] {
+            keys += [Key(b, 0), Key(b + 110, 1), Key(b + 150, 1), Key(b + 340, 0, out: true)]
+        }
+        return keys + [Key(period, 0)]
+    }()
+    /// The hop, as acting (`flow` passes through the poses without stopping).
+    private static let hopMs = 900.0
+    private static let hopSquash: FlowKeys = [(0, 1), (100, 0.9), (220, 1.08), (380, 1.0), (520, 1.05), (580, 0.83), (720, 1.04), (900, 1)]
+    private static let hopLift: FlowKeys = [(0, 0), (100, 0), (220, -0.13), (380, -0.2), (520, 0), (900, 0)]
+    private static let hopTilt: FlowKeys = [(0, 0), (100, -2), (220, 3), (380, 2), (520, 0), (720, -1), (900, 0)]
+
+    /// This owl's own phase, so two owls on screen never blink together.
+    private var phase: Double { seeded(Int(size * 7), salt: 0.3) * Self.period }
 
     // MARK: Drawing
 
-    private func figure(width: CGFloat, height: CGFloat) -> some View {
-        ZStack {
-            // Feet behind everything.
-            OwlPart { p, at, _ in
-                p.addEllipse(in: rect(at, 38, 119, 9, 5))
-                p.addEllipse(in: rect(at, 62, 119, 9, 5))
-            }
-            .fill(beakColor)
+    private func draw(_ ctx: inout GraphicsContext, at now: Date, still: Bool) {
+        let ms = now.timeIntervalSince(start) * 1000
+        let t = still ? 0 : (ms + phase).truncatingRemainder(dividingBy: Self.period)
 
-            // Wings, each hinged at the shoulder so they can flap.
-            OwlPart { p, at, _ in
-                p.move(to: at(-6, 66)); p.addQuadCurve(to: at(8, 104), control: at(-12, 92))
-                p.addQuadCurve(to: at(6, 66), control: at(4, 84)); p.closeSubpath()
-            }
-            .fill(bodyColor)
-            .rotationEffect(.degrees(swayLeft ? 2.5 : -1), anchor: UnitPoint(x: 20.0 / 128.0, y: 70.0 / 132.0))
-            .rotationEffect(.degrees(flap ? 28 : 0), anchor: UnitPoint(x: 20.0 / 128.0, y: 70.0 / 132.0))
-            OwlPart { p, at, _ in
-                p.move(to: at(106, 66)); p.addQuadCurve(to: at(92, 104), control: at(112, 92))
-                p.addQuadCurve(to: at(94, 66), control: at(96, 84)); p.closeSubpath()
-            }
-            .fill(bodyColor)
-            .rotationEffect(.degrees(swayRight ? -2 : 1), anchor: UnitPoint(x: 108.0 / 128.0, y: 70.0 / 132.0))
-            .rotationEffect(.degrees(flapRight ? -26 : 0), anchor: UnitPoint(x: 108.0 / 128.0, y: 70.0 / 132.0))
+        // Happy: the morph between eyes and smile (ease-out, 260 ms).
+        let giggling = giggleUntil.map { now < $0 } ?? false
+        let hp = reduceMotion ? 1 : min(1, now.timeIntervalSince(happyChangedAt) / 0.26)
+        var smile = happyFrom + (happyTo - happyFrom) * easeOut.value(at: hp)
+        if giggling { smile = 1 }
 
-            OwlPart { p, at, _ in
-                p.move(to: at(10, 0))
-                p.addQuadCurve(to: at(50, 18.4), control: at(30, 21.6))
-                p.addQuadCurve(to: at(90, 0), control: at(70, 21.6))
-                p.addCurve(to: at(50, 116), control1: at(110, 45.4), control2: at(104, 116))
-                p.addCurve(to: at(10, 0), control1: at(-4, 116), control2: at(-10, 45.4))
-                p.closeSubpath()
-            }
-            .fill(bodyColor)
-
-            // Belly with two rows of feathers.
-            OwlPart { p, at, _ in p.addEllipse(in: rect(at, 50, 90, 25, 22)) }
-                .fill(bellyColor ?? Color.white.opacity(0.16))
-            OwlPart { p, at, _ in
-                p.move(to: at(40, 84)); p.addQuadCurve(to: at(50, 84), control: at(45, 88))
-                p.addQuadCurve(to: at(60, 84), control: at(55, 88))
-                p.move(to: at(43, 95)); p.addQuadCurve(to: at(50, 95), control: at(46.5, 98.5))
-                p.addQuadCurve(to: at(57, 95), control: at(53.5, 98.5))
-            }
-            .stroke(bodyColor.opacity(0.4), style: StrokeStyle(lineWidth: size * 0.024, lineCap: .round))
-
-            // Cheeks glow a little brighter when happy.
-            OwlPart { p, at, _ in
-                p.addEllipse(in: rect(at, 14, 63, 6, 6))
-                p.addEllipse(in: rect(at, 86, 63, 6, 6))
-            }
-            .fill(cheekColor.opacity(isHappy ? 1 : 0.8))
-            .scaleEffect(isHappy ? 1.12 : 1)
-            OwlPart { p, at, _ in
-                p.move(to: at(44, 62)); p.addLine(to: at(56, 62)); p.addLine(to: at(50, 72)); p.closeSubpath()
-            }
-            .fill(beakColor)
-
-            // Eyes.
-            ZStack {
-                OwlPart { p, at, _ in
-                    p.addEllipse(in: rect(at, 30, 47, 17, 17))
-                    p.addEllipse(in: rect(at, 70, 47, 17, 17))
+        // The hop and the flaps.
+        var sy = 1.0, lift = 0.0, tilt = still ? 0 : 1.5 * wave(t, period: 4700)
+        var flapL = 0.0, flapR = 0.0
+        if let hopAt {
+            let h = now.timeIntervalSince(hopAt) * 1000
+            if h < Self.hopMs {
+                sy = flow(h, Self.hopSquash); lift = flow(h, Self.hopLift) * 100; tilt += flow(h, Self.hopTilt)
+                for i in 0..<flaps {
+                    flapL = max(flapL, 28 * wingPulse(h - 120 - Double(i) * 240))
+                    flapR = max(flapR, 26 * wingPulse(h - 160 - Double(i) * 240))
                 }
-                .fill(eyeColor)
-                if isHappy {
-                    OwlPart { p, at, _ in
-                        for cx in [30.0, 70.0] {
-                            p.move(to: at(cx - 9, 51)); p.addQuadCurve(to: at(cx + 9, 51), control: at(cx, 39))
-                        }
-                    }
-                    .stroke(pupil, style: StrokeStyle(lineWidth: size * 0.055, lineCap: .round))
-                    .transition(.scale(scale: 0.6).combined(with: .opacity))
-                } else {
-                    let dx = gaze.width * 4
-                    let dy = gaze.height * 4
-                    OwlPart { p, at, _ in
-                        p.addEllipse(in: rect(at, 31.5 + dx, 49 + dy, 8.5, 8.5))
-                        p.addEllipse(in: rect(at, 71.5 + dx, 49 + dy, 8.5, 8.5))
-                    }
-                    .fill(pupil)
-                    OwlPart { p, at, _ in
-                        p.addEllipse(in: rect(at, 34.5 + dx, 45.5 + dy, 2.8, 2.8))
-                        p.addEllipse(in: rect(at, 74.5 + dx, 45.5 + dy, 2.8, 2.8))
-                    }
-                    .fill(eyeColor)
-                }
+            } else {
+                DispatchQueue.main.async { self.hopAt = nil }
             }
-            .scaleEffect(x: 1, y: blinking && !isHappy ? 0.1 : 1, anchor: UnitPoint(x: 0.5, y: 51.0 / 132.0))
         }
-        .frame(width: width, height: height)
+        // Breathing: about 1.8% taller from the feet, every 3.6 s.
+        let breath = still ? 0 : 0.009 * (wave(t, period: 3600) + 1)
+        let sx = 1 / pow(sy, 0.6)          // squash keeps the volume
+        let swayL = still ? 0 : 2 * wave(t, period: 3100)
+        let swayR = still ? 0 : 1.6 * wave(t, period: 3700, phase: 0.3)
+
+        // Owl units: x −14…114, y −4…128.
+        let s = size / 100
+        ctx.translateBy(x: 14 * s, y: 4 * s)
+        ctx.scaleBy(x: s, y: s)
+        // Everything moves from the feet: lift, tilt, squash and breath.
+        ctx.translateBy(x: 50, y: 119 + lift)
+        ctx.rotate(by: .degrees(tilt))
+        ctx.scaleBy(x: sx, y: sy * (1 + breath))
+        ctx.translateBy(x: -50, y: -119)
+
+        // Feet.
+        ctx.fill(Path(ellipseIn: CGRect(x: 29, y: 114, width: 18, height: 10)), with: .color(beakColor))
+        ctx.fill(Path(ellipseIn: CGRect(x: 53, y: 114, width: 18, height: 10)), with: .color(beakColor))
+
+        // Wings, hinged at the shoulders; the right one trails the left.
+        var left = Path()
+        left.move(to: CGPoint(x: -6, y: 66)); left.addQuadCurve(to: CGPoint(x: 8, y: 104), control: CGPoint(x: -12, y: 92))
+        left.addQuadCurve(to: CGPoint(x: 6, y: 66), control: CGPoint(x: 4, y: 84)); left.closeSubpath()
+        var right = Path()
+        right.move(to: CGPoint(x: 106, y: 66)); right.addQuadCurve(to: CGPoint(x: 92, y: 104), control: CGPoint(x: 112, y: 92))
+        right.addQuadCurve(to: CGPoint(x: 94, y: 66), control: CGPoint(x: 96, y: 84)); right.closeSubpath()
+        var wl = ctx
+        wl.translateBy(x: 6, y: 66); wl.rotate(by: .degrees(swayL + flapL)); wl.translateBy(x: -6, y: -66)
+        wl.fill(left, with: .color(bodyColor))
+        var wr = ctx
+        wr.translateBy(x: 94, y: 66); wr.rotate(by: .degrees(-(swayR + flapR))); wr.translateBy(x: -94, y: -66)
+        wr.fill(right, with: .color(bodyColor))
+
+        // Body, belly and two rows of feathers.
+        var figure = Path()
+        figure.move(to: CGPoint(x: 10, y: 0))
+        figure.addQuadCurve(to: CGPoint(x: 50, y: 18.4), control: CGPoint(x: 30, y: 21.6))
+        figure.addQuadCurve(to: CGPoint(x: 90, y: 0), control: CGPoint(x: 70, y: 21.6))
+        figure.addCurve(to: CGPoint(x: 50, y: 116), control1: CGPoint(x: 110, y: 45.4), control2: CGPoint(x: 104, y: 116))
+        figure.addCurve(to: CGPoint(x: 10, y: 0), control1: CGPoint(x: -4, y: 116), control2: CGPoint(x: -10, y: 45.4))
+        figure.closeSubpath()
+        ctx.fill(figure, with: .color(bodyColor))
+        ctx.fill(Path(ellipseIn: CGRect(x: 25, y: 68, width: 50, height: 44)), with: .color(bellyColor ?? Color.white.opacity(0.16)))
+        var feathers = Path()
+        feathers.move(to: CGPoint(x: 40, y: 84)); feathers.addQuadCurve(to: CGPoint(x: 50, y: 84), control: CGPoint(x: 45, y: 88))
+        feathers.addQuadCurve(to: CGPoint(x: 60, y: 84), control: CGPoint(x: 55, y: 88))
+        feathers.move(to: CGPoint(x: 43, y: 95)); feathers.addQuadCurve(to: CGPoint(x: 50, y: 95), control: CGPoint(x: 46.5, y: 98.5))
+        feathers.addQuadCurve(to: CGPoint(x: 57, y: 95), control: CGPoint(x: 53.5, y: 98.5))
+        ctx.stroke(feathers, with: .color(bodyColor.opacity(0.4)), style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
+
+        // Cheeks warm up and grow a little with the smile.
+        let cr = 6 * (1 + 0.12 * smile)
+        for cx in [14.0, 86.0] {
+            ctx.fill(Path(ellipseIn: CGRect(x: cx - cr, y: 63 - cr, width: cr * 2, height: cr * 2)),
+                     with: .color(cheekColor.opacity(0.8 + 0.2 * smile)))
+        }
+        var beak = Path()
+        beak.move(to: CGPoint(x: 44, y: 62)); beak.addLine(to: CGPoint(x: 56, y: 62)); beak.addLine(to: CGPoint(x: 50, y: 72)); beak.closeSubpath()
+        ctx.fill(beak, with: .color(beakColor))
+
+        // The live eyes.
+        let blink = (blinks && !still && smile < 0.5) ? track(t, Self.lid) : 0
+        let idleX = still ? 0 : track(t, Self.lookX), idleY = still ? 0 : track(t, Self.lookY)
+        let follow = easeInOut.value(at: min(1, now.timeIntervalSince(lookActiveChangedAt) / 0.3))
+        let lookOn = look == .zero ? 1 - follow : follow
+        let lx = (idleX * (1 - lookOn) + Double(look.width) * lookOn) * 4
+        let ly = (idleY * (1 - lookOn) + Double(look.height) * lookOn) * 4
+        for cx in [30.0, 70.0] { drawEye(&ctx, cx: cx, lx: lx, ly: ly, lid: blink, smile: smile) }
+    }
+
+    /// One eye: the pupil and its shine slide inside the disc; the smile is a
+    /// squint that draws on as the pupil shrinks away; the lids are feathers,
+    /// clipped 2 units wider than the eye so no ring shows when it's closed.
+    private func drawEye(_ ctx: inout GraphicsContext, cx: Double, lx: Double, ly: Double, lid: Double, smile: Double) {
+        let disc = Path(ellipseIn: CGRect(x: cx - 17, y: 30, width: 34, height: 34))
+        ctx.fill(disc, with: .color(eyeColor))
+        let k = 1 - smile
+        if k > 0.01 {
+            ctx.drawLayer { c in
+                c.clip(to: disc)
+                let pr = 8.5 * k
+                c.fill(Path(ellipseIn: CGRect(x: cx + 1.5 + lx - pr, y: 50 + ly - pr, width: pr * 2, height: pr * 2)), with: .color(pupil))
+                let sr = 2.8 * k
+                c.fill(Path(ellipseIn: CGRect(x: cx + 4.5 + lx - sr, y: 46.5 + ly - sr, width: sr * 2, height: sr * 2)), with: .color(eyeColor))
+            }
+        }
+        if smile > 0.01 {
+            var arc = Path()
+            arc.move(to: CGPoint(x: cx - 9, y: 51)); arc.addQuadCurve(to: CGPoint(x: cx + 9, y: 51), control: CGPoint(x: cx, y: 39))
+            ctx.stroke(arc.trimmedPath(from: 0.5 - 0.5 * smile, to: 0.5 + 0.5 * smile), with: .color(pupil),
+                       style: StrokeStyle(lineWidth: 5.5, lineCap: .round))
+        }
+        guard lid > 0.001 else { return }
+        let upper = 28 + 24 * lid, lower = 66 - 14 * lid
+        ctx.drawLayer { c in
+            c.clip(to: Path(ellipseIn: CGRect(x: cx - 19, y: 28, width: 38, height: 38)))
+            c.fill(Path(CGRect(x: cx - 20, y: 26, width: 40, height: upper - 26)), with: .color(bodyColor))
+            c.fill(Path(CGRect(x: cx - 20, y: lower, width: 40, height: 68 - lower)), with: .color(bodyColor))
+        }
+        let closed = min(1, max(0, (lid - 0.85) / 0.15))
+        if closed > 0 {
+            var line = Path()
+            line.move(to: CGPoint(x: cx - 14, y: upper)); line.addQuadCurve(to: CGPoint(x: cx + 14, y: upper), control: CGPoint(x: cx, y: upper + 6))
+            ctx.stroke(line, with: .color(pupil.opacity(closed)), style: StrokeStyle(lineWidth: 3.5, lineCap: .round))
+        }
+    }
+
+    /// One wing beat, 0 → 1 → 0: opens in 100 ms (ease-out), folds in 150 ms.
+    private func wingPulse(_ ms: Double) -> Double {
+        if ms <= 0 || ms >= 250 { return 0 }
+        return ms < 100 ? easeOut.value(at: ms / 100) : 1 - easeInOut.value(at: (ms - 100) / 150)
     }
 
     // MARK: Behavior
 
-    /// Poked: squish, hop, a happy squint and a quick flap.
+    private func setHappy(_ target: Double) {
+        let now = Date()
+        let p = min(1, now.timeIntervalSince(happyChangedAt) / 0.26)
+        happyFrom = happyFrom + (happyTo - happyFrom) * easeOut.value(at: p)
+        happyTo = target
+        happyChangedAt = now
+    }
+
+    /// Poked: a hop with one flap and a happy squint.
     private func poke() {
         Haptics.owl()
         guard !reduceMotion else { return }
-        bounce += 1
-        flapWings(times: 1)
-        withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) { giggle = true }
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(750))
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { giggle = false }
-        }
+        flaps = 1
+        hopAt = Date()
+        giggleUntil = Date().addingTimeInterval(0.75)
     }
 
-    /// Something worth celebrating: hop and flap a few times.
+    /// Something worth celebrating: a hop with three flaps.
     private func cheer() {
-        guard !reduceMotion else { return }
-        bounce += 1
-        flapWings(times: 3)
-    }
-
-    /// Wings open with an ease-out and fold with an ease-in-out; the right
-    /// one follows the left 40 ms later, so they never move as a mirror.
-    private func flapWings(times: Int) {
-        Task { @MainActor in
-            for _ in 0..<times {
-                withAnimation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.14)) { flap = true }
-                try? await Task.sleep(for: .milliseconds(40))
-                withAnimation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.14)) { flapRight = true }
-                try? await Task.sleep(for: .milliseconds(110))
-                withAnimation(.timingCurve(0.77, 0, 0.175, 1, duration: 0.16)) { flap = false }
-                try? await Task.sleep(for: .milliseconds(40))
-                withAnimation(.timingCurve(0.77, 0, 0.175, 1, duration: 0.16)) { flapRight = false }
-                try? await Task.sleep(for: .milliseconds(90))
-            }
-        }
-    }
-
-    /// A blink every 3–4 s, now and then a double one. It closes in 110 ms,
-    /// holds for 40 ms and reopens more slowly, in 190 ms with an ease-out
-    /// (a faster close reads as a flicker).
-    private func blinkLoop() async {
-        guard blinks, !reduceMotion else { return }
-        while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(Double.random(in: 2.8...4.4)))
-            let double = Int.random(in: 0..<5) == 0
-            for i in 0..<(double ? 2 : 1) {
-                if i > 0 { try? await Task.sleep(for: .milliseconds(140)) }
-                await blinkOnce()
-            }
-        }
-    }
-
-    private func blinkOnce() async {
-        withAnimation(.timingCurve(0.77, 0, 0.175, 1, duration: 0.11)) { blinking = true }
-        try? await Task.sleep(for: .milliseconds(150))
-        withAnimation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.19)) { blinking = false }
-        try? await Task.sleep(for: .milliseconds(190))
-    }
-
-    /// When nobody is directing its gaze, the owl glances somewhere now and
-    /// then, blinking as it turns, holds the look, and comes back to center.
-    private func idleLoop() async {
-        guard !reduceMotion, size >= 30 else { return }
-        while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(Double.random(in: 2.5...6)))
-            guard look == .zero else { continue }
-            if blinks { Task { await blinkOnce() } }
-            idleLook = CGSize(width: Double.random(in: -0.9...0.9), height: Double.random(in: -0.4...0.6))
-            try? await Task.sleep(for: .seconds(Double.random(in: 1.2...2.2)))
-            if Bool.random() { idleLook = .zero }
-        }
-    }
-}
-
-/// A unit-space rectangle centered on (cx, cy) with radii (rx, ry).
-private func rect(_ at: (CGFloat, CGFloat) -> CGPoint, _ cx: CGFloat, _ cy: CGFloat, _ rx: CGFloat, _ ry: CGFloat) -> CGRect {
-    let a = at(cx - rx, cy - ry), b = at(cx + rx, cy + ry)
-    return CGRect(x: a.x, y: a.y, width: b.x - a.x, height: b.y - a.y)
-}
-
-/// One piece of the owl, drawn in the 128 × 132 unit space.
-private struct OwlPart: Shape {
-    let draw: (inout Path, (CGFloat, CGFloat) -> CGPoint, CGFloat) -> Void
-
-    func path(in r: CGRect) -> Path {
-        let s = r.width / 128
-        var path = Path()
-        draw(&path, { x, y in CGPoint(x: r.minX + (x + 14) * s, y: r.minY + (y + 4) * s) }, s)
-        return path
+        guard !reduceMotion, alive else { return }
+        flaps = 3
+        hopAt = Date()
     }
 }
 
