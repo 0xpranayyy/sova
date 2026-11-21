@@ -84,6 +84,7 @@ struct TodayView: View {
                             subtitle: Date.now.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())) {
                     HStack(spacing: 8) {
                         CircleAction(symbol: "magnifyingglass", label: String(localized: "Search")) { router.sheet = .search }
+                        CircleAction(symbol: "plus", label: String(localized: "New task")) { router.sheet = .quickTask }
                         CircleAction(symbol: "gearshape", label: String(localized: "Settings")) { showSettings = true }
                     }
                 }
@@ -433,9 +434,13 @@ struct UpNextCard: View {
                     Button {
                         TaskActions.moveToTomorrow(t, router: router)
                     } label: {
-                        Label("Tomorrow", systemImage: "arrow.turn.up.right")
+                        Text("Tomorrow")
+                            .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
+                            .foregroundStyle(tone.deep)
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                            .background(tone.deep.opacity(0.12), in: .capsule)
                     }
-                    .buttonStyle(.tonal(tone))
+                    .buttonStyle(.pressable)
                 }
             }
             .padding(.top, 16)

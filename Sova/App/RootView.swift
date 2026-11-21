@@ -59,14 +59,9 @@ struct MainTabView: View {
             Tab("Insights", systemImage: "chart.bar", value: AppTab.insights) {
                 InsightsView().id(today)
             }
-            Tab("New", systemImage: "plus", value: AppTab.create, role: .search) {
-                Color.canvas
-            }
         }
-        // The default style: on iPhone, five tabs plus New as its own round +
-        // button (the search role); on iPad, the tab bar at the top. (The
-        // sidebar-adaptable style made New a sixth tab on iPhone, which
-        // pushed Rituals and Insights into a "More" list.)
+        // Exactly five tabs, so iOS never folds Rituals and Insights into a
+        // "More" list. New lives as the + in each screen's header.
         .tabBarMinimizeBehavior(.onScrollDown)
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in
             today = Date.now.startOfDay
@@ -94,6 +89,7 @@ struct MainTabView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sovaPendingAction)) { _ in runPendingAction() }
+        .sovaFeedback(.selection, trigger: router.tab)
         .onChange(of: router.tab) { previous, current in
             guard current == .create else { return }
             router.tab = previous

@@ -84,16 +84,13 @@ struct CircleAction: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(Color.ink)
                 .frame(width: 44, height: 44)
-                .contentShape(.circle)
+                .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.08), radius: 8, y: 4)), in: .circle)
+                .overlay(Circle().strokeBorder(Color.hairline, lineWidth: 1.5))
         }
-        .buttonStyle(.plain)
-        // A toolbar-style control, so it's Liquid Glass like the system's own.
-        .glassEffect(.regular.interactive(), in: .circle)
-        .contentShape(.hoverEffect, .circle)
-        .hoverEffect(.highlight)
+        .buttonStyle(.pressable)
         .accessibilityLabel(label)
     }
 }
