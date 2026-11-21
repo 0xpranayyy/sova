@@ -71,6 +71,7 @@ struct OnboardingView: View {
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedGoal: String { goalTitle.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var chosenRituals: [RitualOption] { RitualOption.all.filter { rituals.contains($0.id) } }
+    private var showsDayInTheMaking: Bool { [.name, .rituals, .goal, .rhythm].contains(step) }
 
     var body: some View {
         GeometryReader { geo in
@@ -81,6 +82,17 @@ struct OnboardingView: View {
                     topBar
                         .padding(.horizontal, 16)
                         .frame(height: 52)
+
+                    // Build your first day: Today assembles itself as you answer.
+                    if showsDayInTheMaking {
+                        DayInTheMaking(name: trimmedName, rituals: chosenRituals, goalTitle: trimmedGoal,
+                                       remindersOn: step == .rhythm && (morningOn || eveningOn) || remindersGranted,
+                                       reminderTime: morningOn ? morning : evening)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 4)
+                            .padding(.bottom, 6)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
 
                     ZStack {
                         stepView
