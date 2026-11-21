@@ -69,7 +69,7 @@ struct TodayScreen: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            OwlRing(progress: day.isFromToday ? day.progress : 0, happy: day.isFromToday && day.allDone)
+            OwlRing(progress: day.isFromToday ? day.progress : 0, happy: day.isFromToday && day.allDone, live: true)
                 .frame(width: 58, height: 58)
             VStack(alignment: .leading, spacing: 1) {
                 Text(greeting)

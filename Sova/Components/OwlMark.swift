@@ -29,6 +29,11 @@ struct OwlMark: View {
     @State private var breathing = false
     @State private var idleLook: CGSize = .zero
     @State private var flap = false
+    /// The right wing trails the left by a beat: wings never mirror.
+    @State private var flapRight = false
+    /// A tiny idle sway, each wing on its own period.
+    @State private var swayLeft = false
+    @State private var swayRight = false
     @State private var bounce = 0
     @State private var giggle = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -59,38 +64,54 @@ struct OwlMark: View {
                     .rotationEffect(.degrees(m.tilt), anchor: .bottom)
                     .offset(y: m.lift)
             } keyframes: { _ in
-                KeyframeTrack(\.scaleX) {
-                    LinearKeyframe(1.14, duration: 0.09)
-                    SpringKeyframe(0.93, duration: 0.18, spring: .snappy)
-                    SpringKeyframe(1.0, duration: 0.45, spring: .bouncy)
-                }
+                // Squash and stretch keep the volume: width = 1 / height^0.6.
                 KeyframeTrack(\.scaleY) {
-                    LinearKeyframe(0.84, duration: 0.09)
-                    SpringKeyframe(1.1, duration: 0.18, spring: .snappy)
-                    SpringKeyframe(1.0, duration: 0.45, spring: .bouncy)
+                    CubicKeyframe(0.90, duration: 0.10)   // crouch
+                    CubicKeyframe(1.08, duration: 0.12)   // launch
+                    CubicKeyframe(1.00, duration: 0.16)   // apex
+                    CubicKeyframe(1.05, duration: 0.14)   // fall, stretching
+                    LinearKeyframe(0.83, duration: 0.06)  // contact
+                    CubicKeyframe(1.04, duration: 0.14)   // one small rebound
+                    CubicKeyframe(1.00, duration: 0.18)   // settle
+                }
+                KeyframeTrack(\.scaleX) {
+                    CubicKeyframe(1.065, duration: 0.10)
+                    CubicKeyframe(0.955, duration: 0.12)
+                    CubicKeyframe(1.000, duration: 0.16)
+                    CubicKeyframe(0.971, duration: 0.14)
+                    LinearKeyframe(1.118, duration: 0.06)
+                    CubicKeyframe(0.977, duration: 0.14)
+                    CubicKeyframe(1.000, duration: 0.18)
                 }
                 KeyframeTrack(\.lift) {
-                    LinearKeyframe(0, duration: 0.09)
-                    CubicKeyframe(-size * 0.2, duration: 0.18)
-                    SpringKeyframe(0, duration: 0.45, spring: .bouncy)
+                    CubicKeyframe(0, duration: 0.10)
+                    CubicKeyframe(-size * 0.13, duration: 0.12)
+                    CubicKeyframe(-size * 0.2, duration: 0.16)
+                    CubicKeyframe(0, duration: 0.14)
+                    LinearKeyframe(0, duration: 0.38)
                 }
                 KeyframeTrack(\.tilt) {
-                    CubicKeyframe(-5, duration: 0.14)
-                    CubicKeyframe(5, duration: 0.16)
-                    SpringKeyframe(0, duration: 0.4, spring: .bouncy)
+                    CubicKeyframe(-2, duration: 0.10)
+                    CubicKeyframe(3, duration: 0.12)
+                    CubicKeyframe(2, duration: 0.16)
+                    CubicKeyframe(0, duration: 0.20)
+                    CubicKeyframe(-1, duration: 0.14)
+                    CubicKeyframe(0, duration: 0.18)
                 }
             }
             .frame(width: width, height: height)
             .contentShape(.rect)
             .onTapGesture { if reactsToTap && size >= 40 { poke() } }
             .onChange(of: celebrate) { cheer() }
-            .animation(.interpolatingSpring(stiffness: 170, damping: 16), value: gaze)
+            .animation(.timingCurve(0.77, 0, 0.175, 1, duration: 0.5), value: gaze)
             .animation(.spring(response: 0.4, dampingFraction: 0.6), value: isHappy)
             .task(id: blinks) { await blinkLoop() }
             .task { await idleLoop() }
             .onAppear {
                 guard !reduceMotion, size >= 30 else { return }
                 withAnimation(.easeInOut(duration: 1.7).repeatForever(autoreverses: true)) { breathing = true }
+                withAnimation(.easeInOut(duration: 1.55).repeatForever(autoreverses: true)) { swayLeft = true }
+                withAnimation(.easeInOut(duration: 1.85).repeatForever(autoreverses: true).delay(0.4)) { swayRight = true }
             }
             .accessibilityHidden(true)
     }
@@ -112,13 +133,15 @@ struct OwlMark: View {
                 p.addQuadCurve(to: at(6, 66), control: at(4, 84)); p.closeSubpath()
             }
             .fill(bodyColor)
+            .rotationEffect(.degrees(swayLeft ? 2.5 : -1), anchor: UnitPoint(x: 20.0 / 128.0, y: 70.0 / 132.0))
             .rotationEffect(.degrees(flap ? 28 : 0), anchor: UnitPoint(x: 20.0 / 128.0, y: 70.0 / 132.0))
             OwlPart { p, at, _ in
                 p.move(to: at(106, 66)); p.addQuadCurve(to: at(92, 104), control: at(112, 92))
                 p.addQuadCurve(to: at(94, 66), control: at(96, 84)); p.closeSubpath()
             }
             .fill(bodyColor)
-            .rotationEffect(.degrees(flap ? -28 : 0), anchor: UnitPoint(x: 108.0 / 128.0, y: 70.0 / 132.0))
+            .rotationEffect(.degrees(swayRight ? -2 : 1), anchor: UnitPoint(x: 108.0 / 128.0, y: 70.0 / 132.0))
+            .rotationEffect(.degrees(flapRight ? -26 : 0), anchor: UnitPoint(x: 108.0 / 128.0, y: 70.0 / 132.0))
 
             OwlPart { p, at, _ in
                 p.move(to: at(10, 0))
@@ -210,40 +233,55 @@ struct OwlMark: View {
         flapWings(times: 3)
     }
 
+    /// Wings open with an ease-out and fold with an ease-in-out; the right
+    /// one follows the left 40 ms later, so they never move as a mirror.
     private func flapWings(times: Int) {
         Task { @MainActor in
             for _ in 0..<times {
-                withAnimation(.spring(response: 0.14, dampingFraction: 0.5)) { flap = true }
-                try? await Task.sleep(for: .milliseconds(130))
-                withAnimation(.spring(response: 0.18, dampingFraction: 0.55)) { flap = false }
-                try? await Task.sleep(for: .milliseconds(120))
+                withAnimation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.14)) { flap = true }
+                try? await Task.sleep(for: .milliseconds(40))
+                withAnimation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.14)) { flapRight = true }
+                try? await Task.sleep(for: .milliseconds(110))
+                withAnimation(.timingCurve(0.77, 0, 0.175, 1, duration: 0.16)) { flap = false }
+                try? await Task.sleep(for: .milliseconds(40))
+                withAnimation(.timingCurve(0.77, 0, 0.175, 1, duration: 0.16)) { flapRight = false }
+                try? await Task.sleep(for: .milliseconds(90))
             }
         }
     }
 
+    /// A blink every 3–4 s, now and then a double one. It closes in 110 ms,
+    /// holds for 40 ms and reopens more slowly, in 190 ms with an ease-out
+    /// (a faster close reads as a flicker).
     private func blinkLoop() async {
         guard blinks, !reduceMotion else { return }
         while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(Double.random(in: 2.4...5.5)))
+            try? await Task.sleep(for: .seconds(Double.random(in: 2.8...4.4)))
             let double = Int.random(in: 0..<5) == 0
             for i in 0..<(double ? 2 : 1) {
                 if i > 0 { try? await Task.sleep(for: .milliseconds(140)) }
-                withAnimation(.easeIn(duration: 0.07)) { blinking = true }
-                try? await Task.sleep(for: .milliseconds(100))
-                withAnimation(.easeOut(duration: 0.13)) { blinking = false }
+                await blinkOnce()
             }
         }
     }
 
-    /// When nobody is directing its gaze, the owl looks around now and then
-    /// and comes back to center.
+    private func blinkOnce() async {
+        withAnimation(.timingCurve(0.77, 0, 0.175, 1, duration: 0.11)) { blinking = true }
+        try? await Task.sleep(for: .milliseconds(150))
+        withAnimation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.19)) { blinking = false }
+        try? await Task.sleep(for: .milliseconds(190))
+    }
+
+    /// When nobody is directing its gaze, the owl glances somewhere now and
+    /// then, blinking as it turns, holds the look, and comes back to center.
     private func idleLoop() async {
         guard !reduceMotion, size >= 30 else { return }
         while !Task.isCancelled {
             try? await Task.sleep(for: .seconds(Double.random(in: 2.5...6)))
             guard look == .zero else { continue }
+            if blinks { Task { await blinkOnce() } }
             idleLook = CGSize(width: Double.random(in: -0.9...0.9), height: Double.random(in: -0.4...0.6))
-            try? await Task.sleep(for: .seconds(Double.random(in: 0.9...1.8)))
+            try? await Task.sleep(for: .seconds(Double.random(in: 1.2...2.2)))
             if Bool.random() { idleLook = .zero }
         }
     }

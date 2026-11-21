@@ -9,7 +9,7 @@ struct DayDoneView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
-                WatchOwl(happy: true)
+                LiveWatchOwl(happy: true)
                     .frame(width: 84, height: 84)
                     .scaleEffect(hop ? 1.06 : 0.9)
                     .offset(y: hop ? -4 : 4)
