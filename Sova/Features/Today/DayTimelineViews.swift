@@ -170,7 +170,7 @@ struct TimelineSectionHeader: View {
                 .rotationEffect(.degrees(-3))
             Spacer()
             Text(done == total ? String(localized: "\(done) of \(total) ✓") : String(localized: "\(done) of \(total)"))
-                .font(.allo(size: 12, weight: .heavy).monospacedDigit())
+                .font(.allo(size: 12, weight: .heavy, relativeTo: .caption2).monospacedDigit())
                 .foregroundStyle(done == total ? Color.positive : Color.inkTertiary)
                 .contentTransition(.numericText())
         }
@@ -233,9 +233,9 @@ struct TimelineRow<Card: View>: View {
             VStack(alignment: .trailing, spacing: 0) {
                 if let time {
                     Text(time.formatted(.dateTime.hour(.defaultDigits(amPM: .omitted)).minute()))
-                        .font(.allo(size: 13, weight: .heavy).monospacedDigit())
+                        .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote).monospacedDigit())
                     Text(time.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated))).filter { $0.isLetter })
-                        .font(.allo(size: 9, weight: .heavy))
+                        .font(.allo(size: 9, weight: .heavy, relativeTo: .caption2))
                         .opacity(0.7)
                 }
             }
@@ -247,7 +247,7 @@ struct TimelineRow<Card: View>: View {
                 .overlay(alignment: .topTrailing) {
                     if isNext && !done {
                         Text(String(localized: "NEXT"))
-                            .font(.allo(size: 10, weight: .heavy))
+                            .font(.allo(size: 10, weight: .heavy, relativeTo: .caption2))
                             .tracking(1)
                             .foregroundStyle(StickerTone.yellow.deep)
                             .padding(.horizontal, 7)
@@ -268,7 +268,7 @@ struct NowMarker: View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             HStack(spacing: 8) {
                 Text(context.date.formatted(date: .omitted, time: .shortened))
-                    .font(.allo(size: 11, weight: .heavy).monospacedDigit())
+                    .font(.allo(size: 11, weight: .heavy, relativeTo: .caption2).monospacedDigit())
                     .foregroundStyle(StickerTone.pink.fill)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -279,7 +279,7 @@ struct NowMarker: View {
                     .background(Circle().fill(StickerTone.pink.fill.opacity(0.25)).padding(-5))
                     .frame(width: 16)
                 Text(String(localized: "NOW"))
-                    .font(.allo(size: 10, weight: .heavy))
+                    .font(.allo(size: 10, weight: .heavy, relativeTo: .caption2))
                     .tracking(1.2)
                     .foregroundStyle(.white)
                     .padding(.horizontal, 8)

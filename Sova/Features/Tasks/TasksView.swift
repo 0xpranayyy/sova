@@ -231,7 +231,7 @@ private struct FilterChips: View {
                                 Text(filter.title)
                                     .font(.allo(size: 14, weight: .heavy, relativeTo: .subheadline))
                                 Text("\(n)")
-                                    .font(.allo(size: 12, weight: .heavy).monospacedDigit())
+                                    .font(.allo(size: 12, weight: .heavy, relativeTo: .caption2).monospacedDigit())
                                     .opacity(0.6)
                                     .contentTransition(.numericText(value: Double(n)))
                             }
@@ -301,7 +301,7 @@ private struct CalendarStrip: View {
                 } label: {
                     VStack(spacing: 3) {
                         Text(isToday ? String(localized: "TODAY") : day.formatted(.dateTime.weekday(.abbreviated)).uppercased())
-                            .font(.allo(size: 9.5, weight: .heavy))
+                            .font(.allo(size: 9.5, weight: .heavy, relativeTo: .caption2))
                             .tracking(0.6)
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
@@ -468,7 +468,7 @@ private struct GroupHeader: View {
                 }
                 Spacer(minLength: 6)
                 Text("\(group.tasks.count)")
-                    .font(.allo(size: 13, weight: .heavy).monospacedDigit())
+                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote).monospacedDigit())
                     .foregroundStyle(Color.inkTertiary)
                     .contentTransition(.numericText(value: Double(group.tasks.count)))
             }
@@ -493,7 +493,7 @@ private struct GroupHeader: View {
             if let day {
                 VStack(spacing: 0) {
                     Text(day.formatted(.dateTime.weekday(.abbreviated)).uppercased())
-                        .font(.allo(size: 9, weight: .heavy))
+                        .font(.allo(size: 9, weight: .heavy, relativeTo: .caption2))
                         .tracking(0.8)
                         .opacity(0.75)
                     Text(day.formatted(.dateTime.day()))

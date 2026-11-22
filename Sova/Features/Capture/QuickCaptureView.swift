@@ -118,7 +118,7 @@ struct QuickCaptureView: View {
                     Image(systemName: "slider.horizontal.3")
                         .font(.allo(.subheadline, .medium))
                         .foregroundStyle(Color.inkSecondary)
-                        .frame(width: 40, height: 40)
+                        .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.pressable)
                 .accessibilityLabel("More options")

@@ -75,11 +75,11 @@ struct PlusDetails: View {
                 MonoCaps(String(localized: "Free vs Plus"))
                 Spacer()
                 Text(String(localized: "Free"))
-                    .font(.allo(size: 13, weight: .heavy))
+                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote))
                     .foregroundStyle(Color.inkSecondary)
                     .frame(width: 54)
                 Text(String(localized: "Plus"))
-                    .font(.allo(size: 13, weight: .heavy))
+                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote))
                     .foregroundStyle(StickerTone.yellow.deep)
                     .frame(width: 54, height: 24)
                     .background(StickerTone.yellow.fill, in: .capsule)
@@ -103,7 +103,7 @@ struct PlusDetails: View {
                     .foregroundStyle(Color.ink)
                 Spacer()
                 Text(free)
-                    .font(.allo(size: 15, weight: .heavy).monospacedDigit())
+                    .font(.allo(size: 15, weight: .heavy, relativeTo: .footnote).monospacedDigit())
                     .foregroundStyle(Color.inkTertiary)
                     .frame(width: 54)
                 Text(plus)
@@ -127,7 +127,7 @@ struct PlusDetails: View {
             ForEach(0..<3, id: \.self) { i in
                 HStack(spacing: 5) {
                     Image(systemName: symbols[i]).font(.system(size: 11, weight: .bold))
-                    Text(titles[i]).font(.allo(size: 12, weight: .heavy))
+                    Text(titles[i]).font(.allo(size: 12, weight: .heavy, relativeTo: .caption2))
                 }
                 .foregroundStyle(Color.inkSecondary)
             }

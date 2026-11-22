@@ -3,6 +3,7 @@ import SwiftData
 import TipKit
 
 struct RoutinesView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(AppRouter.self) private var router
     @Query(sort: \Routine.order) private var routines: [Routine]
     @State private var showResting = false
@@ -47,8 +48,8 @@ struct RoutinesView: View {
                                                 .rotationEffect(.degrees(index.isMultiple(of: 2) ? -0.5 : 0.5))
                                                 .scrollTransition(.animated(.spring(response: 0.5, dampingFraction: 0.8))) { content, phase in
                                                     content
-                                                        .scaleEffect(phase.isIdentity ? 1 : 0.95)
-                                                        .opacity(phase.isIdentity ? 1 : 0.6)
+                                                        .scaleEffect(phase.isIdentity || reduceMotion ? 1 : 0.95)
+                                                        .opacity(phase.isIdentity || reduceMotion ? 1 : 0.6)
                                                 }
                                         }
                                     }
@@ -335,7 +336,7 @@ private struct PeriodHeader: View {
                     Circle().fill(StickerTone.pink.fill).frame(width: 7, height: 7)
                         .phaseAnimator([1.0, 0.35]) { dot, phase in dot.opacity(phase) } animation: { _ in .easeInOut(duration: 0.9) }
                     Text(String(localized: "NOW"))
-                        .font(.allo(size: 11, weight: .heavy))
+                        .font(.allo(size: 11, weight: .heavy, relativeTo: .caption2))
                         .tracking(1.2)
                         .foregroundStyle(StickerTone.pink.deep)
                 }

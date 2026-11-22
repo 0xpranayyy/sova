@@ -390,7 +390,7 @@ private struct GoalFilterChips: View {
                                 Text(filter.title)
                                     .font(.allo(size: 14, weight: .heavy, relativeTo: .subheadline))
                                 Text("\(n)")
-                                    .font(.allo(size: 12, weight: .heavy).monospacedDigit())
+                                    .font(.allo(size: 12, weight: .heavy, relativeTo: .caption2).monospacedDigit())
                                     .opacity(0.6)
                             }
                             .foregroundStyle(on ? (filter.tone == .indigo ? Color.white : filter.tone.deep) : Color.ink)

@@ -565,7 +565,7 @@ private struct WeekBars: View {
                 VStack(spacing: 6) {
                     if count > 0 {
                         Text("\(count)")
-                            .font(.allo(size: 11, weight: .heavy).monospacedDigit())
+                            .font(.allo(size: 11, weight: .heavy, relativeTo: .caption2).monospacedDigit())
                             .foregroundStyle(isToday ? StickerTone.yellow.fill : Color.white.opacity(0.7))
                             .opacity(grown ? 1 : 0)
                     }
@@ -679,7 +679,7 @@ private struct BadgeShelf: View {
                 MonoCaps(String(localized: "Badges"))
                 Spacer()
                 Text("\(earned) / \(badges.count)")
-                    .font(.allo(size: 13, weight: .heavy).monospacedDigit())
+                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote).monospacedDigit())
                     .foregroundStyle(Color.inkSecondary)
             }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 14) {

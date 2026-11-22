@@ -119,7 +119,7 @@ struct StickerHeader: View {
             Spacer(minLength: 6)
             if let count {
                 Text("\(count)")
-                    .font(.allo(size: 13, weight: .heavy).monospacedDigit())
+                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote).monospacedDigit())
                     .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
                     .padding(.horizontal, 9)
                     .frame(minWidth: 26, minHeight: 24)

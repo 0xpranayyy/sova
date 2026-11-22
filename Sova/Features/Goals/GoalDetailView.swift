@@ -154,11 +154,12 @@ struct GoalDetailView: View {
                                         .transition(.scale.combined(with: .opacity))
                                 } else {
                                     Text("\(index + 1)")
-                                        .font(.allo(size: 14, weight: .heavy).monospacedDigit())
+                                        .font(.allo(size: 14, weight: .heavy, relativeTo: .footnote).monospacedDigit())
                                         .foregroundStyle(Color.inkSecondary)
                                 }
                             }
                             .frame(width: 34, height: 34)
+                            .contentShape(Circle().inset(by: -5))
                             .scaleEffect(milestone.isDone ? 1.05 : 1)
                         }
                         .buttonStyle(.pressable)

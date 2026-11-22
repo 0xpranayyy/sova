@@ -5,6 +5,7 @@ import SwiftData
 /// live card up top, quick choices instead of form rows, and a big button
 /// docked at the bottom. Typing "tomorrow 6pm !!" offers to fill it all in.
 struct TaskEditor: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let task: TaskItem?
 
     @Environment(\.modelContext) private var context
@@ -300,8 +301,10 @@ struct TaskEditor: View {
                             .font(.system(size: 22, weight: .semibold))
                             .foregroundStyle(item.done ? (tone == .yellow || tone == .lime ? tone.deep : tone.fill) : Color.inkTertiary)
                             .contentTransition(.symbolEffect(.replace))
+                            .contentShape(Circle().inset(by: -11))
                     }
                     .buttonStyle(.pressable)
+                    .accessibilityLabel(item.done ? String(localized: "Mark step not done") : String(localized: "Mark step done"))
                     TextField(String(localized: "Step"), text: $item.title)
                         .font(.allo(size: 16, weight: .semibold, relativeTo: .body))
                         .strikethrough(item.done, color: Color.inkTertiary)
@@ -316,8 +319,10 @@ struct TaskEditor: View {
                             .foregroundStyle(Color.inkTertiary)
                             .frame(width: 26, height: 26)
                             .background(Color.well, in: .circle)
+                            .contentShape(Circle().inset(by: -9))
                     }
                     .buttonStyle(.pressable)
+                    .accessibilityLabel(String(localized: "Remove step"))
                     .accessibilityLabel(String(localized: "Remove step"))
                 }
                 .frame(minHeight: 36)
@@ -524,9 +529,9 @@ struct TaskEditor: View {
         .foregroundStyle(ink)
         .block(tone, cornerRadius: 30)
         .rotationEffect(.degrees(-1.5))
-        .phaseAnimator([0, 1], trigger: wiggle) { view, phase in
+        .phaseAnimator(reduceMotion ? [0] : [0, 1], trigger: wiggle) { view, phase in
             view.rotationEffect(.degrees(phase == 1 ? 2.5 : 0)).scaleEffect(phase == 1 ? 1.03 : 1)
-        } animation: { _ in .spring(response: 0.3, dampingFraction: 0.5) }
+        } animation: { _ in .open(0.28) }
         .padding(6)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: accent)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: priority)

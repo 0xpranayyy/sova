@@ -527,7 +527,7 @@ struct RitualCard: View {
                 .multilineTextAlignment(.leading)
             if routine.isCounted && !done {
                 Text("\(routine.tally(on: .now)) / \(routine.target)")
-                    .font(.allo(size: 12, weight: .heavy).monospacedDigit())
+                    .font(.allo(size: 12, weight: .heavy, relativeTo: .caption2).monospacedDigit())
                     .opacity(0.7)
                     .padding(.top, 2)
             }
@@ -551,7 +551,7 @@ struct RitualCard: View {
                 SpringKeyframe(-5, duration: 0.09, spring: .snappy)
                 SpringKeyframe(4, duration: 0.1, spring: .snappy)
                 SpringKeyframe(-2, duration: 0.1, spring: .snappy)
-                SpringKeyframe(0, duration: 0.3, spring: .bouncy)
+                SpringKeyframe(0, duration: 0.3, spring: .spring(response: 0.35, dampingFraction: 0.78))
             }
         }
         .rotationEffect(.degrees(tilt))
@@ -599,7 +599,7 @@ struct DayRow: View {
                         Image(systemName: "checklist")
                         Text("\(t.checklistDone)/\(t.checklist.count)").monospacedDigit()
                     }
-                    .font(.allo(size: 12, weight: .heavy))
+                    .font(.allo(size: 12, weight: .heavy, relativeTo: .caption2))
                     .foregroundStyle(t.checklistDone == t.checklist.count ? Color.positive : Color.inkTertiary)
                     .accessibilityLabel(String(localized: "\(t.checklistDone) of \(t.checklist.count) steps"))
                 }

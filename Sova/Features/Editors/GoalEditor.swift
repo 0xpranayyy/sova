@@ -4,6 +4,7 @@ import SwiftData
 /// Make or edit a goal. The card up top is the goal as it will look on the
 /// Goals tab, and fills in as you go.
 struct GoalEditor: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let goal: Goal?
 
     @Environment(\.modelContext) private var context
@@ -182,7 +183,7 @@ struct GoalEditor: View {
             ForEach(Array(newSteps.enumerated()), id: \.offset) { index, step in
                 HStack(spacing: 12) {
                     Text("\(index + 1)")
-                        .font(.allo(size: 13, weight: .heavy).monospacedDigit())
+                        .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote).monospacedDigit())
                         .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
                         .frame(width: 26, height: 26)
                         .background(tone.fill, in: .circle)
@@ -198,8 +199,10 @@ struct GoalEditor: View {
                             .foregroundStyle(Color.inkSecondary)
                             .frame(width: 30, height: 30)
                             .background(Color.well, in: .circle)
+                            .contentShape(Circle().inset(by: -7))
                     }
                     .buttonStyle(.pressable)
+                    .accessibilityLabel(String(localized: "Remove step"))
                     .accessibilityLabel(String(localized: "Remove \(step)"))
                 }
                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -219,7 +222,7 @@ struct GoalEditor: View {
                     .onSubmit(addStep)
                 if !trimmedDraft.isEmpty {
                     Button(String(localized: "Add"), action: addStep)
-                        .font(.allo(size: 14, weight: .heavy))
+                        .font(.allo(size: 14, weight: .heavy, relativeTo: .footnote))
                         .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
                         .padding(.horizontal, 14)
                         .frame(height: 32)
@@ -327,9 +330,9 @@ struct GoalEditor: View {
         .foregroundStyle(ink)
         .block(tone, cornerRadius: 30)
         .rotationEffect(.degrees(-1.5))
-        .phaseAnimator([0, 1], trigger: wiggle) { view, phase in
+        .phaseAnimator(reduceMotion ? [0] : [0, 1], trigger: wiggle) { view, phase in
             view.rotationEffect(.degrees(phase == 1 ? 2.5 : 0)).scaleEffect(phase == 1 ? 1.03 : 1)
-        } animation: { _ in .spring(response: 0.3, dampingFraction: 0.5) }
+        } animation: { _ in .open(0.28) }
         .padding(.horizontal, 6)
         .padding(.vertical, 6)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: accent)

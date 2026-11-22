@@ -94,7 +94,7 @@ struct RoutineRow: View {
                 SpringKeyframe(-4, duration: 0.09, spring: .snappy)
                 SpringKeyframe(3, duration: 0.1, spring: .snappy)
                 SpringKeyframe(-1.5, duration: 0.1, spring: .snappy)
-                SpringKeyframe(0, duration: 0.3, spring: .bouncy)
+                SpringKeyframe(0, duration: 0.3, spring: .spring(response: 0.35, dampingFraction: 0.78))
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.75), value: done)

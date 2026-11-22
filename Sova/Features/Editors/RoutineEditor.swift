@@ -4,6 +4,7 @@ import SwiftData
 /// Make or edit a ritual. The sticker up top is exactly how it will look on
 /// Today, and it changes as you type, pick a color or an icon.
 struct RoutineEditor: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let routine: Routine?
 
     @Environment(\.modelContext) private var context
@@ -198,9 +199,9 @@ struct RoutineEditor: View {
             .frame(width: 156, height: 156, alignment: .topLeading)
             .background(tone.fill, in: .rect(cornerRadius: 34, style: .continuous))
             .rotationEffect(.degrees(-3))
-            .phaseAnimator([0, 1], trigger: wiggle) { view, phase in
+            .phaseAnimator(reduceMotion ? [0] : [0, 1], trigger: wiggle) { view, phase in
                 view.rotationEffect(.degrees(phase == 1 ? 4 : 0)).scaleEffect(phase == 1 ? 1.05 : 1)
-            } animation: { _ in .spring(response: 0.3, dampingFraction: 0.5) }
+            } animation: { _ in .open(0.28) }
 
             HStack(spacing: 6) {
                 Image(systemName: period.symbol)
