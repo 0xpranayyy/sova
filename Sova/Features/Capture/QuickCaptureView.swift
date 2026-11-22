@@ -8,6 +8,7 @@ struct QuickCaptureView: View {
     @Environment(\.modelContext) private var context
     @Environment(AppRouter.self) private var router
     @AppStorage("theme") private var themeRaw = SovaTheme.ember.rawValue
+    @Query(filter: #Predicate<Goal> { !$0.isArchived }, sort: \Goal.createdAt) private var goals: [Goal]
 
     @State private var text = ""
     @State private var day: DayChoice = .today
@@ -36,7 +37,11 @@ struct QuickCaptureView: View {
 
     private var theme: SovaTheme { SovaTheme(rawValue: themeRaw) ?? .ember }
     private var accent: Color { theme.accent.color }
-    private var parsed: ParsedTask { QuickParse.parse(text) }
+    private var parsed: ParsedTask { QuickParse.parse(text, goals: goals.map(\.title)) }
+    private var parsedGoal: Goal? {
+        guard let i = parsed.goalIndex, goals.indices.contains(i) else { return nil }
+        return goals[i]
+    }
     private var canSave: Bool { !parsed.title.isEmpty }
     private let fieldFont = Font.allo(size: 27, weight: .heavy, relativeTo: .title2)
 
@@ -55,6 +60,10 @@ struct QuickCaptureView: View {
         if let range = parsed.priorityRange, let r = Range(range, in: attributed) {
             attributed[r].foregroundColor = StickerTone.pink.deep
             attributed[r].backgroundColor = StickerTone.pink.fill
+        }
+        if let range = parsed.goalRange, let r = Range(range, in: attributed) {
+            attributed[r].foregroundColor = StickerTone.cyan.deep
+            attributed[r].backgroundColor = StickerTone.cyan.fill
         }
         return attributed
     }
@@ -113,6 +122,11 @@ struct QuickCaptureView: View {
                 if parsed.priority != .low {
                     Token(symbol: "flag", text: parsed.priority == .high ? String(localized: "High") : String(localized: "Medium"))
                 }
+                if let goal = parsedGoal {
+                    Token(symbol: goal.symbol, text: goal.title)
+                        .lineLimit(1)
+                        .layoutPriority(-1)
+                }
                 Spacer(minLength: 4)
                 Button(action: openDetails) {
                     Image(systemName: "slider.horizontal.3")
@@ -147,6 +161,7 @@ struct QuickCaptureView: View {
         .sovaFeedback(.selection, trigger: parsed.dueDate != nil) { _, found in found }
         .sovaFeedback(.selection, trigger: parsed.priority)
         .sovaFeedback(.selection, trigger: parsed.repeatRule)
+        .sovaFeedback(.selection, trigger: parsed.goalIndex)
         .task { focused = true }
     }
 
@@ -163,6 +178,7 @@ struct QuickCaptureView: View {
         )
         task.repeatRule = p.repeatRule
         context.insert(task)
+        if let i = p.goalIndex, goals.indices.contains(i) { task.goal = goals[i] }
         TaskAlerts.schedule(task)
         SovaRefresh.changed(context)
         if task.hasTime { Task { await TaskAlerts.requestPermissionIfNeeded() } }

@@ -83,13 +83,15 @@ struct AddTaskIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let parsed = QuickParse.parse(text)
+        let context = SovaStore.workContext()
+        let goals = (try? context.fetch(FetchDescriptor<Goal>(predicate: #Predicate<Goal> { !$0.isArchived }))) ?? []
+        let parsed = QuickParse.parse(text, goals: goals.map(\.title))
         let title = parsed.title.isEmpty ? text : parsed.title
         let task = TaskItem(title: title, dueDate: parsed.dueDate ?? Date.now.startOfDay,
                             hasTime: parsed.dueDate != nil && parsed.hasTime,
                             priority: parsed.priority, accent: SovaTheme.current.accent)
         task.repeatRule = parsed.repeatRule
-        let context = SovaStore.workContext()
+        if let i = parsed.goalIndex, goals.indices.contains(i) { task.goal = goals[i] }
         context.insert(task)
         try? context.save()
         TaskAlerts.schedule(task)

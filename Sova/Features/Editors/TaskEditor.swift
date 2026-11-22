@@ -152,8 +152,9 @@ struct TaskEditor: View {
 
     private func parse() -> ParsedTask? {
         guard task == nil, !trimmedTitle.isEmpty else { return nil }
-        let result = QuickParse.parse(title)
-        guard result.dateRange != nil || result.priorityRange != nil || result.repeatRange != nil,
+        let result = QuickParse.parse(title, goals: goals.map(\.title))
+        guard result.dateRange != nil || result.priorityRange != nil || result.repeatRange != nil
+                || result.goalRange != nil,
               !result.title.isEmpty else { return nil }
         return result
     }
@@ -438,6 +439,7 @@ struct TaskEditor: View {
         if let date = parsed.dueDate { parts.append(date.relativeDayText(includingTime: parsed.hasTime)) }
         if parsed.repeatRule != .none { parts.append(parsed.repeatRule.label) }
         if parsed.priority != .low { parts.append(parsed.priority == .high ? String(localized: "High priority") : String(localized: "Medium priority")) }
+        if let i = parsed.goalIndex, goals.indices.contains(i) { parts.append(goals[i].title) }
         return Button { apply(parsed) } label: {
             HStack(spacing: 10) {
                 Image(systemName: "sparkles")
@@ -480,6 +482,7 @@ struct TaskEditor: View {
             }
             if parsed.priority != .low { priority = parsed.priority }
             if parsed.repeatRule != .none { repeatRule = parsed.repeatRule }
+            if let i = parsed.goalIndex, goals.indices.contains(i) { goal = goals[i] }
         }
         wiggle += 1
         Haptics.pop()

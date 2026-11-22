@@ -160,5 +160,20 @@ extension Routine {
         }
         return seen == 3 && missed >= 2
     }
-}
 
+    /// The time of day you usually finish this ritual, in minutes after
+    /// midnight: the median of the last 30 check-offs, rounded to 5 minutes.
+    /// Nil until there are at least 5 real check-offs (ones ticked from the
+    /// history, stored at midnight, don't count).
+    var usualMinutes: Int? {
+        let cal = Calendar.current
+        let minutes = completions.suffix(30).compactMap { date -> Int? in
+            let parts = cal.dateComponents([.hour, .minute], from: date)
+            let m = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+            return m == 0 ? nil : m
+        }.sorted()
+        guard minutes.count >= 5 else { return nil }
+        let median = minutes[minutes.count / 2]
+        return min(Int((Double(median) / 5).rounded()) * 5, 23 * 60 + 55)
+    }
+}

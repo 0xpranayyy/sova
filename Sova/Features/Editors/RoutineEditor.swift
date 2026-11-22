@@ -110,6 +110,9 @@ struct RoutineEditor: View {
                                     .foregroundStyle(Color.ink)
                             }
                             .tint(tone == .yellow || tone == .lime ? tone.deep : tone.fill)
+                            if let usual = routine?.usualMinutes, usual != reminderMinutes {
+                                suggestedTime(usual)
+                            }
                             if reminderOn {
                                 DatePicker(String(localized: "Time"), selection: $reminderTime, displayedComponents: .hourAndMinute)
                                     .datePickerStyle(.wheel)
@@ -272,6 +275,38 @@ struct RoutineEditor: View {
     }
 
     // MARK: Saving
+
+    /// "Suggested 7:40 AM": when you usually do it, one tap to use it.
+    private func suggestedTime(_ minutes: Int) -> some View {
+        let time = Reminders.time(hour: minutes / 60, minute: minutes % 60)
+        return Button {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                reminderOn = true
+                reminderTime = time
+            }
+            Haptics.pop(0.5)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles").font(.system(size: 13, weight: .heavy))
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(String(localized: "Suggested \(time.formatted(date: .omitted, time: .shortened))"))
+                        .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
+                    Text(String(localized: "When you usually do it"))
+                        .font(.allo(size: 12, weight: .bold, relativeTo: .caption))
+                        .opacity(0.75)
+                }
+                Spacer(minLength: 4)
+                Text(String(localized: "Use"))
+                    .font(.allo(size: 14, weight: .heavy, relativeTo: .footnote))
+            }
+            .foregroundStyle(StickerTone.indigo.deep)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 18, style: .continuous))
+        }
+        .buttonStyle(.pressable)
+        .transition(.scale.combined(with: .opacity))
+    }
 
     private var reminderMinutes: Int {
         guard reminderOn else { return -1 }
