@@ -513,10 +513,8 @@ struct RitualCard: View {
 
     @State private var wiggle = 0
 
-    var body: some View {
-        let tone = StickerTone(routine.accent)
-        let ink = tone == .indigo ? Color.white : tone.deep
-        let done = routine.isDone(on: .now)
+    /// The tile's content: icon and check, the name, and a count or tag.
+    private func tile(tone: StickerTone, ink: Color, done: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 Image(systemName: routine.symbol)
@@ -554,6 +552,13 @@ struct RitualCard: View {
                     .padding(.top, 4)
             }
         }
+    }
+
+    var body: some View {
+        let tone = StickerTone(routine.accent)
+        let ink = tone == .indigo ? Color.white : tone.deep
+        let done = routine.isDone(on: .now)
+        tile(tone: tone, ink: ink, done: done)
         .foregroundStyle(ink)
         .padding(14)
         .frame(width: 132, height: 132, alignment: .topLeading)
@@ -566,8 +571,8 @@ struct RitualCard: View {
         }
         .opacity(done ? 0.6 : 1)
         // A happy wiggle when checked: a quick swell and a shake that settles.
-        .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { view, t in
-            view.scaleEffect(1 + abs(t) * 0.012).rotationEffect(.degrees(t))
+        .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { (view, t: Double) in
+            view.scaleEffect(CGFloat(1 + abs(t) * 0.012)).rotationEffect(.degrees(t))
         } keyframes: { _ in
             KeyframeTrack {
                 SpringKeyframe(-5, duration: 0.09, spring: .snappy)

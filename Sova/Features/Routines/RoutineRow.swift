@@ -13,8 +13,35 @@ struct RoutineRow: View {
     @Environment(\.modelContext) private var context
     @State private var confirmDelete = false
 
+    private var scheduleText: String {
+        let days: String = Weekdays.summary(for: routine.weekdays)
+        guard routine.isCounted else { return days }
+        return "\(routine.tally(on: .now))/\(routine.target) · " + days
+    }
+
     /// Streaks worth a little party.
     private static let milestones: Set<Int> = [3, 7, 14, 21, 30, 50, 100, 200, 365]
+
+    /// The name with its streak chip, or a slipping tag.
+    private func titleLine(ink: Color, done: Bool) -> some View {
+        HStack(spacing: 6) {
+            Text(routine.title)
+                .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
+                .tracking(-0.4)
+                .lineLimit(2)
+            if routine.streak > 1 {
+                Text("\(Image(systemName: "flame.fill")) \(routine.streak)")
+                    .font(.allo(size: 12, weight: .heavy, relativeTo: .caption))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(ink.opacity(0.12), in: .capsule)
+                    .rotationEffect(.degrees(-4))
+                    .accessibilityLabel(String(localized: "\(routine.streak) day streak"))
+            } else if !done && routine.isSlipping {
+                SlippingTag(ink: ink)
+            }
+        }
+    }
 
     var body: some View {
         let tone = StickerTone(routine.accent)
@@ -31,27 +58,10 @@ struct RoutineRow: View {
                             in: .rect(cornerRadius: 16, style: .continuous))
                 .rotationEffect(.degrees(-6))
             VStack(alignment: .leading, spacing: 7) {
-                HStack(spacing: 6) {
-                    Text(routine.title)
-                        .font(.allo(size: 18, weight: .heavy, relativeTo: .headline))
-                        .tracking(-0.4)
-                        .lineLimit(2)
-                    if routine.streak > 1 {
-                        Text("\(Image(systemName: "flame.fill")) \(routine.streak)")
-                            .font(.allo(size: 12, weight: .heavy, relativeTo: .caption))
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 3)
-                            .background(ink.opacity(0.12), in: .capsule)
-                            .rotationEffect(.degrees(-4))
-                            .accessibilityLabel(String(localized: "\(routine.streak) day streak"))
-                    } else if !done && routine.isSlipping {
-                        SlippingTag(ink: ink)
-                    }
-                }
+                titleLine(ink: ink, done: done)
                 HStack(spacing: 8) {
                     WeekTrack(routine: routine, color: ink)
-                    Text((routine.isCounted ? "\(routine.tally(on: .now))/\(routine.target) · " : "")
-                         + Weekdays.summary(for: routine.weekdays))
+                    Text(scheduleText)
                         .font(.allo(size: 10.5, weight: .heavy, relativeTo: .caption2))
                         .tracking(1.2)
                         .textCase(.uppercase)
@@ -89,8 +99,8 @@ struct RoutineRow: View {
                 shape.strokeBorder(tone.fill.opacity(0.65), lineWidth: 1.5)
             }
         }
-        .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { view, t in
-            view.scaleEffect(1 + abs(t) * 0.01).rotationEffect(.degrees(t * 0.6))
+        .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { (view, t: Double) in
+            view.scaleEffect(CGFloat(1 + abs(t) * 0.01)).rotationEffect(.degrees(t * 0.6))
         } keyframes: { _ in
             KeyframeTrack {
                 SpringKeyframe(-4, duration: 0.09, spring: .snappy)

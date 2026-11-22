@@ -49,7 +49,8 @@ struct WeeklyReviewCard: View {
             .padding(.top, 14)
 
             if let slip = review.slip {
-                Text("\(Image(systemName: "arrow.down.right")) \(String(localized: "\(slip) · kept \(review.slipKept) of \(review.slipScheduled) days"))")
+                let line: String = String(localized: "\(slip) · kept \(review.slipKept) of \(review.slipScheduled) days")
+                Label(line, systemImage: "arrow.down.right")
                     .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
