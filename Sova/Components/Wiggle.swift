@@ -19,7 +19,7 @@ struct Wiggle: ViewModifier {
                 SpringKeyframe(Double(-5), duration: 0.09, spring: .snappy)
                 SpringKeyframe(Double(4), duration: 0.1, spring: .snappy)
                 SpringKeyframe(Double(-2), duration: 0.1, spring: .snappy)
-                SpringKeyframe(Double(0), duration: 0.3, spring: .spring(response: 0.35, dampingFraction: 0.78))
+                SpringKeyframe(Double(0), duration: 0.3, spring: Spring(response: 0.35, dampingRatio: 0.78))
             }
         }
     }
