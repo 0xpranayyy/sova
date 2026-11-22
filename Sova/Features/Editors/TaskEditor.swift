@@ -527,7 +527,6 @@ struct TaskEditor: View {
         .phaseAnimator([0, 1], trigger: wiggle) { view, phase in
             view.rotationEffect(.degrees(phase == 1 ? 2.5 : 0)).scaleEffect(phase == 1 ? 1.03 : 1)
         } animation: { _ in .spring(response: 0.3, dampingFraction: 0.5) }
-        .shadow(color: tone.deep.opacity(0.16), radius: 18, y: 10)
         .padding(6)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: accent)
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: priority)

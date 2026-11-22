@@ -298,8 +298,7 @@ struct ComingUpCard: View {
                     .foregroundStyle(Color.inkTertiary)
             }
             .padding(14)
-            .background(Color.surface, in: .rect(cornerRadius: 26, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
+            .cardBackground()
         }
         .buttonStyle(.pressable)
         .accessibilityHint(String(localized: "Opens Tasks"))
@@ -349,7 +348,7 @@ struct DayStage: View {
 
                 OwlMark(size: 84, happy: total > 0 && done == total,
                         bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
                         celebrate: cheers)
                     .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { owlFrame = $0 }
                     .position(x: w / 2, y: h * 0.57)
@@ -374,7 +373,7 @@ struct DayStage: View {
             }
         }
         .frame(height: 250)
-        .clipShape(.rect(cornerRadius: 36, style: .continuous))
+        .clipShape(.rect(cornerRadius: Radius.hero, style: .continuous))
         .shadow(color: StickerTone.indigo.shadow, radius: 18, y: 10)
         .onChange(of: done) { old, new in
             // The last thing of the day: the owl hops, sparkles burst, and a
@@ -622,9 +621,7 @@ struct DayRow: View {
             .padding(.leading, 14)
             .padding(.trailing, 14)
             .padding(.vertical, 9)
-            .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.05), radius: 10, y: 5)),
-                        in: .rect(cornerRadius: 26, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
+            .cardBackground()
             .contentShape(.rect)
             .onTapGesture(perform: onOpen)
             .accessibilityElement(children: .combine)

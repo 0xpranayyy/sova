@@ -517,7 +517,7 @@ private struct GroupHeader: View {
         HStack(spacing: 10) {
             Text(group.tasks.count == 1 ? String(localized: "1 overdue") : String(localized: "\(group.tasks.count) overdue"))
                 .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
-                .foregroundStyle(Color(hex: 0xC21E5A))
+                .foregroundStyle(Color.alertInk)
             Text(String(localized: "from earlier"))
                 .font(.allo(size: 13, weight: .bold, relativeTo: .footnote))
                 .foregroundStyle(Color.inkSecondary)
@@ -573,8 +573,7 @@ private struct AllClear: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 26)
-        .background(Color.surface, in: .rect(cornerRadius: 34, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 34, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
+        .cardBackground(Radius.hero)
     }
 }
 
@@ -583,20 +582,10 @@ private struct NothingHere: View {
     let onReset: () -> Void
 
     var body: some View {
-        VStack(spacing: 10) {
-            OwlMark(size: 60, happy: true, reactsToTap: false)
-            Text(isFiltered ? String(localized: "Nothing matches") : String(localized: "A free day"))
-                .font(.allo(size: 19, weight: .heavy, relativeTo: .headline))
-                .foregroundStyle(Color.ink)
-            Text(isFiltered ? String(localized: "Try another filter.") : String(localized: "Nothing planned for this day yet."))
-                .font(.allo(.subheadline, .semibold))
-                .foregroundStyle(Color.inkSecondary)
-            Button(String(localized: "Show everything"), action: onReset)
-                .buttonStyle(.inkCompact)
-                .padding(.top, 4)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 18)
+        // The same empty state as every other tab.
+        EmptyState(title: isFiltered ? String(localized: "Nothing matches") : String(localized: "A free day"),
+                   message: isFiltered ? String(localized: "Try another filter.") : String(localized: "Nothing planned for this day yet."),
+                   actionTitle: String(localized: "Show everything"), action: onReset)
     }
 }
 

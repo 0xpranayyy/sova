@@ -117,7 +117,7 @@ private struct OwlStage: View {
 
                 OwlMark(size: 150, look: look, bodyColor: StickerTone.yellow.fill,
                         eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
-                        bellyColor: Color(hex: 0xFFF4A8), celebrate: wave)
+                        bellyColor: Color.owlBelly, celebrate: wave)
                     .position(x: w / 2, y: h * 0.42)
 
                 TiltPill(text: String(localized: "Meditate ✓"), tone: .mint, tilt: -8).position(x: w * 0.24, y: h * 0.13).pop(0)
@@ -819,7 +819,7 @@ struct FinishStep: View {
                         .position(x: w / 2, y: h * 0.5)
                     OwlMark(size: 140, happy: true, blinks: false, bodyColor: StickerTone.yellow.fill,
                             eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
-                            bellyColor: Color(hex: 0xFFF4A8), celebrate: hop)
+                            bellyColor: Color.owlBelly, celebrate: hop)
                         .position(x: w / 2, y: h * 0.52)
                     SparkleDot(color: StickerTone.mint.fill, size: 40).position(x: w * 0.16, y: h * 0.22).pop(0)
                     SparkleDot(color: StickerTone.pink.fill, size: 28).position(x: w * 0.84, y: h * 0.18).pop(1)

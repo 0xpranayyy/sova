@@ -201,7 +201,6 @@ struct RoutineEditor: View {
             .phaseAnimator([0, 1], trigger: wiggle) { view, phase in
                 view.rotationEffect(.degrees(phase == 1 ? 4 : 0)).scaleEffect(phase == 1 ? 1.05 : 1)
             } animation: { _ in .spring(response: 0.3, dampingFraction: 0.5) }
-            .shadow(color: tone.deep.opacity(0.18), radius: 18, y: 10)
 
             HStack(spacing: 6) {
                 Image(systemName: period.symbol)

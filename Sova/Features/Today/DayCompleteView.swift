@@ -37,7 +37,7 @@ struct DayCompleteView: View {
                     .position(owl)
                 OwlMark(size: 84, happy: true,
                         bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
                         reactsToTap: false)
                     .position(owl)
 

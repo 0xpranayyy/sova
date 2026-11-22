@@ -43,7 +43,7 @@ struct InsightsView: View {
 
                     StatStrip(items: [
                         .init(value: "\(index.tasks(inLast: range.days))", unit: nil,
-                              label: String(localized: "Tasks done"), color: Color(hex: 0xC21E5A)),
+                              label: String(localized: "Tasks done"), color: Color.alertInk),
                         .init(value: "\(routines.map(\.streak).max() ?? 0)", unit: String(localized: "d"),
                               label: String(localized: "Best streak"), color: Color(hex: 0xE07F17)),
                         .init(value: index.perDay(inLast: range.days).formatted(.number.precision(.fractionLength(0...1))),
@@ -174,7 +174,7 @@ struct InsightsView: View {
                 }
                 OwlMark(size: 62, happy: current >= 0.5 || owlTaps > 0, bodyColor: StickerTone.yellow.fill,
                         eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
-                        bellyColor: Color(hex: 0xFFF4A8), celebrate: secret, reactsToTap: false)
+                        bellyColor: Color.owlBelly, celebrate: secret, reactsToTap: false)
                     .rotationEffect(.degrees(8))
                     .onTapGesture(perform: pokeOwl)
                     .overlay { SparkleBurst(trigger: secret, radius: CGSize(width: 110, height: 90), count: 14) }
@@ -182,7 +182,7 @@ struct InsightsView: View {
         }
         .padding(20)
         .background(StickerTone.indigo.fill.shadow(.drop(color: StickerTone.indigo.shadow, radius: 18, y: 10)),
-                    in: .rect(cornerRadius: 34, style: .continuous))
+                    in: .rect(cornerRadius: Radius.hero, style: .continuous))
         .overlay(alignment: .topLeading) {
             SparkleDot(color: StickerTone.pink.fill, size: 14)
                 .padding(.leading, 236)
@@ -511,9 +511,7 @@ private struct StatStrip: View {
         }
         .padding(.vertical, 16)
         .padding(.horizontal, 4)
-        .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.06), radius: 12, y: 6)),
-                    in: .rect(cornerRadius: 26, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
+        .cardBackground()
     }
 }
 

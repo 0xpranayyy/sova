@@ -56,8 +56,9 @@ struct GoalsView: View {
                         }
 
                         if !achieved.isEmpty {
-                            SectionLabel(String(localized: "Achieved"), trailing: "\(achieved.count)")
-                                .padding(.top, 14)
+                            StickerHeader(title: String(localized: "Achieved"), symbol: "trophy.fill", tone: .yellow,
+                                          count: achieved.count)
+                                .padding(.top, 18)
                             ForEach(achieved) { goal in
                                 TrophyRow(goal: goal) { open(goal) } onArchive: { archive(goal) }
                                     .matchedTransitionSource(id: goal.persistentModelID, in: zoom)
@@ -209,7 +210,7 @@ private struct SeasonStage: View {
             GoalRings(goals: ringed, grown: grown, size: 112) {
                 OwlMark(size: 40, happy: average >= 0.5 || owlTaps > 0,
                         bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
                         celebrate: secret, reactsToTap: false)
                     .onTapGesture(perform: pokeOwl)
             }
@@ -253,7 +254,7 @@ private struct SeasonStage: View {
                     .padding(.trailing, 26).padding(.bottom, 22)
             }
         }
-        .clipShape(.rect(cornerRadius: 34, style: .continuous))
+        .clipShape(.rect(cornerRadius: Radius.hero, style: .continuous))
         .shadow(color: StickerTone.indigo.shadow, radius: 18, y: 10)
         .onAppear {
             withAnimation(reduceMotion ? nil : .spring(response: 1.0, dampingFraction: 0.8).delay(0.1)) { grown = true }
@@ -455,8 +456,7 @@ private struct TrophyRow: View {
             .accessibilityLabel(archived ? String(localized: "Unarchive") : String(localized: "Archive"))
         }
         .padding(12)
-        .background(Color.surface, in: .rect(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Color.hairline, lineWidth: 1.5))
+        .cardBackground()
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)
         .accessibilityElement(children: .combine)

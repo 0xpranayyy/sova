@@ -4,11 +4,33 @@ import SwiftUI
 // Allo color with tonal text. Liquid Glass stays on the system tab bar,
 // sheets and the undo bar.
 
+/// The corner radii every card in Sova uses, so the app reads as one hand.
+enum Radius {
+    /// Big indigo hero cards at the top of each tab.
+    static let hero: CGFloat = 34
+    /// White cards and rows.
+    static let card: CGFloat = 26
+    /// Sticker tiles.
+    static let tile: CGFloat = 22
+    /// Chips and pills that aren't capsules.
+    static let chip: CGFloat = 18
+    static let small: CGFloat = 12
+}
+
 extension View {
+    /// The white card's fill, shadow and ring, for cards that set their own
+    /// padding. Same as `surface`, so every white card matches.
+    func cardBackground(_ radius: CGFloat = Radius.card) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        return self
+            .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.06), radius: 14, y: 7)), in: shape)
+            .overlay(shape.strokeBorder(Color.hairline, lineWidth: 1.5))
+    }
+
     /// A white card. Pass `tint` to fill it with a flat color instead.
     func surface(cornerRadius: CGFloat = 24, padding: CGFloat = 16, tint: Color? = nil,
                  interactive: Bool = false) -> some View {
-        let shape = RoundedRectangle(cornerRadius: max(cornerRadius, 22), style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         return self
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)

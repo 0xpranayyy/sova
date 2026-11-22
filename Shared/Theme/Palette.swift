@@ -55,6 +55,10 @@ extension Color {
     static let danger = Color.ember
     /// Green for good news, readable on the page in both modes.
     static let positive = Color(light: 0x0B5A3C, dark: 0x4DF2B0)
+    /// The owl's pale yellow belly.
+    static let owlBelly = Color(hex: 0xFFF4A8)
+    /// Overdue and warning text on white.
+    static let alertInk = Color(hex: 0xC21E5A)
 
     static let skyMorning = StickerTone.orange.fill
     static let skyAfternoon = StickerTone.yellow.fill

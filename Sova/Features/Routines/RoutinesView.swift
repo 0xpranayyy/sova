@@ -239,7 +239,7 @@ struct WeekStage: View {
                         if isToday {
                             OwlMark(size: 34, happy: total > 0 && done == total,
                                     bodyColor: StickerTone.yellow.fill, eyeColor: Color(hex: 0x2B1677),
-                                    pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
+                                    pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
                                     celebrate: cheers)
                                 .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 80, height: 60), count: 10) }
                                 .onTapGesture(perform: pokeOwl)
@@ -284,7 +284,7 @@ struct WeekStage: View {
                     .padding(.trailing, 98).padding(.top, 54)
             }
         }
-        .clipShape(.rect(cornerRadius: 34, style: .continuous))
+        .clipShape(.rect(cornerRadius: Radius.hero, style: .continuous))
         .shadow(color: StickerTone.indigo.shadow, radius: 18, y: 10)
         .onChange(of: done) { old, new in
             if total > 0, new == total, old < total {

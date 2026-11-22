@@ -76,7 +76,7 @@ struct PlusView: View {
         HStack(alignment: .center, spacing: 14) {
             ZStack(alignment: .top) {
                 OwlMark(size: 58, happy: true, bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8), celebrate: cheers)
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly, celebrate: cheers)
                     .padding(.top, 16)
                 PlusCrown()
                     .frame(width: 30, height: 21)

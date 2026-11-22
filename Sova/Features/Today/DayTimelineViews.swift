@@ -36,7 +36,7 @@ struct DayHeaderCard: View {
                     .opacity(progress > 0 ? 1 : 0)
                 OwlMark(size: 44, happy: allDone,
                         bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8),
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
                         celebrate: cheers)
                     .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { owlFrame = $0 }
                     .offset(y: 2)

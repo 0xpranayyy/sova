@@ -284,7 +284,7 @@ struct SettingsView: View {
                 Spacer(minLength: 0)
                 OwlMark(size: 70, happy: versionTaps > 0 || streak > 1, bodyColor: StickerTone.yellow.fill,
                         eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
-                        bellyColor: Color(hex: 0xFFF4A8), celebrate: secret)
+                        bellyColor: Color.owlBelly, celebrate: secret)
                     .rotationEffect(.degrees(8))
                     .overlay { SparkleBurst(trigger: secret, radius: CGSize(width: 110, height: 90), count: 14) }
             }
@@ -298,7 +298,7 @@ struct SettingsView: View {
         }
         .padding(20)
         .background(StickerTone.indigo.fill.shadow(.drop(color: StickerTone.indigo.shadow, radius: 18, y: 10)),
-                    in: .rect(cornerRadius: 30, style: .continuous))
+                    in: .rect(cornerRadius: Radius.hero, style: .continuous))
         .overlay(alignment: .topLeading) {
             SparkleDot(color: StickerTone.pink.fill, size: 13).padding(.leading, 210).padding(.top, 18)
         }
@@ -326,7 +326,7 @@ struct SettingsView: View {
             HStack(spacing: 14) {
                 OwlMark(size: 34, happy: store.isPlus, blinks: false,
                         bodyColor: StickerTone.yellow.fill, eyeColor: Color(hex: 0x2B1677),
-                        pupilColor: StickerTone.yellow.fill, bellyColor: Color(hex: 0xFFF4A8))
+                        pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly)
                     .frame(width: 52, height: 52)
                     .background(StickerTone.indigo.fill, in: .rect(cornerRadius: 16, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
