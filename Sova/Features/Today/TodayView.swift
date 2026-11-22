@@ -520,21 +520,8 @@ struct RitualCard: View {
                 Image(systemName: routine.symbol)
                     .font(.system(size: 24, weight: .semibold))
                 Spacer()
-                Group {
-                    if routine.isCounted {
-                        CountCheck(routine: routine, ink: tone.deep, fill: tone.fill, size: 30) {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.advance(on: .now) }
-                            if routine.isDone(on: .now) { wiggle += 1 }
-                        }
-                    } else {
-                        CheckButton(isOn: done, color: tone.deep, round: true, size: 30, checkColor: tone.fill,
-                                    label: routine.title) {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.advance(on: .now) }
-                            if routine.isDone(on: .now) { wiggle += 1 }
-                        }
-                    }
-                }
-                .padding(-7)
+                check(tone: tone, done: done)
+                    .padding(-7)
             }
             Spacer(minLength: 8)
             Text(routine.title)
@@ -555,40 +542,49 @@ struct RitualCard: View {
     }
 
     var body: some View {
-        let tone = StickerTone(routine.accent)
-        let ink = tone == .indigo ? Color.white : tone.deep
-        let done = routine.isDone(on: .now)
+        let tone: StickerTone = StickerTone(routine.accent)
+        let ink: Color = tone == .indigo ? Color.white : tone.deep
+        let done: Bool = routine.isDone(on: .now)
+        let actionName: String = done ? String(localized: "Mark as not done") : String(localized: "Mark as done")
         tile(tone: tone, ink: ink, done: done)
-        .foregroundStyle(ink)
-        .padding(14)
-        .frame(width: 132, height: 132, alignment: .topLeading)
-        .background {
-            let shape = RoundedRectangle(cornerRadius: 30, style: .continuous)
-            shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
-            shape.fill(LinearGradient(colors: [Color.white.opacity(0.24), .clear], startPoint: .top, endPoint: .center))
-            shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.55), .clear],
-                                              startPoint: .top, endPoint: .center), lineWidth: 1.2)
-        }
-        .opacity(done ? 0.6 : 1)
-        // A happy wiggle when checked: a quick swell and a shake that settles.
-        .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { (view, t: Double) in
-            view.scaleEffect(CGFloat(1 + abs(t) * 0.012)).rotationEffect(.degrees(t))
-        } keyframes: { _ in
-            KeyframeTrack {
-                SpringKeyframe(-5, duration: 0.09, spring: .snappy)
-                SpringKeyframe(4, duration: 0.1, spring: .snappy)
-                SpringKeyframe(-2, duration: 0.1, spring: .snappy)
-                SpringKeyframe(0, duration: 0.3, spring: .spring(response: 0.35, dampingFraction: 0.78))
+            .foregroundStyle(ink)
+            .padding(14)
+            .frame(width: 132, height: 132, alignment: .topLeading)
+            .background { tileBackground(tone) }
+            .opacity(done ? 0.6 : 1)
+            .wiggle(on: wiggle)
+            .rotationEffect(.degrees(tilt))
+            .contentShape(.rect)
+            .onTapGesture(perform: onOpen)
+            .animation(.spring(response: 0.4, dampingFraction: 0.7), value: done)
+            .accessibilityElement(children: .combine)
+            .accessibilityAction(named: Text(actionName)) {
+                withAnimation { routine.advance(on: .now) }
             }
+    }
+
+    @ViewBuilder
+    private func check(tone: StickerTone, done: Bool) -> some View {
+        if routine.isCounted {
+            CountCheck(routine: routine, ink: tone.deep, fill: tone.fill, size: 30, action: advance)
+        } else {
+            CheckButton(isOn: done, color: tone.deep, round: true, size: 30, checkColor: tone.fill,
+                        label: routine.title, action: advance)
         }
-        .rotationEffect(.degrees(tilt))
-        .contentShape(.rect)
-        .onTapGesture(perform: onOpen)
-        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: done)
-        .accessibilityElement(children: .combine)
-        .accessibilityAction(named: done ? "Mark as not done" : "Mark as done") {
-            withAnimation { routine.advance(on: .now) }
-        }
+    }
+
+    private func advance() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) { routine.advance(on: .now) }
+        if routine.isDone(on: .now) { wiggle += 1 }
+    }
+
+    @ViewBuilder
+    private func tileBackground(_ tone: StickerTone) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 30, style: .continuous)
+        shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
+        shape.fill(LinearGradient(colors: [Color.white.opacity(0.24), .clear], startPoint: .top, endPoint: .center))
+        shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.55), .clear],
+                                          startPoint: .top, endPoint: .center), lineWidth: 1.2)
     }
 }
 

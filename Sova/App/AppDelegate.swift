@@ -36,15 +36,18 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         for (key, value) in response.notification.request.content.userInfo {
             if let key = key as? String, let value = value as? String { info[key] = value }
         }
+        let userInfo = info
         await MainActor.run {
-            NotificationActions.handle(action: action, id: id, userInfo: info)
+            NotificationActions.handle(action: action, id: id, userInfo: userInfo)
         }
     }
 }
 
 final class SceneDelegate: NSObject, UIWindowSceneDelegate {
-    func windowScene(_ windowScene: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem) async -> Bool {
-        QuickActions.run(shortcutItem.type)
+    nonisolated func windowScene(_ windowScene: UIWindowScene,
+                                 performActionFor shortcutItem: UIApplicationShortcutItem) async -> Bool {
+        let type = shortcutItem.type
+        await MainActor.run { QuickActions.run(type) }
         return true
     }
 }

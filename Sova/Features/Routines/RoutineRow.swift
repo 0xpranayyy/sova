@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// A ritual as a block in its color: a tilted icon tile, its name and
 /// schedule, the last seven days as chunky dots, a streak chip and a big
@@ -44,19 +45,46 @@ struct RoutineRow: View {
     }
 
     var body: some View {
-        let tone = StickerTone(routine.accent)
-        let done = routine.isDone(on: .now)
+        let tone: StickerTone = StickerTone(routine.accent)
+        let done: Bool = routine.isDone(on: .now)
+        let scheduled: Bool = routine.isScheduled(on: .now)
         // Open rituals are a soft wash of their color; done ones fill in.
-        let ink = tone == .indigo ? (done ? Color.white : StickerTone.indigo.fill) : tone.deep
-        let scheduled = routine.isScheduled(on: .now)
+        let ink: Color = inkColor(tone: tone, done: done)
+        let actionName: String = done ? String(localized: "Mark as not done") : String(localized: "Mark as done")
+        decorated(row(tone: tone, ink: ink, done: done, scheduled: scheduled), tone: tone, done: done)
+            .contextMenu { menu(done: done, scheduled: scheduled) }
+            .confirmationDialog(String(localized: "Delete this ritual and its history?"), isPresented: $confirmDelete,
+                                titleVisibility: .visible) {
+                Button(String(localized: "Delete Ritual"), role: .destructive, action: delete)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityHint(String(localized: "Opens the ritual"))
+            .accessibilityAction(named: Text(actionName)) {
+                guard scheduled else { return }
+                toggle()
+            }
+    }
+
+    private func inkColor(tone: StickerTone, done: Bool) -> Color {
+        guard tone == .indigo else { return tone.deep }
+        return done ? Color.white : StickerTone.indigo.fill
+    }
+
+    private func icon(tone: StickerTone, ink: Color, done: Bool) -> some View {
+        let symbolColor: Color = done ? ink : (tone == .indigo ? Color.white : tone.deep)
+        let fill: AnyShapeStyle = done ? AnyShapeStyle(Color.white.opacity(0.3))
+                                       : AnyShapeStyle(tone.fill.shadow(.drop(color: tone.shadow, radius: 5, y: 3)))
+        return Image(systemName: routine.symbol)
+            .font(.system(size: 22, weight: .semibold))
+            .foregroundStyle(symbolColor)
+            .frame(width: 48, height: 48)
+            .background(fill, in: .rect(cornerRadius: 16, style: .continuous))
+            .rotationEffect(.degrees(-6))
+    }
+
+    private func row(tone: StickerTone, ink: Color, done: Bool, scheduled: Bool) -> some View {
         HStack(spacing: 14) {
-            Image(systemName: routine.symbol)
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(done ? ink : (tone == .indigo ? Color.white : tone.deep))
-                .frame(width: 48, height: 48)
-                .background(done ? AnyShapeStyle(Color.white.opacity(0.3)) : AnyShapeStyle(tone.fill.shadow(.drop(color: tone.shadow, radius: 5, y: 3))),
-                            in: .rect(cornerRadius: 16, style: .continuous))
-                .rotationEffect(.degrees(-6))
+            icon(tone: tone, ink: ink, done: done)
             VStack(alignment: .leading, spacing: 7) {
                 titleLine(ink: ink, done: done)
                 HStack(spacing: 8) {
@@ -70,72 +98,67 @@ struct RoutineRow: View {
                 }
             }
             Spacer(minLength: 0)
-            if scheduled {
-                if routine.isCounted {
-                    CountCheck(routine: routine, ink: ink, fill: tone.fill, size: 36, action: toggle)
-                } else {
-                    CheckButton(isOn: done, color: ink, round: true, size: 36, emphasized: true,
-                                checkColor: tone.fill, label: routine.title, action: toggle)
-                }
-            } else {
-                MonoCaps(String(localized: "Rest"), color: ink.opacity(0.6))
-                    .frame(width: 44)
-            }
+            check(tone: tone, ink: ink, done: done, scheduled: scheduled)
         }
         .foregroundStyle(ink)
         .padding(.leading, 14)
         .padding(.trailing, 8)
         .padding(.vertical, 14)
-        .background {
-            let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
-            if done {
-                shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
-                shape.fill(LinearGradient(colors: [Color.white.opacity(0.2), .clear], startPoint: .top, endPoint: .center))
-                shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.5), .clear],
-                                                  startPoint: .top, endPoint: .center), lineWidth: 1.2)
-            } else {
-                shape.fill(Color.surface)
-                shape.fill(tone.fill.opacity(0.24))
-                shape.strokeBorder(tone.fill.opacity(0.65), lineWidth: 1.5)
-            }
+    }
+
+    @ViewBuilder
+    private func check(tone: StickerTone, ink: Color, done: Bool, scheduled: Bool) -> some View {
+        if !scheduled {
+            MonoCaps(String(localized: "Rest"), color: ink.opacity(0.6))
+                .frame(width: 44)
+        } else if routine.isCounted {
+            CountCheck(routine: routine, ink: ink, fill: tone.fill, size: 36, action: toggle)
+        } else {
+            CheckButton(isOn: done, color: ink, round: true, size: 36, emphasized: true,
+                        checkColor: tone.fill, label: routine.title, action: toggle)
         }
-        .keyframeAnimator(initialValue: 0.0, trigger: wiggle) { (view, t: Double) in
-            view.scaleEffect(CGFloat(1 + abs(t) * 0.01)).rotationEffect(.degrees(t * 0.6))
-        } keyframes: { _ in
-            KeyframeTrack {
-                SpringKeyframe(-4, duration: 0.09, spring: .snappy)
-                SpringKeyframe(3, duration: 0.1, spring: .snappy)
-                SpringKeyframe(-1.5, duration: 0.1, spring: .snappy)
-                SpringKeyframe(0, duration: 0.3, spring: .spring(response: 0.35, dampingFraction: 0.78))
-            }
+    }
+
+    @ViewBuilder
+    private func background(tone: StickerTone, done: Bool) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
+        if done {
+            shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
+            shape.fill(LinearGradient(colors: [Color.white.opacity(0.2), .clear], startPoint: .top, endPoint: .center))
+            shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.5), .clear],
+                                              startPoint: .top, endPoint: .center), lineWidth: 1.2)
+        } else {
+            shape.fill(Color.surface)
+            shape.fill(tone.fill.opacity(0.24))
+            shape.strokeBorder(tone.fill.opacity(0.65), lineWidth: 1.5)
         }
-        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: done)
-        .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 150, height: 70), count: 12) }
-        .contentShape(.rect)
-        .onTapGesture(perform: onOpen)
-        .contextMenu {
-            if scheduled {
-                Button(done ? String(localized: "Mark as Not Done") : String(localized: "Mark as Done"),
-                       systemImage: done ? "arrow.uturn.backward" : "checkmark.circle", action: toggle)
-            }
-            Button(String(localized: "Edit Ritual"), systemImage: "pencil", action: onOpen)
-            Divider()
-            Button(String(localized: "Delete Ritual"), systemImage: "trash", role: .destructive) { confirmDelete = true }
+    }
+
+    private func decorated(_ content: some View, tone: StickerTone, done: Bool) -> some View {
+        content
+            .background { background(tone: tone, done: done) }
+            .wiggle(on: wiggle, angle: 0.48, swell: 0.008)
+            .animation(.spring(response: 0.4, dampingFraction: 0.75), value: done)
+            .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 150, height: 70), count: 12) }
+            .contentShape(.rect)
+            .onTapGesture(perform: onOpen)
+    }
+
+    @ViewBuilder
+    private func menu(done: Bool, scheduled: Bool) -> some View {
+        if scheduled {
+            Button(done ? String(localized: "Mark as Not Done") : String(localized: "Mark as Done"),
+                   systemImage: done ? "arrow.uturn.backward" : "checkmark.circle", action: toggle)
         }
-        .confirmationDialog(String(localized: "Delete this ritual and its history?"), isPresented: $confirmDelete,
-                            titleVisibility: .visible) {
-            Button(String(localized: "Delete Ritual"), role: .destructive) {
-                RitualReminders.cancel(routine)
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { context.delete(routine) }
-                SovaRefresh.changed(context)
-            }
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityHint(String(localized: "Opens the ritual"))
-        .accessibilityAction(named: done ? String(localized: "Mark as not done") : String(localized: "Mark as done")) {
-            guard scheduled else { return }
-            toggle()
-        }
+        Button(String(localized: "Edit Ritual"), systemImage: "pencil", action: onOpen)
+        Divider()
+        Button(String(localized: "Delete Ritual"), systemImage: "trash", role: .destructive) { confirmDelete = true }
+    }
+
+    private func delete() {
+        RitualReminders.cancel(routine)
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { context.delete(routine) }
+        SovaRefresh.changed(context)
     }
 
     private func toggle() {

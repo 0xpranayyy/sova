@@ -13,7 +13,9 @@ private struct StepHeadline: View {
     private var styled: Text {
         guard let last = text.last, ".?!".contains(last) else { return Text(text).foregroundStyle(Color.ink) }
         let dot = tone == .yellow || tone == .lime ? tone.lip : tone.fill
-        return Text(String(text.dropLast())).foregroundStyle(Color.ink) + Text(String(last)).foregroundStyle(dot)
+        let head = Text(String(text.dropLast())).foregroundStyle(Color.ink)
+        let mark = Text(String(last)).foregroundStyle(dot)
+        return Text("\(head)\(mark)")
     }
 
     var body: some View {

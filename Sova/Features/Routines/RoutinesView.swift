@@ -46,10 +46,10 @@ struct RoutinesView: View {
                                         ForEach(Array(items.enumerated()), id: \.element.id) { index, routine in
                                             RoutineRow(routine: routine) { router.sheet = .routine(routine) }
                                                 .rotationEffect(.degrees(index.isMultiple(of: 2) ? -0.5 : 0.5))
-                                                .scrollTransition(.animated(.spring(response: 0.5, dampingFraction: 0.8))) { content, phase in
+                                                .scrollTransition(.animated(.spring(response: 0.5, dampingFraction: 0.8))) { [still = reduceMotion] content, phase in
                                                     content
-                                                        .scaleEffect(phase.isIdentity || reduceMotion ? 1 : 0.95)
-                                                        .opacity(phase.isIdentity || reduceMotion ? 1 : 0.6)
+                                                        .scaleEffect(phase.isIdentity || still ? 1 : 0.95)
+                                                        .opacity(phase.isIdentity || still ? 1 : 0.6)
                                                 }
                                         }
                                     }

@@ -62,8 +62,7 @@ struct ScreenTitle<Trailing: View>: View {
                 trailing
             }
             .frame(minHeight: 44)
-            (Text(title).foregroundStyle(Color.ink)
-                + Text(".").foregroundStyle(SovaTheme.current.accent.color))
+            Text("\(Text(title).foregroundStyle(Color.ink))\(Text(".").foregroundStyle(SovaTheme.current.accent.color))")
                 .font(.hero(58, weight: .heavy))
                 .tracking(-2.6)
                 .lineLimit(1)
