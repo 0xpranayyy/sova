@@ -47,6 +47,7 @@ enum NotificationActions {
             case .snooze:
                 TaskAlerts.snooze(task, minutes: 60)
             case .tomorrow:
+                task.notePostponed()
                 let tomorrow = Date.now.startOfDay.adding(days: 1)
                 if task.hasTime, let due = task.dueDate {
                     let parts = Calendar.current.dateComponents([.hour, .minute], from: due)

@@ -59,6 +59,20 @@ final class Goal {
         return Calendar.current.dateComponents([.day], from: Date.now.startOfDay, to: deadline.startOfDay).day
     }
 
+    /// Share of the time from start to deadline that has passed: 0…1.
+    var elapsedFraction: Double? {
+        guard let deadline else { return nil }
+        let total = deadline.timeIntervalSince(createdAt)
+        guard total > 0 else { return nil }
+        return min(max(Date.now.timeIntervalSince(createdAt) / total, 0), 1)
+    }
+
+    /// Time is running ahead of progress by more than 15%.
+    var isBehindPace: Bool {
+        guard !isArchived, progress < 1, let elapsed = elapsedFraction, elapsed >= 0.2 else { return false }
+        return elapsed - progress > 0.15
+    }
+
     var deadlineText: String? {
         guard let days = daysLeft else { return nil }
         switch days {

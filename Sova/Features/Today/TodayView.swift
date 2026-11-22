@@ -549,6 +549,9 @@ struct RitualCard: View {
                     .font(.allo(size: 12, weight: .heavy, relativeTo: .caption2).monospacedDigit())
                     .opacity(0.7)
                     .padding(.top, 2)
+            } else if !done && routine.isSlipping {
+                SlippingTag(ink: ink)
+                    .padding(.top, 4)
             }
         }
         .foregroundStyle(ink)

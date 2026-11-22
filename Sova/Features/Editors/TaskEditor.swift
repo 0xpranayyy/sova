@@ -27,6 +27,7 @@ struct TaskEditor: View {
     @State private var checklistDraft = ""
     @State private var confirmDelete = false
     @State private var wiggle = 0
+    @State private var breakingDown = false
     @FocusState private var focus: Field?
 
     private enum Field: Hashable { case title, notes, checklist }
@@ -290,6 +291,9 @@ struct TaskEditor: View {
 
     private var checklistEditor: some View {
         VStack(alignment: .leading, spacing: 6) {
+            if let task, task.keepsSlipping, checklist.isEmpty {
+                slippingNudge(task)
+            }
             ForEach($checklist) { $item in
                 HStack(spacing: 12) {
                     Button {
@@ -323,7 +327,6 @@ struct TaskEditor: View {
                     }
                     .buttonStyle(.pressable)
                     .accessibilityLabel(String(localized: "Remove step"))
-                    .accessibilityLabel(String(localized: "Remove step"))
                 }
                 .frame(minHeight: 36)
                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -340,6 +343,76 @@ struct TaskEditor: View {
                     .onSubmit(addChecklistItem)
             }
             .frame(minHeight: 36)
+
+            if StepSuggester.isAvailable && !trimmedTitle.isEmpty && checklist.count < 3 {
+                Button(action: breakItDown) {
+                    HStack(spacing: 8) {
+                        if breakingDown {
+                            ProgressView().tint(StickerTone.indigo.deep)
+                        } else {
+                            Image(systemName: "sparkles").font(.system(size: 14, weight: .heavy))
+                        }
+                        Text(breakingDown ? String(localized: "Thinking…") : String(localized: "Break it down"))
+                            .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
+                    }
+                    .foregroundStyle(StickerTone.indigo.deep)
+                    .padding(.horizontal, 16)
+                    .frame(height: 40)
+                    .background(StickerTone.indigo.fill, in: .capsule)
+                }
+                .buttonStyle(.pressable)
+                .disabled(breakingDown)
+                .padding(.top, 6)
+                .accessibilityHint(String(localized: "Uses Apple Intelligence on your iPhone"))
+                .transition(.scale.combined(with: .opacity))
+            }
+        }
+    }
+
+    /// A gentle word when a task keeps getting pushed back.
+    private func slippingNudge(_ task: TaskItem) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "arrow.uturn.right")
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(StickerTone.orange.deep)
+                .frame(width: 28, height: 28)
+                .background(StickerTone.orange.fill, in: .circle)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Moved \(task.deferCount) times")
+                    .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
+                    .foregroundStyle(Color.ink)
+                Text(StepSuggester.isAvailable
+                     ? String(localized: "Big tasks hide. Break it into small steps and start with the first.")
+                     : String(localized: "Big tasks hide. Add the first small step below."))
+                    .font(.allo(size: 13, weight: .medium, relativeTo: .footnote))
+                    .foregroundStyle(Color.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.bottom, 8)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// Asks the on-device model for small steps and adds them to the checklist.
+    private func breakItDown() {
+        guard !breakingDown, !trimmedTitle.isEmpty else { return }
+        breakingDown = true
+        Haptics.soft(0.5)
+        Task {
+            let steps = (try? await StepSuggester.suggest(for: trimmedTitle, notes: notes)) ?? []
+            breakingDown = false
+            guard !steps.isEmpty else {
+                focus = .checklist
+                router.show(Toast(message: String(localized: "Couldn't think of steps right now. Add the first one yourself.")))
+                return
+            }
+            let existing = Set(checklist.map { $0.title.lowercased() })
+            for (i, step) in steps.enumerated() where !existing.contains(step.lowercased()) {
+                try? await Task.sleep(for: .milliseconds(i == 0 ? 0 : 120))
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { checklist.append(ChecklistItem(title: step)) }
+                Haptics.pop(0.4)
+            }
+            Sounds.play(.pop)
         }
     }
 

@@ -39,8 +39,11 @@ struct GoalCard: View {
                 .lineLimit(2)
                 .padding(.top, 6)
 
-            MonoCaps(label, color: (goal.daysLeft ?? 1) < 0 ? Color.ember : ink.opacity(0.75))
-                .padding(.top, 4)
+            HStack(spacing: 8) {
+                MonoCaps(label, color: (goal.daysLeft ?? 1) < 0 ? Color.ember : ink.opacity(0.75))
+                if goal.isBehindPace { BehindPacePill(ink: ink) }
+            }
+            .padding(.top, 4)
 
             StepBar(progress: goal.progress, steps: goal.sortedMilestones.map(\.isDone),
                     color: tone == .indigo ? tone.deep : tone.deep)
@@ -97,3 +100,20 @@ struct GoalCard: View {
         return parts.joined(separator: " · ")
     }
 }
+
+/// "Behind pace": time is running ahead of progress on this goal.
+struct BehindPacePill: View {
+    let ink: Color
+
+    var body: some View {
+        Text("\(Image(systemName: "tortoise.fill")) \(String(localized: "Behind pace"))")
+            .font(.allo(size: 12, weight: .heavy, relativeTo: .caption))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(ink.opacity(0.14), in: .capsule)
+            .rotationEffect(.degrees(-3))
+            .lineLimit(1)
+            .accessibilityLabel(String(localized: "Behind pace for the deadline"))
+    }
+}
+

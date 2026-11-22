@@ -143,3 +143,22 @@ final class Routine {
         return scheduled == 0 ? 0 : Double(done) / Double(scheduled)
     }
 }
+
+extension Routine {
+    /// Missed 2 of the last 3 days it was scheduled (not counting today,
+    /// which is still open). Only for rituals at least a week old.
+    var isSlipping: Bool {
+        guard createdAt.startOfDay <= Date.now.startOfDay.adding(days: -7) else { return false }
+        var day = Date.now.startOfDay.adding(days: -1)
+        var seen = 0, missed = 0
+        for _ in 0..<21 where seen < 3 {
+            if isScheduled(on: day) {
+                seen += 1
+                if !isDone(on: day) { missed += 1 }
+            }
+            day = day.adding(days: -1)
+        }
+        return seen == 3 && missed >= 2
+    }
+}
+

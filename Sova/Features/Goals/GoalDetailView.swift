@@ -75,6 +75,7 @@ struct GoalDetailView: View {
             HStack {
                 MonoCaps(goal.deadlineText ?? String(localized: "No deadline"),
                          color: tone == .indigo ? tone.deep : tone.deep)
+                if goal.isBehindPace { BehindPacePill(ink: tone.deep) }
                 Spacer()
                 Image(systemName: goal.symbol).font(.system(size: 22, weight: .semibold))
             }
@@ -108,6 +109,13 @@ struct GoalDetailView: View {
                 }
             }
             .padding(.top, 14)
+            if goal.isBehindPace {
+                Text(paceHint)
+                    .font(.allo(size: 14, weight: .bold, relativeTo: .footnote))
+                    .opacity(0.8)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 12)
+            }
         }
         .foregroundStyle(tone == .indigo ? Color.white : tone.deep)
         .block(tone, cornerRadius: 32, padding: 22)
@@ -115,6 +123,17 @@ struct GoalDetailView: View {
         .animation(.spring(response: 0.5, dampingFraction: 0.75), value: goal.progress >= 1)
         .padding(.top, 8)
         .accessibilityElement(children: .combine)
+    }
+
+    /// What to do about a goal that's behind: the next step, or a nudge.
+    private var paceHint: String {
+        if let step = goal.sortedMilestones.first(where: { !$0.isDone }) {
+            return String(localized: "Time's moving faster than progress. Try \"\(step.title)\" this week.")
+        }
+        if goal.steps.isEmpty {
+            return String(localized: "Time's moving faster than progress. Add a few small steps to get going.")
+        }
+        return String(localized: "Time's moving faster than progress.")
     }
 
     private var manualProgress: some View {

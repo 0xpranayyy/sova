@@ -44,6 +44,8 @@ struct RoutineRow: View {
                             .background(ink.opacity(0.12), in: .capsule)
                             .rotationEffect(.degrees(-4))
                             .accessibilityLabel(String(localized: "\(routine.streak) day streak"))
+                    } else if !done && routine.isSlipping {
+                        SlippingTag(ink: ink)
                     }
                 }
                 HStack(spacing: 8) {
@@ -172,3 +174,19 @@ struct WeekTrack: View {
         .accessibilityValue("\((-6...0).filter { routine.isDone(on: Date.now.adding(days: $0)) }.count) of 7 done")
     }
 }
+
+/// A gentle tag for a ritual that missed 2 of its last 3 days.
+struct SlippingTag: View {
+    let ink: Color
+
+    var body: some View {
+        Text("\(Image(systemName: "arrow.down.right")) \(String(localized: "slipping"))")
+            .font(.allo(size: 12, weight: .heavy, relativeTo: .caption))
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(ink.opacity(0.12), in: .capsule)
+            .rotationEffect(.degrees(3))
+            .accessibilityLabel(String(localized: "Slipping: missed 2 of the last 3 days"))
+    }
+}
+

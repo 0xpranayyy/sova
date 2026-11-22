@@ -73,6 +73,9 @@ struct TaskRow: View {
             parts.append(.init(text: due.relativeDayText(includingTime: task.hasTime),
                                color: task.isOverdue ? Color.danger : .inkTertiary))
         }
+        if task.keepsSlipping {
+            parts.append(.init(text: String(localized: "Moved \(task.deferCount)×"), color: StickerTone.orange.deep))
+        }
         if showGoal, let goal = task.goal {
             parts.append(.init(text: goal.title))
         }

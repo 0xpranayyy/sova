@@ -85,7 +85,6 @@ enum TaskActions {
         })
     }
 
-    /// Moves a task to tomorrow, keeping its time of day.
     /// Pulls a task forward to today, keeping its time of day.
     static func moveToToday(_ task: TaskItem, router: AppRouter?) {
         let previous = task.dueDate
@@ -106,9 +105,13 @@ enum TaskActions {
     static func moveOverdueToToday(_ tasks: [TaskItem], router: AppRouter?) {
         guard !tasks.isEmpty else { return }
         let previous = tasks.map(\.dueDate)
+        let counts = tasks.map { ($0.deferCount, $0.originalDue) }
         Haptics.pop(0.7, sound: true)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
-            for task in tasks { task.dueDate = sameTime(as: task, on: Date.now.startOfDay) }
+            for task in tasks {
+                task.notePostponed()
+                task.dueDate = sameTime(as: task, on: Date.now.startOfDay)
+            }
         }
         for task in tasks { TaskAlerts.schedule(task) }
         SovaRefresh.changed(tasks.first?.modelContext)
@@ -116,6 +119,7 @@ enum TaskActions {
                                                      : String(localized: "Moved \(tasks.count) tasks to today")) {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
                 for (task, due) in zip(tasks, previous) { task.dueDate = due }
+                for (task, count) in zip(tasks, counts) { (task.deferCount, task.originalDue) = count }
             }
             for task in tasks { TaskAlerts.schedule(task) }
             SovaRefresh.changed(tasks.first?.modelContext)
@@ -129,11 +133,14 @@ enum TaskActions {
         return Calendar.current.date(bySettingHour: parts.hour ?? 9, minute: parts.minute ?? 0, second: 0, of: day) ?? day
     }
 
+    /// Moves a task to tomorrow, keeping its time of day.
     static func moveToTomorrow(_ task: TaskItem, router: AppRouter?) {
         let previous = task.dueDate
+        let count = (task.deferCount, task.originalDue)
         Haptics.pop(0.6)
         let tomorrow = Date.now.startOfDay.adding(days: 1)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            task.notePostponed()
             if task.hasTime, let due = task.dueDate {
                 let parts = Calendar.current.dateComponents([.hour, .minute], from: due)
                 task.dueDate = Calendar.current.date(bySettingHour: parts.hour ?? 9, minute: parts.minute ?? 0,
@@ -145,7 +152,10 @@ enum TaskActions {
         TaskAlerts.schedule(task)
         SovaRefresh.changed(task.modelContext)
         router?.show(Toast(message: String(localized: "Moved to tomorrow")) {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { task.dueDate = previous }
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                task.dueDate = previous
+                (task.deferCount, task.originalDue) = count
+            }
             TaskAlerts.schedule(task)
             SovaRefresh.changed(task.modelContext)
         })

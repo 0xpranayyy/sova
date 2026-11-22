@@ -107,6 +107,10 @@ final class TaskItem {
     var goal: Goal?
     /// Small steps inside the task, like "passport, charger" for "Pack".
     var checklist: [ChecklistItem] = []
+    /// How many times the task was pushed to a later day, and the day it
+    /// was first meant for. Sova uses these to offer to break it down.
+    var deferCount: Int = 0
+    var originalDue: Date?
 
     init(
         title: String,
@@ -169,4 +173,15 @@ final class TaskItem {
         if ad != bd { return ad < bd }
         return a.createdAt > b.createdAt
     }
+}
+
+extension TaskItem {
+    /// Call before moving the task to a later day.
+    func notePostponed() {
+        if originalDue == nil { originalDue = dueDate }
+        deferCount += 1
+    }
+
+    /// Pushed off three times or more: worth a gentle nudge.
+    var keepsSlipping: Bool { !isDone && deferCount >= 3 }
 }
