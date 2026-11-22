@@ -85,6 +85,7 @@ struct MainTabView: View {
             if phase == .active {
                 runPendingAction()
                 WatchLink.shared.push()
+                DailyDigest.refreshSoon()
                 Task { await plus.refresh() }
             }
         }

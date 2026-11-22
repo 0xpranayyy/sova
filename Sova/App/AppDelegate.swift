@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         NotificationActions.register()
         QuickActions.install()
         WatchLink.shared.start()
+        DailyDigest.start()
         return true
     }
 

@@ -70,8 +70,9 @@ enum TaskAlerts {
         let tasks = ((try? context.fetch(descriptor)) ?? [])
             .filter { ($0.dueDate ?? .distantPast) > now }
             .sorted { ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture) }
-        // Rituals keep a share of iOS's 64 pending notifications.
-        for task in tasks.prefix(64 - RitualReminders.budget - 4) where !snoozed.contains(task.alertID) { schedule(task) }
+        // Rituals and the morning and evening check-ins keep a share of
+        // iOS's 64 pending notifications.
+        for task in tasks.prefix(64 - RitualReminders.budget - 12) where !snoozed.contains(task.alertID) { schedule(task) }
     }
 }
 

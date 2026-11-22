@@ -182,6 +182,20 @@ extension TaskItem {
         deferCount += 1
     }
 
+    /// Moves the task to tomorrow, keeping its time of day if it has one.
+    func postponeToTomorrow() {
+        notePostponed()
+        let tomorrow = Date.now.startOfDay.adding(days: 1)
+        if hasTime, let due = dueDate {
+            let parts = Calendar.current.dateComponents([.hour, .minute], from: due)
+            dueDate = Calendar.current.date(bySettingHour: parts.hour ?? 9, minute: parts.minute ?? 0,
+                                            second: 0, of: tomorrow)
+        } else {
+            dueDate = tomorrow
+            hasTime = false
+        }
+    }
+
     /// Pushed off three times or more: worth a gentle nudge.
     var keepsSlipping: Bool { !isDone && deferCount >= 3 }
 }

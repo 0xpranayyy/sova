@@ -2,6 +2,7 @@ import Foundation
 import UserNotifications
 
 /// Two gentle daily notifications: plan in the morning, look back at night.
+@MainActor
 enum Reminders {
     static let morningID = "sova.morning"
     static let eveningID = "sova.evening"
@@ -14,32 +15,18 @@ enum Reminders {
         return granted
     }
 
+    /// The morning and evening notifications are written from your day by
+    /// `DailyDigest`; this hands it the chosen times.
     static func schedule(morning: Date?, evening: Date?) {
-        let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: [morningID, eveningID])
-        if let morning {
-            add(id: morningID, at: morning,
-                title: String(localized: "Good morning"),
-                body: String(localized: "Your day is ready. Take a minute to plan it."))
-        }
-        if let evening {
-            add(id: eveningID, at: evening,
-                title: String(localized: "How did today go?"),
-                body: String(localized: "Tick off what you finished and let the rest wait for tomorrow."))
-        }
+        DailyDigest.refresh(morning: .some(morning.map(minutes(of:))), evening: .some(evening.map(minutes(of:))))
     }
 
-    private static func add(id: String, at time: Date, title: String, body: String) {
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
-        content.sound = .default
-        let components = Calendar.current.dateComponents([.hour, .minute], from: time)
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
-        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
+    private static func minutes(of date: Date) -> Int {
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
     }
 
-    static func time(hour: Int, minute: Int = 0) -> Date {
+    nonisolated static func time(hour: Int, minute: Int = 0) -> Date {
         Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: .now) ?? .now
     }
 }

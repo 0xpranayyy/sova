@@ -9,12 +9,15 @@ import WidgetKit
 enum NotificationActions {
     static let taskCategory = "SOVA_TASK"
     static let ritualCategory = "SOVA_RITUAL"
+    /// The evening check-in, with a button that moves what's left to tomorrow.
+    static let eveningCategory = "SOVA_EVENING"
 
     enum Action: String {
         case done = "SOVA_DONE"
         case snooze = "SOVA_SNOOZE"
         case tomorrow = "SOVA_TOMORROW"
         case ritualDone = "SOVA_RITUAL_DONE"
+        case moveOpenToTomorrow = "SOVA_MOVE_OPEN"
     }
 
     static func register() {
@@ -26,9 +29,13 @@ enum NotificationActions {
                                             options: [], icon: UNNotificationActionIcon(systemImageName: "arrow.turn.up.right"))
         let ritualDone = UNNotificationAction(identifier: Action.ritualDone.rawValue, title: String(localized: "Done"),
                                               options: [], icon: UNNotificationActionIcon(systemImageName: "checkmark.circle"))
+        let moveOpen = UNNotificationAction(identifier: Action.moveOpenToTomorrow.rawValue,
+                                            title: String(localized: "Move to tomorrow"),
+                                            options: [], icon: UNNotificationActionIcon(systemImageName: "arrow.turn.up.right"))
         UNUserNotificationCenter.current().setNotificationCategories([
             UNNotificationCategory(identifier: taskCategory, actions: [done, snooze, tomorrow], intentIdentifiers: []),
             UNNotificationCategory(identifier: ritualCategory, actions: [ritualDone], intentIdentifiers: []),
+            UNNotificationCategory(identifier: eveningCategory, actions: [moveOpen], intentIdentifiers: []),
         ])
     }
 
@@ -47,20 +54,19 @@ enum NotificationActions {
             case .snooze:
                 TaskAlerts.snooze(task, minutes: 60)
             case .tomorrow:
-                task.notePostponed()
-                let tomorrow = Date.now.startOfDay.adding(days: 1)
-                if task.hasTime, let due = task.dueDate {
-                    let parts = Calendar.current.dateComponents([.hour, .minute], from: due)
-                    task.dueDate = Calendar.current.date(bySettingHour: parts.hour ?? 9, minute: parts.minute ?? 0,
-                                                         second: 0, of: tomorrow)
-                } else {
-                    task.dueDate = tomorrow
-                    task.hasTime = false
-                }
+                task.postponeToTomorrow()
                 TaskAlerts.schedule(task)
             default:
                 // A tap on the notification itself opens the task.
                 SovaSettings.shared.set(taskID, forKey: SovaSettings.Key.pendingTask)
+            }
+            SovaRefresh.changed(context)
+        } else if action == Action.moveOpenToTomorrow.rawValue {
+            // The evening check-in: everything still open today goes to tomorrow.
+            let open = (try? context.fetch(FetchDescriptor<TaskItem>(predicate: #Predicate { !$0.isDone }))) ?? []
+            for task in open where task.isDueTodayOrEarlier && task.dueDate != nil {
+                task.postponeToTomorrow()
+                TaskAlerts.schedule(task)
             }
             SovaRefresh.changed(context)
         } else if let ritualID = userInfo["ritualID"], action == Action.ritualDone.rawValue {

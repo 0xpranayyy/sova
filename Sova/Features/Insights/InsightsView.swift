@@ -17,6 +17,7 @@ struct InsightsView: View {
     @State private var picked: Date?
     @State private var owlTaps = 0
     @State private var secret = 0
+    @AppStorage("weeklyReviewHidden") private var reviewHiddenWeek = 0
 
     static let weeks = 17
     static let mintInk = Color.positive
@@ -36,6 +37,18 @@ struct InsightsView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     ScreenTitle(title: String(localized: "Insights"), subtitle: range.subtitle) { EmptyView() }
                         .padding(.top, 4)
+
+                    if WeeklyReview.isReviewTime, reviewHiddenWeek != WeeklyReview.weekKey {
+                        let review = WeeklyReview(tasks: tasks, routines: routines, goals: goals.filter { !$0.isArchived })
+                        if review.hasAnything {
+                            WeeklyReviewCard(review: review) {
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                                    reviewHiddenWeek = WeeklyReview.weekKey
+                                }
+                            }
+                            .transition(.scale(scale: 0.96).combined(with: .opacity))
+                        }
+                    }
 
                     RangePicker(selection: $range)
 
