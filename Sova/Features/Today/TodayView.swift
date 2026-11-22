@@ -7,6 +7,7 @@ struct TodayView: View {
     @Environment(AppRouter.self) private var router
     @Query(sort: \TaskItem.createdAt, order: .reverse) private var tasks: [TaskItem]
     @Query(sort: \Routine.order) private var routines: [Routine]
+    @Query(filter: #Predicate<Goal> { !$0.isArchived }) private var goals: [Goal]
     @AppStorage("userName") private var userName = ""
     @Environment(WaveDirector.self) private var waves
     @Environment(\.requestReview) private var requestReview
@@ -56,6 +57,13 @@ struct TodayView: View {
     }
 
     private func next(in entries: [TimelineEntry]) -> TimelineEntry? {
+        // A high-priority task that slipped past its time goes first.
+        if let urgent = entries.first(where: { entry in
+            if !entry.isDone, entry.section == .overdue, case .task(let task) = entry.source, task.priority == .high { return true }
+            return false
+        }) {
+            return urgent
+        }
         let open = entries.filter { !$0.isDone && $0.section != .overdue }
         if let timed = open.filter({ ($0.dueTime ?? .distantPast) >= .now })
             .min(by: { ($0.dueTime ?? .distantFuture) < ($1.dueTime ?? .distantFuture) }) {
@@ -94,7 +102,16 @@ struct TodayView: View {
                     dayComplete(from: owl, summary: DaySummary(tasks: doneTasks.count, rituals: ritualsDone,
                                                                streak: streak))
                 }
-                .cardRow(bottom: 10)
+                .cardRow(bottom: 6)
+
+                // The owl's line about your day, from what's actually going on.
+                Text(DayBriefing.line(tasks: tasks, routines: routines, goals: goals))
+                    .font(.allo(size: 15, weight: .bold, relativeTo: .subheadline))
+                    .foregroundStyle(Color.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 6)
+                    .contentTransition(.opacity)
+                    .cardRow(bottom: 12)
 
                 TipView(captureTip).cardRow(bottom: 8)
                 if !entries.isEmpty { TipView(swipeTip).cardRow(bottom: 8) }
@@ -178,7 +195,7 @@ struct TodayView: View {
                 // Pull down and the owl says something nice about your day.
                 await MainActor.run { Haptics.owl() }
                 try? await Task.sleep(for: .milliseconds(450))
-                await MainActor.run { router.show(Toast(message: OwlMorningLines.random())) }
+                await MainActor.run { router.show(Toast(message: "🦉 " + DayBriefing.line(tasks: tasks, routines: routines, goals: goals))) }
             }
             .task {
                 for await status in captureTip.statusUpdates {
@@ -469,7 +486,9 @@ struct UpNextCard: View {
     }
 
     private var label: String {
-        guard let due = entry.dueTime, due > .now else { return String(localized: "Up next") }
+        guard let due = entry.dueTime, due > .now else {
+            return entry.section == .overdue ? String(localized: "Overdue · first things first") : String(localized: "Up next")
+        }
         let minutes = Int(due.timeIntervalSinceNow / 60)
         if minutes < 60 { return String(localized: "Up next · in \(max(minutes, 1)) min") }
         return minutes < 12 * 60 ? String(localized: "Up next · in \(minutes / 60) h") : String(localized: "Up next")
