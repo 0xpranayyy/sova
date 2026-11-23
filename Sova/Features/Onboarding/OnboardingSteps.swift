@@ -75,74 +75,36 @@ private extension View {
 
 struct HelloStep: View {
     var look: CGSize
-    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 88
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 54
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            OwlStage(look: look)
+            OwlFace(look: look)
+                .frame(maxHeight: 440)
                 .padding(.top, 4)
+                .shadow(color: StickerTone.yellow.shadow, radius: 18, y: 10)
                 .reveal(0)
 
-            Spacer(minLength: 18)
-
-            Text("Sova.")
+            Text("Hi\(Text(".").foregroundStyle(StickerTone.pink.fill)) I'm Sova.")
                 .font(.hero(titleSize, weight: .heavy))
-                .tracking(-4.2)
+                .tracking(-2.4)
                 .foregroundStyle(Color.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+                .padding(.top, 26)
+                .padding(.horizontal, 8)
                 .reveal(2)
-            Text("Your day, your rituals, your goals.\nPlanned in a minute.")
-                .font(.allo(size: 20, weight: .bold, relativeTo: .title3))
+            Text("I'll help you plan your day, keep your rituals and reach your goals.")
+                .font(.allo(size: 18, weight: .bold, relativeTo: .title3))
                 .tracking(-0.3)
                 .foregroundStyle(Color.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 8)
-                .padding(.bottom, 22)
+                .padding(.horizontal, 8)
+                .padding(.bottom, 18)
                 .reveal(3)
         }
         .padding(.horizontal, 16)
-    }
-}
-
-/// The welcome stage: the owl on indigo, with the things a Sova day is
-/// made of floating around it.
-private struct OwlStage: View {
-    var look: CGSize
-    @State private var wave = 0
-
-    var body: some View {
-        GeometryReader { geo in
-            let w = geo.size.width
-            let h = geo.size.height
-            ZStack {
-                StickerTone.indigo.fill
-
-                OwlMark(size: 132, look: look, bodyColor: StickerTone.yellow.fill,
-                        eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
-                        bellyColor: Color.owlBelly, celebrate: wave)
-                    .position(x: w / 2, y: h * 0.47)
-
-                // Three stickers, each in its own corner, clear of the owl.
-                TiltPill(text: String(localized: "Meditate ✓"), tone: .mint, tilt: -7)
-                    .position(x: min(70, w * 0.22), y: 44).pop(0)
-                TiltPill(text: String(localized: "🔥 12 days"), tone: .orange, tilt: 6)
-                    .position(x: w - min(66, w * 0.2), y: 92).pop(1)
-                TiltPill(text: String(localized: "Call Mom · 6 PM"), tone: .cyan, tilt: -4)
-                    .position(x: w / 2, y: h - 40).pop(2)
-
-                SparkleDot(color: StickerTone.yellow.fill, size: 22).position(x: w - 44, y: 34)
-                SparkleDot(color: StickerTone.pink.fill, size: 16).position(x: 40, y: h * 0.62)
-            }
-        }
-        .frame(height: 360)
-        .clipShape(.rect(cornerRadius: 40, style: .continuous))
-        .shadow(color: StickerTone.indigo.shadow, radius: 22, y: 12)
-        .task {
-            // Say hello once the stickers have landed.
-            try? await Task.sleep(for: .milliseconds(900))
-            wave += 1
-        }
-        .accessibilityHidden(true)
     }
 }
 
