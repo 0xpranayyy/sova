@@ -36,8 +36,6 @@ struct GoalsView: View {
                                    message: String(localized: "Add a goal and break it into steps you can check off."),
                                    actionTitle: String(localized: "Set a goal")) { router.sheet = router.newGoalSheet }
                     } else {
-                        SeasonStage(goals: inProgress, achieved: achieved.count)
-
                         if inProgress.count > 1 {
                             GoalFilterChips(selection: $filter, counts: GoalFilter.counts(in: inProgress))
                                 .padding(.horizontal, -16)
@@ -56,8 +54,7 @@ struct GoalsView: View {
                         }
 
                         if !achieved.isEmpty {
-                            StickerHeader(title: String(localized: "Achieved"), symbol: "trophy.fill", tone: .yellow,
-                                          count: achieved.count)
+                            SectionCaps(title: String(localized: "Achieved"), count: "\(achieved.count)")
                                 .padding(.top, 18)
                             ForEach(achieved) { goal in
                                 TrophyRow(goal: goal) { open(goal) } onArchive: { archive(goal) }
@@ -139,7 +136,8 @@ struct GoalsView: View {
 
     private func card(_ goal: Goal, index: Int) -> some View {
         GoalCard(goal: goal, number: index + 1)
-            .rotationEffect(.degrees(index.isMultiple(of: 2) ? -0.6 : 0.6))
+            .rotationEffect(.degrees(index.isMultiple(of: 2) ? -1 : 1))
+            .padding(.top, index == 0 ? 30 : 0)
             .contentShape(.rect)
             .onTapGesture { open(goal) }
             .matchedTransitionSource(id: goal.persistentModelID, in: zoom)
