@@ -29,7 +29,7 @@ struct RoutinesView: View {
                                    message: String(localized: "Rituals are things you do on a schedule, like reading or a morning walk."),
                                    actionTitle: String(localized: "Add a ritual")) { router.sheet = router.newRoutineSheet }
                     } else {
-                        WeekStage(routines: routines, done: doneToday, total: today.count)
+                        WeekDots(routines: routines)
                         TipView(RitualCountTip())
 
                         if today.isEmpty {
@@ -39,20 +39,8 @@ struct RoutinesView: View {
                         ForEach(DayPeriod.allCases) { period in
                             let items = today.filter { $0.period == period }
                             if !items.isEmpty {
-                                let done = items.filter { $0.isDone(on: .now) }.count
-                                VStack(alignment: .leading, spacing: 10) {
-                                    PeriodHeader(period: period, done: done, total: items.count, isNow: period == now)
-                                    VStack(spacing: 10) {
-                                        ForEach(Array(items.enumerated()), id: \.element.id) { index, routine in
-                                            RoutineRow(routine: routine) { router.sheet = .routine(routine) }
-                                                .rotationEffect(.degrees(index.isMultiple(of: 2) ? -0.5 : 0.5))
-                                                .scrollTransition(.animated(.spring(response: 0.5, dampingFraction: 0.8))) { [still = reduceMotion] content, phase in
-                                                    content
-                                                        .scaleEffect(phase.isIdentity || still ? 1 : 0.95)
-                                                        .opacity(phase.isIdentity || still ? 1 : 0.6)
-                                                }
-                                        }
-                                    }
+                                PeriodBand(period: period, items: items, isNow: period == now) { routine in
+                                    router.sheet = .routine(routine)
                                 }
                             }
                         }

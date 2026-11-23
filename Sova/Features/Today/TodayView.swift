@@ -521,6 +521,8 @@ struct UpNextCard: View {
 struct RitualCard: View {
     let routine: Routine
     var tilt: Double = 0
+    /// A fixed width for the Today strip; nil fills the column it's in.
+    var width: CGFloat? = 128
     var onOpen: () -> Void
 
     @State private var wiggle = 0
@@ -572,7 +574,8 @@ struct RitualCard: View {
         tile(tone: tone, ink: ink, done: done)
             .foregroundStyle(ink)
             .padding(14)
-            .frame(width: 128, height: 118, alignment: .topLeading)
+            .frame(width: width, height: 118, alignment: .topLeading)
+            .frame(maxWidth: width == nil ? .infinity : nil, alignment: .topLeading)
             .background { tileBackground(tone, done: done) }
             .wiggle(on: wiggle)
             .rotationEffect(.degrees(done ? tilt : 0))
