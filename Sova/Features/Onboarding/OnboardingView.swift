@@ -71,7 +71,16 @@ struct OnboardingView: View {
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedGoal: String { goalTitle.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var chosenRituals: [RitualOption] { RitualOption.all.filter { rituals.contains($0.id) } }
-    private var showsDayInTheMaking: Bool { [.name, .rituals, .goal, .rhythm].contains(step) }
+    /// The little owl in the top bar smiles once you've answered.
+    private var owlHappy: Bool {
+        switch step {
+        case .name: !trimmedName.isEmpty
+        case .rituals: !rituals.isEmpty
+        case .goal: !trimmedGoal.isEmpty
+        case .rhythm: morningOn || eveningOn
+        default: false
+        }
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -80,19 +89,8 @@ struct OnboardingView: View {
 
                 VStack(spacing: 0) {
                     topBar
-                        .padding(.horizontal, 16)
-                        .frame(height: 52)
-
-                    // Build your first day: Today assembles itself as you answer.
-                    if showsDayInTheMaking {
-                        DayInTheMaking(name: trimmedName, rituals: chosenRituals, goalTitle: trimmedGoal,
-                                       remindersOn: step == .rhythm && (morningOn || eveningOn) || remindersGranted,
-                                       reminderTime: morningOn ? morning : evening)
-                            .padding(.horizontal, 16)
-                            .padding(.top, 4)
-                            .padding(.bottom, 6)
-                            .transition(.move(edge: .top).combined(with: .opacity))
-                    }
+                        .padding(.horizontal, 24)
+                        .frame(height: 56)
 
                     ZStack {
                         stepView
@@ -160,17 +158,21 @@ struct OnboardingView: View {
         let indicated = OnboardingStep.indicated
         let position = indicated.firstIndex(of: step) ?? 0
         return HStack(spacing: 14) {
-            if step > .hello && step < .finish {
+            if indicated.contains(step) {
                 CircleAction(symbol: "chevron.left", label: String(localized: "Back"), action: back)
                     .transition(.opacity.combined(with: .scale(scale: 0.8)))
-            }
-            if indicated.contains(step) {
-                OwlProgress(value: Double(position + 1) / Double(indicated.count), tone: step.tone)
+                StepTrack(value: Double(position + 1) / Double(indicated.count))
                     .accessibilityElement()
                     .accessibilityLabel("Step \(position + 1) of \(indicated.count)")
                     .transition(.opacity)
+                OwlMark(size: 32, happy: owlHappy, bodyColor: StickerTone.yellow.fill,
+                        eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
+                        bellyColor: Color.owlBelly, reactsToTap: false)
+                    .accessibilityHidden(true)
+                    .transition(.opacity.combined(with: .scale(scale: 0.6)))
+            } else {
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.85), value: step)
     }
@@ -202,7 +204,7 @@ struct OnboardingView: View {
                     }
                 }
             }
-            .buttonStyle(.big(step == .finish ? .yellow : .indigo))
+            .buttonStyle(.big(.indigo))
             .disabled(isRequesting)
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { launchFrame = $0 }
 
@@ -219,7 +221,7 @@ struct OnboardingView: View {
             }
 
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.bottom, 12)
         .animation(.smooth(duration: 0.35), value: step)
     }
@@ -287,30 +289,10 @@ struct OnboardingBackdrop: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let strength = scheme == .dark ? 0.22 : 0.42
-        let next = step.next?.tone ?? .lilac
-        ZStack {
-            CanvasBackground()
-            GeometryReader { geo in
-                let w = geo.size.width, h = geo.size.height
-                Circle()
-                    .fill(step.tone.fill.opacity(strength))
-                    .frame(width: w * 1.1, height: w * 1.1)
-                    .blur(radius: 70)
-                    .position(x: w * 0.92, y: h * 0.12)
-                Circle()
-                    .fill(next.fill.opacity(strength * 0.6))
-                    .frame(width: w * 0.9, height: w * 0.9)
-                    .blur(radius: 80)
-                    .position(x: w * 0.02, y: h * 0.86)
-            }
-            .phaseAnimator(reduceMotion ? [0.0] : [0.0, 1.0]) { glow, phase in
-                glow.offset(x: phase * 18, y: phase * -14).scaleEffect(1 + phase * 0.04)
-            } animation: { _ in .easeInOut(duration: 6) }
-            .animation(.easeInOut(duration: 0.8), value: step)
-        }
-        .ignoresSafeArea()
-        .accessibilityHidden(true)
+        // One calm canvas for every step: the content carries the color.
+        CanvasBackground()
+            .ignoresSafeArea()
+            .accessibilityHidden(true)
     }
 }
 
