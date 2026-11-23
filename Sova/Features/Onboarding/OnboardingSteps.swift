@@ -117,23 +117,24 @@ private struct OwlStage: View {
             ZStack {
                 StickerTone.indigo.fill
 
-                OwlMark(size: 150, look: look, bodyColor: StickerTone.yellow.fill,
+                OwlMark(size: 132, look: look, bodyColor: StickerTone.yellow.fill,
                         eyeColor: StickerTone.indigo.fill, pupilColor: StickerTone.yellow.fill,
                         bellyColor: Color.owlBelly, celebrate: wave)
-                    .position(x: w / 2, y: h * 0.42)
+                    .position(x: w / 2, y: h * 0.47)
 
-                TiltPill(text: String(localized: "Meditate ✓"), tone: .mint, tilt: -8).position(x: w * 0.24, y: h * 0.13).pop(0)
-                TiltPill(text: String(localized: "12 days"), tone: .orange, tilt: 7).position(x: w * 0.82, y: h * 0.27).pop(1)
-                TiltPill(text: String(localized: "Read 12 books"), tone: .pink, tilt: -5).position(x: w * 0.25, y: h * 0.66).pop(2)
-                TiltPill(text: String(localized: "Call Mom · 6 PM"), tone: .cyan, tilt: 6).position(x: w * 0.74, y: h * 0.78).pop(3)
-                TiltPill(text: String(localized: "3/8 today"), tone: .lilac, tilt: 3).position(x: w * 0.28, y: h * 0.88).pop(4)
+                // Three stickers, each in its own corner, clear of the owl.
+                TiltPill(text: String(localized: "Meditate ✓"), tone: .mint, tilt: -7)
+                    .position(x: min(70, w * 0.22), y: 44).pop(0)
+                TiltPill(text: String(localized: "🔥 12 days"), tone: .orange, tilt: 6)
+                    .position(x: w - min(66, w * 0.2), y: 92).pop(1)
+                TiltPill(text: String(localized: "Call Mom · 6 PM"), tone: .cyan, tilt: -4)
+                    .position(x: w / 2, y: h - 40).pop(2)
 
-                SparkleDot(color: StickerTone.yellow.fill, size: 30).position(x: w * 0.88, y: h * 0.11)
-                SparkleDot(color: StickerTone.mint.fill, size: 20).position(x: w * 0.13, y: h * 0.45)
-                SparkleDot(color: StickerTone.pink.fill, size: 16).position(x: w * 0.84, y: h * 0.58)
+                SparkleDot(color: StickerTone.yellow.fill, size: 22).position(x: w - 44, y: 34)
+                SparkleDot(color: StickerTone.pink.fill, size: 16).position(x: 40, y: h * 0.62)
             }
         }
-        .frame(height: 400)
+        .frame(height: 360)
         .clipShape(.rect(cornerRadius: 40, style: .continuous))
         .shadow(color: StickerTone.indigo.shadow, radius: 22, y: 12)
         .task {

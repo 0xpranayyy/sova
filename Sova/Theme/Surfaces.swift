@@ -68,7 +68,8 @@ extension Glass {
 
 // MARK: - Buttons
 
-/// Big, pretty buttons: tall rounded blocks of one tone with heavy text.
+/// Big, pretty buttons: tall flat capsules of one solid tone with heavy
+/// text. No shine, no 3D edge; a press dims and settles it a touch.
 struct BigButtonStyle: ButtonStyle {
     var tone: StickerTone = .indigo
     var height: CGFloat = 60
@@ -76,32 +77,19 @@ struct BigButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
-        let pressed = configuration.isPressed
-        let lip: CGFloat = 4
+        let pressed: Bool = configuration.isPressed
         configuration.label
             .font(.allo(size: height >= 58 ? 18 : 16, weight: .heavy, relativeTo: .headline))
             .tracking(-0.3)
             .foregroundStyle(tone.deep)
             .padding(.horizontal, 22)
             .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: height)
-            .background {
-                Capsule().fill(tone.fill)
-                Capsule().fill(LinearGradient(colors: [Color.white.opacity(0.28), .clear],
-                                              startPoint: .top, endPoint: .center))
-                    .padding(2)
-            }
-            .offset(y: pressed ? lip : 0)
-            // The lip underneath: a darker shade the button sinks onto.
-            .background {
-                Capsule().fill(tone.lip)
-                    .offset(y: lip)
-                    .shadow(color: tone.shadow, radius: pressed ? 4 : 10, y: pressed ? 3 : 7)
-            }
-            .padding(.bottom, lip)
+            .background(tone.fill, in: .capsule)
+            .overlay(Capsule().fill(Color.black.opacity(pressed ? 0.08 : 0)))
             .opacity(isEnabled ? 1 : 0.4)
-            .scaleEffect(pressed ? 0.985 : 1)
-            .animation(.spring(response: 0.22, dampingFraction: 0.6), value: configuration.isPressed)
-            .sovaFeedback(.impact(flexibility: .soft, intensity: 0.55), trigger: configuration.isPressed) { _, pressed in pressed }
+            .scaleEffect(pressed ? 0.97 : 1)
+            .animation(.spring(response: 0.22, dampingFraction: 0.7), value: pressed)
+            .sovaFeedback(.impact(flexibility: .soft, intensity: 0.55), trigger: pressed) { _, isDown in isDown }
     }
 }
 
