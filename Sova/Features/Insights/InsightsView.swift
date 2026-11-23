@@ -52,32 +52,25 @@ struct InsightsView: View {
 
                     RangePicker(selection: $range)
 
-                    stage(current: current, delta: delta, canCompare: canCompare, hasHistory: hasHistory, index: index)
+                    KeptHero(current: current, delta: delta, canCompare: canCompare, hasHistory: hasHistory,
+                             rangeName: range.short, owlHappy: current >= 0.5 || owlTaps > 0, secret: secret,
+                             onOwl: pokeOwl)
 
-                    StatStrip(items: [
-                        .init(value: "\(index.tasks(inLast: range.days))", unit: nil,
-                              label: String(localized: "Tasks done"), color: Color.alertInk),
-                        .init(value: "\(routines.map(\.streak).max() ?? 0)", unit: String(localized: "d"),
-                              label: String(localized: "Best streak"), color: Color(hex: 0xE07F17)),
-                        .init(value: index.perDay(inLast: range.days).formatted(.number.precision(.fractionLength(0...1))),
-                              unit: nil, label: String(localized: "Per day"), color: Color(hex: 0x16A6DB)),
-                        .init(value: "\(Int((goalAverage * 100).rounded()))", unit: "%",
-                              label: String(localized: "Goals"), color: Color(hex: 0x4E8A00)),
-                    ])
+                    HStack(spacing: 8) {
+                        StatSticker(label: String(localized: "Tasks"), value: "\(index.tasks(inLast: range.days))", tone: .pink)
+                        StatSticker(label: String(localized: "Streak"), value: "\(routines.map(\.streak).max() ?? 0)d", tone: .orange)
+                        StatSticker(label: String(localized: "Goals"), value: "\(Int((goalAverage * 100).rounded()))%", tone: .lime)
+                    }
+
+                    WeekColumns(values: index.lastSeven)
 
                     if hasHistory {
-                        HStack(spacing: 10) {
+                        FlowLayout(spacing: 8) {
                             if let day = index.powerWeekday {
-                                FunFact(symbol: "bolt.heart.fill", tone: .yellow,
-                                        title: String(localized: "Power day"),
-                                        value: Calendar.current.weekdaySymbols[day - 1] + "s",
-                                        detail: String(localized: "You get the most done"))
+                                FactChip(text: "⚡ " + String(localized: "Power day · \(Calendar.current.shortWeekdaySymbols[day - 1])"))
                             }
                             if let period = index.bestPeriod {
-                                FunFact(symbol: period.symbol, tone: .lilac,
-                                        title: String(localized: "Best time"),
-                                        value: period.name,
-                                        detail: String(localized: "When you finish most tasks"))
+                                FactChip(text: "🌅 " + String(localized: "Best time · \(period.name)"))
                             }
                         }
                     }
@@ -726,3 +719,141 @@ private struct BadgeShelf: View {
         .surface(cornerRadius: 30, padding: 18)
     }
 }
+
+// MARK: - The week, in the onboarding style
+
+/// "You kept 82% of your rituals." with the highlighter on the number and
+/// a proud owl beside it.
+private struct KeptHero: View {
+    let current: Double
+    let delta: Int
+    let canCompare: Bool
+    let hasHistory: Bool
+    let rangeName: String
+    let owlHappy: Bool
+    let secret: Int
+    let onOwl: () -> Void
+
+    private var line: String {
+        guard hasHistory else { return String(localized: "Your story\n*starts today*.") }
+        let percent: Int = Int((current * 100).rounded())
+        return String(localized: "You kept\n*\(percent)%* of your\nrituals.")
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text.marked(line)
+                    .font(.hero(40, weight: .heavy))
+                    .tracking(-1.8)
+                    .foregroundStyle(Color.ink)
+                    .textRenderer(MarkerRenderer(color: StickerTone.yellow.fill))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .contentTransition(.numericText(value: current))
+                if hasHistory {
+                    Text(canCompare ? (delta >= 0 ? String(localized: "↑ \(delta)% vs the \(rangeName) before")
+                                                  : String(localized: "↓ \(-delta)% vs the \(rangeName) before"))
+                                    : String(localized: "Over the last \(rangeName)"))
+                        .font(.allo(size: 14, weight: .heavy, relativeTo: .footnote))
+                        .foregroundStyle(canCompare ? (delta >= 0 ? Color.positive : Color.alertInk) : Color.inkSecondary)
+                }
+            }
+            Spacer(minLength: 0)
+            OwlMark(size: 76, happy: owlHappy, bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
+                    pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly, celebrate: secret, reactsToTap: false)
+                .rotationEffect(.degrees(8))
+                .onTapGesture(perform: onOwl)
+                .overlay { SparkleBurst(trigger: secret, radius: CGSize(width: 110, height: 90), count: 14) }
+                .accessibilityHidden(true)
+        }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 6)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// One number as a flat sticker in its color.
+private struct StatSticker: View {
+    let label: String
+    let value: String
+    let tone: StickerTone
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            MonoCaps(label, color: tone.deep.opacity(0.75), size: 10)
+            Text(value)
+                .font(.hero(30, weight: .heavy))
+                .tracking(-1.2)
+                .foregroundStyle(tone.deep)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+                .contentTransition(.numericText())
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(tone.fill, in: .rect(cornerRadius: Radius.tile, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// The last seven days as fat indigo columns; today is yellow.
+private struct WeekColumns: View {
+    let values: [(Date, Int)]
+    @State private var grown = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        let peak: Int = max(values.map(\.1).max() ?? 1, 1)
+        VStack(alignment: .leading, spacing: 12) {
+            MonoCaps(String(localized: "Last 7 days"), color: Color.ink.opacity(0.55))
+            HStack(alignment: .bottom, spacing: 10) {
+                ForEach(Array(values.enumerated()), id: \.offset) { index, item in
+                    column(day: item.0, count: item.1, peak: peak, isToday: index == values.count - 1)
+                }
+            }
+            .frame(height: 130)
+        }
+        .padding(18)
+        .cardBackground()
+        .onAppear {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.7, dampingFraction: 0.75).delay(0.15)) { grown = true }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Last 7 days"))
+    }
+
+    private func column(day: Date, count: Int, peak: Int, isToday: Bool) -> some View {
+        let share: CGFloat = CGFloat(count) / CGFloat(peak)
+        return VStack(spacing: 6) {
+            GeometryReader { geo in
+                VStack {
+                    Spacer(minLength: 0)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(isToday ? StickerTone.yellow.fill : StickerTone.indigo.fill)
+                        .frame(height: max(8, geo.size.height * (grown ? share : 0.06)))
+                }
+            }
+            Text(day.formatted(.dateTime.weekday(.narrow)))
+                .font(.allo(size: 11, weight: .heavy, relativeTo: .caption2))
+                .foregroundStyle(isToday ? Color.ink : Color.inkSecondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+/// A fun fact as a white chip.
+private struct FactChip: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
+            .foregroundStyle(Color.ink)
+            .padding(.horizontal, 16)
+            .frame(height: 44)
+            .background(Color.surface, in: .capsule)
+            .overlay(Capsule().strokeBorder(Color.hairline, lineWidth: 1.5))
+    }
+}
+
