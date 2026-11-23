@@ -62,7 +62,7 @@ struct ScreenTitle<Trailing: View>: View {
                 trailing
             }
             .frame(minHeight: 44)
-            Text("\(Text(title).foregroundStyle(Color.ink))\(Text(".").foregroundStyle(SovaTheme.current.accent.color))")
+            Text("\(Text(title).foregroundStyle(Color.ink))\(Text(".").foregroundStyle(Color(hex: 0xFFC800)))")
                 .font(.hero(58, weight: .heavy))
                 .tracking(-2.6)
                 .lineLimit(1)
@@ -91,6 +91,64 @@ struct CircleAction: View {
         }
         .buttonStyle(.pressable)
         .accessibilityLabel(label)
+    }
+}
+
+/// A calm section label: mono caps with an optional count chip, as in
+/// onboarding. "UP NEXT", "RITUALS  2 LEFT".
+struct SectionCaps: View {
+    let title: String
+    var count: String? = nil
+    var color: Color = Color.ink.opacity(0.5)
+
+    var body: some View {
+        HStack(spacing: 8) {
+            MonoCaps(title, color: color)
+            if let count {
+                Text(count)
+                    .font(.mono(11))
+                    .textCase(.uppercase)
+                    .foregroundStyle(Color.ink)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.ink.opacity(0.07), in: .capsule)
+                    .contentTransition(.numericText())
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// The owl saying something: a small owl and a speech bubble.
+struct OwlSays: View {
+    let line: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            OwlMark(size: 34, blinks: true, bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
+                    pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly)
+                .accessibilityHidden(true)
+            Text(line)
+                .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
+                .foregroundStyle(Color.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .contentTransition(.opacity)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 11)
+                .background(Color.surface, in: UnevenRoundedRectangle(topLeadingRadius: 6, bottomLeadingRadius: 20,
+                                                                     bottomTrailingRadius: 20, topTrailingRadius: 20,
+                                                                     style: .continuous))
+                .overlay(UnevenRoundedRectangle(topLeadingRadius: 6, bottomLeadingRadius: 20,
+                                                bottomTrailingRadius: 20, topTrailingRadius: 20, style: .continuous)
+                    .strokeBorder(Color.hairline, lineWidth: 1.5))
+                .shadow(color: Color.night.opacity(0.05), radius: 10, y: 5)
+                .padding(.top, 6)
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

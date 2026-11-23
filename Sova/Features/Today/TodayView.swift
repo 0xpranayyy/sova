@@ -105,12 +105,8 @@ struct TodayView: View {
                 .cardRow(bottom: 6)
 
                 // The owl's line about your day, from what's actually going on.
-                Text(DayBriefing.line(tasks: tasks, routines: routines, goals: goals))
-                    .font(.allo(size: 15, weight: .bold, relativeTo: .subheadline))
-                    .foregroundStyle(Color.inkSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 6)
-                    .contentTransition(.opacity)
+                OwlSays(line: DayBriefing.line(tasks: tasks, routines: routines, goals: goals))
+                    .padding(.top, 8)
                     .cardRow(bottom: 12)
 
                 TipView(captureTip).cardRow(bottom: 8)
@@ -124,16 +120,19 @@ struct TodayView: View {
                 }
 
                 if let upNext {
+                    SectionCaps(title: upNext.section == .overdue ? String(localized: "Overdue · first things first")
+                                                                  : String(localized: "Up next"),
+                                color: upNext.section == .overdue ? Color.alertInk : Color.ink.opacity(0.5))
+                        .cardRow(top: 10, bottom: 8)
                     UpNextCard(entry: upNext) { open(upNext) }
-                        .cardRow(top: 6, bottom: 6)
+                        .cardRow(top: 0, bottom: 6)
                 }
 
                 if !todaysRituals.isEmpty {
-                    HStack {
-                        StickerHeader(title: String(localized: "Rituals"), symbol: "repeat", tone: .mint,
-                                      count: todaysRituals.count - ritualsDone)
-                    }
-                    .cardRow(top: 18, bottom: 10)
+                    SectionCaps(title: String(localized: "Rituals"),
+                                count: ritualsDone == todaysRituals.count ? String(localized: "All kept")
+                                                                          : String(localized: "\(todaysRituals.count - ritualsDone) left"))
+                        .cardRow(top: 18, bottom: 4)
 
                     ScrollView(.horizontal) {
                         HStack(spacing: 10) {
@@ -153,8 +152,7 @@ struct TodayView: View {
                 }
 
                 if !timeline.isEmpty {
-                    StickerHeader(title: String(localized: "Your day"), symbol: "clock.fill", tone: .yellow,
-                                  count: openTaskCount)
+                    SectionCaps(title: String(localized: "Your day"), count: "\(openTaskCount)")
                         .cardRow(top: 18, bottom: 2)
 
                     ForEach(timeline) { item in
@@ -423,47 +421,61 @@ struct UpNextCard: View {
     private let tone = StickerTone.yellow
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            MonoCaps(label, color: tone.deep)
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                if case .task(let t) = entry.source, !t.priority.marks.isEmpty {
-                    Text(t.priority.marks).foregroundStyle(Color.ember)
-                }
-                Text(title).foregroundStyle(StickerTone.indigo.fill)
+        HStack(spacing: 14) {
+            Button(action: complete) {
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .strokeBorder(tone.deep, lineWidth: 3)
+                    .frame(width: 34, height: 34)
+                    .contentShape(Rectangle().inset(by: -8))
             }
-            .font(.allo(size: 26, weight: .heavy, relativeTo: .title2))
-            .tracking(-0.8)
-            .padding(.top, 8)
-            if let meta {
-                Text(meta)
-                    .font(.allo(.subheadline, .heavy))
-                    .opacity(0.7)
-                    .padding(.top, 4)
-            }
-            HStack(spacing: 8) {
-                Button(action: complete) {
-                    Label("Done", systemImage: "checkmark")
-                }
-                .buttonStyle(.big(.indigo, height: 50))
-                .layoutPriority(1)
-                if case .task(let t) = entry.source {
-                    Button {
-                        TaskActions.moveToTomorrow(t, router: router)
-                    } label: {
-                        Text("Tomorrow")
-                            .font(.allo(size: 16, weight: .heavy, relativeTo: .headline))
-                            .foregroundStyle(tone.deep)
-                            .frame(maxWidth: .infinity, minHeight: 50)
-                            .background(tone.deep.opacity(0.12), in: .capsule)
+            .buttonStyle(.pressable)
+            .accessibilityLabel(String(localized: "Mark \(title) as done"))
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    if case .task(let t) = entry.source, !t.priority.marks.isEmpty {
+                        Text(t.priority.marks).foregroundStyle(Color.alertInk)
                     }
-                    .buttonStyle(.pressable)
+                    Text(title)
                 }
+                .font(.allo(size: 21, weight: .heavy, relativeTo: .title3))
+                .tracking(-0.5)
+                .lineLimit(2)
+                Text(subline)
+                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote))
+                    .opacity(0.7)
+                    .lineLimit(1)
             }
-            .padding(.top, 16)
+            Spacer(minLength: 4)
+            if case .task(let t) = entry.source {
+                Button {
+                    TaskActions.moveToTomorrow(t, router: router)
+                } label: {
+                    Image(systemName: "arrow.turn.up.right")
+                        .font(.system(size: 14, weight: .heavy))
+                        .frame(width: 36, height: 36)
+                        .background(tone.deep.opacity(0.12), in: .circle)
+                        .contentShape(Circle().inset(by: -4))
+                }
+                .buttonStyle(.pressable)
+                .accessibilityLabel(String(localized: "Move to tomorrow"))
+            }
         }
-        .block(tone, cornerRadius: 32)
+        .foregroundStyle(tone.deep)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
+        .frame(maxWidth: .infinity, minHeight: 78, alignment: .leading)
+        .background(tone.fill, in: .rect(cornerRadius: Radius.tile, style: .continuous))
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)
+    }
+
+    /// "6:00 PM · in 2 h" or what it's for.
+    private var subline: String {
+        var parts: [String] = []
+        if let meta { parts.append(meta) }
+        let timing = label.replacingOccurrences(of: String(localized: "Up next · "), with: "")
+        if timing != label { parts.append(timing) }
+        return parts.isEmpty ? String(localized: "Tap to open") : parts.joined(separator: " · ")
     }
 
     private var title: String {
@@ -518,7 +530,10 @@ struct RitualCard: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 Image(systemName: routine.symbol)
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(.system(size: done ? 24 : 18, weight: .semibold))
+                    .foregroundStyle(done ? ink : (tone == .indigo ? Color.white : tone.deep))
+                    .frame(width: done ? nil : 36, height: done ? nil : 36)
+                    .background(done ? Color.clear : tone.fill, in: .rect(cornerRadius: 12, style: .continuous))
                 Spacer()
                 check(tone: tone, done: done)
                     .padding(-7)
@@ -537,23 +552,30 @@ struct RitualCard: View {
             } else if !done && routine.isSlipping {
                 SlippingTag(ink: ink)
                     .padding(.top, 4)
+            } else if done && routine.streak > 1 {
+                Text("🔥 \(routine.streak)")
+                    .font(.allo(size: 12, weight: .heavy, relativeTo: .caption2).monospacedDigit())
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.white.opacity(0.45), in: .capsule)
+                    .contentTransition(.numericText())
+                    .padding(.top, 4)
             }
         }
     }
 
     var body: some View {
         let tone: StickerTone = StickerTone(routine.accent)
-        let ink: Color = tone == .indigo ? Color.white : tone.deep
         let done: Bool = routine.isDone(on: .now)
+        let ink: Color = done ? (tone == .indigo ? Color.white : tone.deep) : Color.ink
         let actionName: String = done ? String(localized: "Mark as not done") : String(localized: "Mark as done")
         tile(tone: tone, ink: ink, done: done)
             .foregroundStyle(ink)
             .padding(14)
-            .frame(width: 132, height: 132, alignment: .topLeading)
-            .background { tileBackground(tone) }
-            .opacity(done ? 0.6 : 1)
+            .frame(width: 128, height: 118, alignment: .topLeading)
+            .background { tileBackground(tone, done: done) }
             .wiggle(on: wiggle)
-            .rotationEffect(.degrees(tilt))
+            .rotationEffect(.degrees(done ? tilt : 0))
             .contentShape(.rect)
             .onTapGesture(perform: onOpen)
             .animation(.spring(response: 0.4, dampingFraction: 0.7), value: done)
@@ -579,8 +601,19 @@ struct RitualCard: View {
     }
 
     @ViewBuilder
-    private func tileBackground(_ tone: StickerTone) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 30, style: .continuous)
+    private func tileBackground(_ tone: StickerTone, done: Bool) -> some View {
+        let shape = RoundedRectangle(cornerRadius: Radius.tile, style: .continuous)
+        if done {
+            filledBackground(tone)
+        } else {
+            shape.fill(Color.surface.shadow(.drop(color: Color.night.opacity(0.05), radius: 10, y: 5)))
+            shape.strokeBorder(Color.hairline, lineWidth: 1.5)
+        }
+    }
+
+    @ViewBuilder
+    private func filledBackground(_ tone: StickerTone) -> some View {
+        let shape = RoundedRectangle(cornerRadius: Radius.tile, style: .continuous)
         shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
         shape.fill(LinearGradient(colors: [Color.white.opacity(0.24), .clear], startPoint: .top, endPoint: .center))
         shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.55), .clear],

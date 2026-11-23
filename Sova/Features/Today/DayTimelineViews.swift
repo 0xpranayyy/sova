@@ -23,68 +23,49 @@ struct DayHeaderCard: View {
     private var progress: Double { total == 0 ? 0 : Double(done) / Double(total) }
     private var allDone: Bool { total > 0 && done == total }
 
-    var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle().stroke(Color.white.opacity(0.13), lineWidth: 8)
-                Circle()
-                    .trim(from: 0, to: max(0.001, progress))
-                    .stroke(AngularGradient(colors: [StickerTone.orange.fill, StickerTone.yellow.fill, StickerTone.yellow.fill],
-                                            center: .center, startAngle: .degrees(0), endAngle: .degrees(360 * max(progress, 0.001))),
-                            style: StrokeStyle(lineWidth: 8, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .opacity(progress > 0 ? 1 : 0)
-                OwlMark(size: 44, happy: allDone,
-                        bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                        pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
-                        celebrate: cheers)
-                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { owlFrame = $0 }
-                    .offset(y: 2)
-            }
-            .frame(width: 78, height: 78)
-            .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 120, height: 90)) }
-            .animation(.spring(response: 0.8, dampingFraction: 0.8), value: progress)
+    /// "Good morning, Alex" split into the small line and the big name.
+    private var parts: (hello: String, name: String?) {
+        guard let comma = greeting.range(of: ", ") else { return (greeting, nil) }
+        return (String(greeting[..<comma.lowerBound]), String(greeting[comma.upperBound...]))
+    }
 
-            VStack(alignment: .leading, spacing: 3) {
-                MonoCaps(greeting, color: StickerTone.yellow.fill)
+    private var statusLine: String {
+        if total == 0 { return String(localized: "A clear day") }
+        if allDone { return String(localized: "All done!") }
+        return String(localized: "of \(total) done")
+    }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 8) {
+            VStack(alignment: .leading, spacing: 0) {
+                MonoCaps(parts.name == nil ? String(localized: "Today") : parts.hello,
+                         color: StickerTone.yellow.fill.opacity(0.85))
                     .lineLimit(1)
-                Text(total == 0 ? String(localized: "A clear day")
-                     : allDone ? String(localized: "All done!")
-                     : String(localized: "\(done) of \(total) done"))
-                    .font(.allo(size: 25, weight: .heavy, relativeTo: .title2))
-                    .tracking(-0.7)
+                Text("\(parts.name ?? parts.hello)\(Text(".").foregroundStyle(StickerTone.yellow.fill))")
+                    .font(.hero(34, weight: .heavy))
+                    .tracking(-1.4)
                     .foregroundStyle(.white)
-                    .contentTransition(.numericText(value: Double(done)))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                if total > 0 {
-                    HStack(spacing: 4) {
-                        ForEach(0..<min(total, 12), id: \.self) { index in
-                            let lit = total <= 12 ? index < done : Double(index) < progress * 12
-                            Capsule()
-                                .fill(lit ? StickerTone.yellow.fill : Color.white.opacity(0.16))
-                                .frame(height: 6)
-                        }
-                    }
-                    .padding(.top, 6)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.75), value: done)
-                }
+                    .minimumScaleFactor(0.6)
+                    .padding(.top, 4)
+                progressLine
+                    .padding(.top, 12)
+                track
+                    .padding(.top, 10)
             }
             Spacer(minLength: 0)
-            if streak > 1 {
-                TiltPill(text: "🔥 \(streak)", tone: .mint, tilt: 6, size: 13)
-                    .frame(maxHeight: .infinity, alignment: .top)
-            }
+            OwlMark(size: 78, happy: allDone,
+                    bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
+                    pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
+                    celebrate: cheers)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { owlFrame = $0 }
+                .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 120, height: 90)) }
         }
-        .padding(.vertical, 14)
-        .padding(.leading, 14)
-        .padding(.trailing, 16)
-        .background {
-            let shape = RoundedRectangle(cornerRadius: 28, style: .continuous)
-            shape.fill(StickerTone.indigo.fill.shadow(.drop(color: StickerTone.indigo.shadow, radius: 16, y: 9)))
-            shape.fill(RadialGradient(colors: [Color.white.opacity(0.14), .clear],
-                                      center: .topLeading, startRadius: 0, endRadius: 240))
-        }
+        .padding(.vertical, 20)
+        .padding(.leading, 20)
+        .padding(.trailing, 14)
+        .background(StickerTone.indigo.fill.shadow(.drop(color: StickerTone.indigo.shadow, radius: 16, y: 9)),
+                    in: .rect(cornerRadius: Radius.hero, style: .continuous))
         .onChange(of: done) { old, new in
             // The last thing of the day: the owl hops, sparkles burst, and a
             // rolling haptic plays.
@@ -104,6 +85,37 @@ struct DayHeaderCard: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(greeting)
         .accessibilityValue(String(localized: "\(done) of \(total) done"))
+    }
+
+    /// "3 of 8 done · 🔥 12" with the number big and yellow.
+    private var progressLine: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            if total > 0 && !allDone {
+                Text(done, format: .number)
+                    .font(.hero(30, weight: .heavy))
+                    .foregroundStyle(StickerTone.yellow.fill)
+                    .contentTransition(.numericText(value: Double(done)))
+            }
+            Text(streak > 1 ? "\(statusLine) · 🔥 \(streak)" : statusLine)
+                .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
+                .foregroundStyle(allDone ? StickerTone.yellow.fill : Color.white.opacity(0.6))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+    }
+
+    /// A chunky yellow track that fills as the day gets done.
+    private var track: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.white.opacity(0.14))
+                Capsule().fill(StickerTone.yellow.fill)
+                    .frame(width: progress > 0 ? max(10, geo.size.width * progress) : 0)
+            }
+        }
+        .frame(maxWidth: 210)
+        .frame(height: 10)
+        .animation(.spring(response: 0.6, dampingFraction: 0.78), value: progress)
     }
 }
 
