@@ -33,7 +33,6 @@ struct TasksView: View {
         let doneThisWeek = recentlyDone.filter { ($0.completedAt ?? .distantPast) >= weekAgo }
         let filtered = open.filter(filter.matches)
         let groups = TaskGroup.build(filtered, focus: focusDay)
-        let load = DayLoad(open)
         let overdue = open.filter(\.isOverdue)
 
         NavigationStack {
@@ -46,15 +45,14 @@ struct TasksView: View {
                 }
                 .cardRow(top: 4, bottom: 14)
 
+                InlineAdd().cardRow(bottom: 14)
+
                 TipView(TasksTabTip()).cardRow(bottom: 10)
 
                 if open.isEmpty {
                     AllClear(hadTasks: !doneThisWeek.isEmpty, cheers: clearedCheers) { router.sheet = .newTask(nil) }
                         .cardRow(top: 4)
                 } else {
-                    CalendarStrip(load: load, selection: $focusDay)
-                        .cardRow(bottom: 12)
-
                     FilterChips(selection: $filter, counts: TaskFilter.counts(in: open))
                         .readableRow(bottom: 4, side: 0)
 
@@ -74,7 +72,7 @@ struct TasksView: View {
                                 TaskActions.moveOverdueToToday(group.tasks, router: router)
                             }
                         }
-                        .cardRow(top: 20, bottom: 10)
+                        .cardRow(top: 20, bottom: 8)
 
                         ForEach(group.tasks) { task in
                             row(task, overdue: group.kind == .overdue)
@@ -455,25 +453,21 @@ private struct GroupHeader: View {
 
     var body: some View {
         if group.kind == .overdue {
-            overdueBanner
-        } else {
-            HStack(alignment: .center, spacing: 12) {
-                tile
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(group.title)
-                        .font(.allo(size: 21, weight: .heavy, relativeTo: .title3))
-                        .tracking(-0.6)
-                        .foregroundStyle(Color.ink)
-                    if let sub = subtitle { MonoCaps(sub) }
+            HStack(spacing: 8) {
+                SectionCaps(title: group.title, count: "\(group.tasks.count)", color: Color.alertInk)
+                Button(action: onAction) {
+                    Text(String(localized: "All to today"))
+                        .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote))
+                        .foregroundStyle(StickerTone.pink.deep)
+                        .padding(.horizontal, 12)
+                        .frame(height: 30)
+                        .background(StickerTone.pink.fill.opacity(0.35), in: .capsule)
                 }
-                Spacer(minLength: 6)
-                Text("\(group.tasks.count)")
-                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote).monospacedDigit())
-                    .foregroundStyle(Color.inkTertiary)
-                    .contentTransition(.numericText(value: Double(group.tasks.count)))
+                .buttonStyle(.pressable)
             }
-            .accessibilityElement(children: .combine)
-            .accessibilityAddTraits(.isHeader)
+        } else {
+            let caption: String = subtitle.map { "\(group.title) · \($0)" } ?? group.title
+            SectionCaps(title: caption, count: "\(group.tasks.count)")
         }
     }
 
