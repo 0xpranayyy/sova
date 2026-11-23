@@ -91,9 +91,13 @@ struct InsightsView: View {
                     heatmap(index)
 
                     BadgeShelf(badges: badges) { badge in
-                        Haptics.pop(0.5, sound: badge.earned)
-                        router.show(Toast(message: badge.earned ? "\(badge.emoji) \(badge.title): \(badge.howTo)"
-                                                                : String(localized: "🔒 \(badge.title): \(badge.howTo)")))
+                        if badge.earned {
+                            router.badgeCollection = (badges.filter(\.earned).count, badges.count)
+                            router.unlockedBadge = badge
+                        } else {
+                            Haptics.pop(0.4)
+                            router.show(Toast(message: String(localized: "🔒 \(badge.title): \(badge.howTo) (\(badge.progressText))")))
+                        }
                     }
                 }
                 .readableColumn()
@@ -105,6 +109,10 @@ struct InsightsView: View {
             .scrollIndicators(.hidden)
             .background { CanvasBackground() }
             .toolbarVisibility(.hidden, for: .navigationBar)
+            .onAppear {
+                BadgeBook.markSeen()
+                router.newBadges = 0
+            }
             .refreshable {
                 // Pull down and the owl reads you a fun stat.
                 await MainActor.run { Haptics.owl() }
@@ -640,86 +648,6 @@ private struct ConsistencyRow: View {
 // MARK: - Badges
 
 /// Little achievements to collect. Locked ones show how to earn them.
-struct Badge: Identifiable {
-    let id: String
-    let emoji: String
-    let title: String
-    let howTo: String
-    let tone: StickerTone
-    let earned: Bool
-
-    static func all(index: ActivityIndex, routines: [Routine], goals: [Goal], weekKept: Double) -> [Badge] {
-        let streak = routines.map(\.streak).max() ?? 0
-        return [
-            Badge(id: "first", emoji: "✅", title: String(localized: "First tick"),
-                  howTo: String(localized: "Finish your first task."), tone: .mint, earned: index.tasksDone >= 1),
-            Badge(id: "ten", emoji: "🔟", title: String(localized: "Ten down"),
-                  howTo: String(localized: "Finish 10 tasks."), tone: .yellow, earned: index.tasksDone >= 10),
-            Badge(id: "hundred", emoji: "💯", title: String(localized: "Centurion"),
-                  howTo: String(localized: "Finish 100 tasks."), tone: .pink, earned: index.tasksDone >= 100),
-            Badge(id: "week", emoji: "🔥", title: String(localized: "On fire"),
-                  howTo: String(localized: "Keep a 7-day streak."), tone: .orange, earned: streak >= 7),
-            Badge(id: "month", emoji: "🌙", title: String(localized: "Moon cycle"),
-                  howTo: String(localized: "Keep a 30-day streak."), tone: .lilac, earned: streak >= 30),
-            Badge(id: "perfect", emoji: "✨", title: String(localized: "Perfect week"),
-                  howTo: String(localized: "Keep every ritual for 7 days."), tone: .cyan,
-                  earned: !routines.isEmpty && weekKept >= 1),
-            Badge(id: "goal", emoji: "🏆", title: String(localized: "Goal getter"),
-                  howTo: String(localized: "Reach 100% on a goal."), tone: .lime, earned: goals.contains { $0.progress >= 1 }),
-            Badge(id: "night", emoji: "🦉", title: String(localized: "Night owl"),
-                  howTo: String(localized: "Finish a task after 11 PM."), tone: .indigo, earned: index.nightOwl),
-            Badge(id: "early", emoji: "🌅", title: String(localized: "Early bird"),
-                  howTo: String(localized: "Finish a task before 7 AM."), tone: .orange, earned: index.earlyBird),
-        ]
-    }
-}
-
-private struct BadgeShelf: View {
-    let badges: [Badge]
-    let onTap: (Badge) -> Void
-
-    var body: some View {
-        let earned = badges.filter(\.earned).count
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                MonoCaps(String(localized: "Badges"))
-                Spacer()
-                Text("\(earned) / \(badges.count)")
-                    .font(.allo(size: 13, weight: .heavy, relativeTo: .footnote).monospacedDigit())
-                    .foregroundStyle(Color.inkSecondary)
-            }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 14) {
-                ForEach(Array(badges.enumerated()), id: \.element.id) { position, badge in
-                    Button { onTap(badge) } label: {
-                        VStack(spacing: 6) {
-                            ZStack {
-                                StarburstShape(points: 14)
-                                    .fill(badge.earned ? badge.tone.fill : Color.well)
-                                    .frame(width: 66, height: 66)
-                                Text(badge.earned ? badge.emoji : "?")
-                                    .font(badge.earned ? .system(size: 28) : .allo(size: 24, weight: .heavy))
-                                    .foregroundStyle(Color.inkTertiary)
-                            }
-                            .rotationEffect(.degrees(badge.earned ? Double([-8, 6, -4][position % 3]) : 0))
-                            .saturation(badge.earned ? 1 : 0)
-                            Text(badge.title)
-                                .font(.allo(size: 12, weight: .heavy, relativeTo: .caption))
-                                .foregroundStyle(badge.earned ? Color.ink : Color.inkTertiary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.pressable)
-                    .accessibilityLabel(badge.title)
-                    .accessibilityValue(badge.earned ? String(localized: "Earned") : String(localized: "Locked. \(badge.howTo)"))
-                }
-            }
-        }
-        .surface(cornerRadius: 30, padding: 18)
-    }
-}
-
 // MARK: - The week, in the onboarding style
 
 /// "You kept 82% of your rituals." with the highlighter on the number and

@@ -58,6 +58,11 @@ final class AppRouter {
     /// Kept current by the tab view, for the free-plan limits.
     var routineCount = 0
     var activeGoalCount = 0
+    /// A badge just earned: shows the unlock moment.
+    var unlockedBadge: Badge?
+    var badgeCollection: (earned: Int, total: Int) = (0, 0)
+    /// Badges earned but not looked at yet (the Insights tab badge).
+    var newBadges = 0
 
     var newRoutineSheet: EditorSheet {
         PlusGate.canAddRitual(existing: routineCount) ? .newRoutine : .plus(.rituals)

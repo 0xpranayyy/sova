@@ -59,6 +59,7 @@ struct MainTabView: View {
             Tab("Insights", systemImage: "chart.bar", value: AppTab.insights) {
                 InsightsView().id(today)
             }
+            .badge(router.newBadges)
         }
         // Exactly five tabs, so iOS never folds Rituals and Insights into a
         // "More" list. New lives as the + in each screen's header.
@@ -105,6 +106,13 @@ struct MainTabView: View {
         }
         .sheet(item: $router.sheet) { sheet in
             editor(for: sheet)
+        }
+        .modifier(BadgeWatcher())
+        .fullScreenCover(item: $router.unlockedBadge) { badge in
+            BadgeUnlockView(badge: badge, collected: router.badgeCollection.earned,
+                            total: router.badgeCollection.total) {
+                router.unlockedBadge = nil
+            }
         }
         .tint(Color.ink)
         .environment(router)

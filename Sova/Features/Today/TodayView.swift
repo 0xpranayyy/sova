@@ -48,6 +48,15 @@ struct TodayView: View {
         }
     }
 
+    /// The latest badge you haven't looked at yet, for the banner.
+    private var newestBadge: Badge? {
+        let unseen = BadgeBook.unseen
+        guard !unseen.isEmpty else { return nil }
+        let index = ActivityIndex(tasks: tasks, routines: routines, days: 7)
+        let all = Badge.all(index: index, routines: routines, goals: goals, weekKept: Badge.weekKept(routines))
+        return all.last { unseen.contains($0.id) && $0.earned }
+    }
+
     private func askForReviewIfDue(after delay: Duration = .seconds(2.5)) {
         guard ReviewPrompt.shouldAskAfterCelebration() else { return }
         Task {
@@ -105,6 +114,12 @@ struct TodayView: View {
                 .cardRow(bottom: 6)
 
                 // The owl's line about your day, from what's actually going on.
+                if router.newBadges > 0, let badge = newestBadge {
+                    NewStickerBanner(badge: badge) { router.tab = .insights }
+                        .cardRow(top: 4, bottom: 6)
+                        .transition(.scale(scale: 0.95).combined(with: .opacity))
+                }
+
                 OwlSays(line: DayBriefing.line(tasks: tasks, routines: routines, goals: goals))
                     .padding(.top, 8)
                     .cardRow(bottom: 12)
