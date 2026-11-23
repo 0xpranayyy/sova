@@ -188,6 +188,11 @@ struct BadgeUnlockView: View {
     let total: Int
     let onDone: () -> Void
 
+    @Query private var tasks: [TaskItem]
+    @Query private var routines: [Routine]
+    @Query private var goals: [Goal]
+    @State private var sharing = false
+
     @State private var landed = false
     @State private var cheers = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -244,8 +249,7 @@ struct BadgeUnlockView: View {
                 Spacer(minLength: 20)
                 Button(action: onDone) { Text("Add to my sticker book") }
                     .buttonStyle(.big(.yellow))
-                ShareLink(item: Image(badge.sticker),
-                          preview: SharePreview(badge.title, image: Image(badge.sticker))) {
+                Button { sharing = true } label: {
                     Text("Share sticker ↗")
                         .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
                         .foregroundStyle(Color.white.opacity(0.65))
@@ -255,6 +259,10 @@ struct BadgeUnlockView: View {
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 8)
+        }
+        .sheet(isPresented: $sharing) {
+            BadgeShareSheet(badge: badge, badges: allBadges, streak: routines.map(\.streak).max() ?? 0)
+                .presentationDetents([.large])
         }
         .task {
             try? await Task.sleep(for: .milliseconds(250))
@@ -266,6 +274,14 @@ struct BadgeUnlockView: View {
             Haptics.celebrate()
             Sounds.play(.pop)
         }
+    }
+}
+
+extension BadgeUnlockView {
+    /// Every badge, for the sticker-book share image.
+    fileprivate var allBadges: [Badge] {
+        let index = ActivityIndex(tasks: tasks, routines: routines, days: 7)
+        return Badge.all(index: index, routines: routines, goals: goals, weekKept: Badge.weekKept(routines))
     }
 }
 

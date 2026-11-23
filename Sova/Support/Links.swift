@@ -11,6 +11,10 @@ enum Links {
     static var hasSupportEmail: Bool { !supportEmail.contains("yourdomain") }
     /// Fill in once App Store Connect gives the app an id (digits only).
     static let appStoreID = ""
+    /// Sova's App Store page, once it has an id.
+    static var appPage: URL? {
+        appStoreID.isEmpty ? nil : URL(string: "https://apps.apple.com/app/id\(appStoreID)")
+    }
     static var writeReview: URL? {
         appStoreID.isEmpty ? nil : URL(string: "https://apps.apple.com/app/id\(appStoreID)?action=write-review")
     }
