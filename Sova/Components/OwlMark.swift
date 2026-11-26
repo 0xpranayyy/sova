@@ -29,6 +29,8 @@ struct OwlMark: View {
     var celebrate: Int = 0
     /// Whether tapping the owl gets a reaction. Off for tiny owls.
     var reactsToTap = true
+    /// Heavy-lidded at night: the lids rest half closed.
+    var sleepy = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -183,7 +185,8 @@ struct OwlMark: View {
         ctx.fill(beak, with: .color(beakColor))
 
         // The live eyes.
-        let blink = (blinks && !still && smile < 0.5) ? track(t, Self.lid) : 0
+        let blinkLid = (blinks && !still && smile < 0.5) ? track(t, Self.lid) : 0
+        let blink = sleepy && smile < 0.5 ? max(blinkLid, 0.58) : blinkLid
         let idleX = still ? 0 : track(t, Self.lookX), idleY = still ? 0 : track(t, Self.lookY)
         let follow = easeInOut.value(at: min(1, now.timeIntervalSince(lookActiveChangedAt) / 0.3))
         let lookOn = look == .zero ? 1 - follow : follow

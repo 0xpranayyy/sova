@@ -19,6 +19,7 @@ struct DayHeaderCard: View {
     @Environment(\.requestReview) private var requestReview
     @State private var cheers = 0
     @State private var owlFrame: CGRect = .zero
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var progress: Double { total == 0 ? 0 : Double(done) / Double(total) }
     private var allDone: Bool { total > 0 && done == total }
@@ -36,36 +37,9 @@ struct DayHeaderCard: View {
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 8) {
-            VStack(alignment: .leading, spacing: 0) {
-                MonoCaps(parts.name == nil ? String(localized: "Today") : parts.hello,
-                         color: StickerTone.yellow.fill.opacity(0.85))
-                    .lineLimit(1)
-                Text("\(parts.name ?? parts.hello)\(Text(".").foregroundStyle(StickerTone.yellow.fill))")
-                    .font(.hero(34, weight: .heavy))
-                    .tracking(-1.4)
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                    .padding(.top, 4)
-                progressLine
-                    .padding(.top, 12)
-                track
-                    .padding(.top, 10)
-            }
-            Spacer(minLength: 0)
-            OwlMark(size: 78, happy: allDone,
-                    bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
-                    pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
-                    celebrate: cheers)
-                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { owlFrame = $0 }
-                .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 120, height: 90)) }
+        TimelineView(.everyMinute) { timeline in
+            hero(part: DayPart.at(timeline.date))
         }
-        .padding(.vertical, 20)
-        .padding(.leading, 20)
-        .padding(.trailing, 14)
-        .background(StickerTone.indigo.fill.shadow(.drop(color: StickerTone.indigo.shadow, radius: 16, y: 9)),
-                    in: .rect(cornerRadius: Radius.hero, style: .continuous))
         .onChange(of: done) { old, new in
             // The last thing of the day: the owl hops, sparkles burst, and a
             // rolling haptic plays.
@@ -87,36 +61,93 @@ struct DayHeaderCard: View {
         .accessibilityValue(String(localized: "\(done) of \(total) done"))
     }
 
-    /// "3 of 8 done · 🔥 12" with the number big and yellow.
-    private var progressLine: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
-            if total > 0 && !allDone {
-                Text(done, format: .number)
-                    .font(.hero(30, weight: .heavy))
-                    .foregroundStyle(StickerTone.yellow.fill)
-                    .contentTransition(.numericText(value: Double(done)))
-            }
-            Text(streak > 1 ? "\(statusLine) · 🔥 \(streak)" : statusLine)
-                .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
-                .foregroundStyle(allDone ? StickerTone.yellow.fill : Color.white.opacity(0.6))
+    private func hero(part: DayPart) -> some View {
+        let harmony: Harmony = part.harmony
+        return ZStack(alignment: .topLeading) {
+            harmony.bg
+            DayScene(part: part, harmony: harmony)
+            heroText(part: part, harmony: harmony)
+                .padding(.leading, 20)
+                .padding(.top, 18)
+            SegmentBar(done: done, total: total, fill: harmony.accent,
+                       empty: harmony.isDark ? harmony.soft : harmony.top)
+                .frame(width: 166)
+                .padding(.leading, 20)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 22)
+            owl(part: part)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(.trailing, 22)
+                .padding(.bottom, 26)
+        }
+        .frame(height: 212)
+        .clipShape(.rect(cornerRadius: Radius.hero, style: .continuous))
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.8), value: part)
+    }
+
+    /// The owl on the hill: sleepy at night, happy when the day is done.
+    private func owl(part: DayPart) -> some View {
+        let sleepy: Bool = part.isNight && !allDone
+        return OwlMark(size: 88, happy: allDone, blinks: !sleepy,
+                       bodyColor: StickerTone.yellow.fill, eyeColor: StickerTone.indigo.fill,
+                       pupilColor: StickerTone.yellow.fill, bellyColor: Color.owlBelly,
+                       celebrate: cheers, sleepy: sleepy)
+            .shadow(color: Color(hex: 0x120840).opacity(0.18), radius: 5, y: 5)
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { owlFrame = $0 }
+            .overlay { SparkleBurst(trigger: cheers, radius: CGSize(width: 120, height: 90)) }
+    }
+
+    private func heroText(part: DayPart, harmony: Harmony) -> some View {
+        let name: String = parts.name ?? ""
+        return VStack(alignment: .leading, spacing: 0) {
+            MonoCaps(name.isEmpty ? String(localized: "Today") : part.greeting, color: harmony.mute)
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
+            nameLine(name.isEmpty ? part.greeting : name, harmony: harmony)
+                .padding(.top, 4)
+            HStack(alignment: .center, spacing: 8) {
+                progressText(harmony: harmony)
+                if streak > 1 { StreakSticker(streak: streak) }
+            }
+            .padding(.top, 8)
+        }
+        .frame(maxWidth: 220, alignment: .leading)
+    }
+
+    /// The name with the yellow highlighter (by night, the name is yellow).
+    @ViewBuilder
+    private func nameLine(_ name: String, harmony: Harmony) -> some View {
+        let dot = Text(".").foregroundStyle(harmony.isDark ? StickerTone.yellow.fill : harmony.accent)
+        if harmony.isDark {
+            Text("\(Text(name).foregroundStyle(StickerTone.yellow.fill))\(dot)")
+                .font(.hero(34, weight: .heavy))
+                .tracking(-1.4)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        } else {
+            Text("\(Text(name).foregroundStyle(harmony.ink).customAttribute(MarkerAttribute()))\(dot)")
+                .font(.hero(34, weight: .heavy))
+                .tracking(-1.4)
+                .textRenderer(MarkerRenderer(color: StickerTone.yellow.fill))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
     }
 
-    /// A chunky yellow track that fills as the day gets done.
-    private var track: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Color.white.opacity(0.14))
-                Capsule().fill(StickerTone.yellow.fill)
-                    .frame(width: progress > 0 ? max(10, geo.size.width * progress) : 0)
+    private func progressText(harmony: Harmony) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 5) {
+            if total > 0 && !allDone {
+                Text(done, format: .number)
+                    .font(.hero(22, weight: .heavy))
+                    .foregroundStyle(harmony.ink)
+                    .contentTransition(.numericText(value: Double(done)))
             }
+            Text(statusLine)
+                .font(.allo(size: 14, weight: .heavy, relativeTo: .subheadline))
+                .foregroundStyle(allDone ? harmony.ink : harmony.mute)
+                .lineLimit(1)
         }
-        .frame(maxWidth: 210)
-        .frame(height: 10)
-        .animation(.spring(response: 0.6, dampingFraction: 0.78), value: progress)
     }
+
 }
 
 extension DaySection {
