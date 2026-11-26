@@ -41,7 +41,7 @@ extension Color {
     static let ember = Color(hex: 0xE63E2E)
 
     /// Near-white paper by day, deep indigo night after dark.
-    static let canvas = Color(light: 0xFCFCFA, dark: 0x0E0B1F)
+    static let canvas = Color(light: 0xFAF5EC, dark: 0x0E0B1F)
     static let inkSecondary = Color.ink.opacity(0.5)
     static let inkTertiary = Color.ink.opacity(0.3)
     static let inkInverse = Color(light: 0xFFFFFF, dark: 0x15102E)
@@ -50,11 +50,14 @@ extension Color {
     static let surface = Color(light: 0xFFFFFF, dark: 0x1B1636)
     static let surfaceRaised = Color(light: 0xFFFFFF, dark: 0x231D42)
     /// Small chips inside a card (time labels).
-    static let surfaceMuted = Color(light: 0xF3F1EA, dark: 0x2A2347)
+    static let surfaceMuted = Color(light: 0xF1E9DA, dark: 0x2A2347)
     static let hairline = Color(light: UIColor(hex: 0x15102E, alpha: 0.07), dark: UIColor(white: 1, alpha: 0.08))
     static let danger = Color.ember
     /// Green for good news, readable on the page in both modes.
     static let positive = Color(light: 0x0B5A3C, dark: 0x4DF2B0)
+    /// A soft warm shadow that sits well on cream.
+    static let cardShadow = Color(light: UIColor(red: 60 / 255, green: 40 / 255, blue: 10 / 255, alpha: 0.07),
+                                  dark: UIColor(white: 0, alpha: 0.35))
     /// The owl's pale yellow belly.
     static let owlBelly = Color(hex: 0xFFF4A8)
     /// Overdue and warning text on white.

@@ -7,9 +7,9 @@ import SwiftUI
 /// The corner radii every card in Sova uses, so the app reads as one hand.
 enum Radius {
     /// Big indigo hero cards at the top of each tab.
-    static let hero: CGFloat = 34
+    static let hero: CGFloat = 32
     /// White cards and rows.
-    static let card: CGFloat = 26
+    static let card: CGFloat = 24
     /// Sticker tiles.
     static let tile: CGFloat = 22
     /// Chips and pills that aren't capsules.
@@ -23,7 +23,7 @@ extension View {
     func cardBackground(_ radius: CGFloat = Radius.card) -> some View {
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         return self
-            .background(Color.surface.shadow(.drop(color: Color.night.opacity(0.06), radius: 14, y: 7)), in: shape)
+            .background(Color.surface.shadow(.drop(color: Color.cardShadow, radius: 14, y: 7)), in: shape)
             .overlay(shape.strokeBorder(Color.hairline, lineWidth: 1.5))
     }
 

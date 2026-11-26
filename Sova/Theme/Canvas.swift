@@ -11,13 +11,16 @@ struct CanvasBackground: View {
         let dark = scheme == .dark
         ZStack {
             Color.canvas
-            RadialGradient(colors: [StickerTone.yellow.fill.opacity(dark ? 0.10 : 0.22), .clear],
-                           center: UnitPoint(x: 0.95, y: -0.02), startRadius: 0, endRadius: 360)
-            RadialGradient(colors: [StickerTone.lilac.fill.opacity(dark ? 0.16 : 0.30), .clear],
-                           center: UnitPoint(x: -0.1, y: 0.42), startRadius: 0, endRadius: 380)
-            RadialGradient(colors: [StickerTone.mint.fill.opacity(dark ? 0.06 : 0.14), .clear],
-                           center: UnitPoint(x: 1.1, y: 1.0), startRadius: 0, endRadius: 340)
-            PaperGrain(color: dark ? .white : Color(hex: 0x15102E), opacity: dark ? 0.035 : 0.045)
+            // By day, calm cream paper. After dark, a few soft glows.
+            if dark {
+                RadialGradient(colors: [StickerTone.yellow.fill.opacity(0.10), .clear],
+                               center: UnitPoint(x: 0.95, y: -0.02), startRadius: 0, endRadius: 360)
+                RadialGradient(colors: [StickerTone.lilac.fill.opacity(0.16), .clear],
+                               center: UnitPoint(x: -0.1, y: 0.42), startRadius: 0, endRadius: 380)
+                RadialGradient(colors: [StickerTone.mint.fill.opacity(0.06), .clear],
+                               center: UnitPoint(x: 1.1, y: 1.0), startRadius: 0, endRadius: 340)
+            }
+            PaperGrain(color: dark ? .white : Color(hex: 0x5A4A2E), opacity: dark ? 0.035 : 0.03)
         }
         .drawingGroup()
         .ignoresSafeArea()
