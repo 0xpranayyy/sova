@@ -133,7 +133,7 @@ struct OwlSays: View {
                 .accessibilityHidden(true)
             Text(line)
                 .font(.allo(size: 15, weight: .heavy, relativeTo: .subheadline))
-                .foregroundStyle(Color.ink)
+                .foregroundStyle(Color(light: 0x2B1677, dark: 0xF4F1FF))
                 .fixedSize(horizontal: false, vertical: true)
                 .contentTransition(.opacity)
                 .padding(.horizontal, 14)
@@ -141,10 +141,7 @@ struct OwlSays: View {
                 .background(Color.surface, in: UnevenRoundedRectangle(topLeadingRadius: 6, bottomLeadingRadius: 20,
                                                                      bottomTrailingRadius: 20, topTrailingRadius: 20,
                                                                      style: .continuous))
-                .overlay(UnevenRoundedRectangle(topLeadingRadius: 6, bottomLeadingRadius: 20,
-                                                bottomTrailingRadius: 20, topTrailingRadius: 20, style: .continuous)
-                    .strokeBorder(Color.hairline, lineWidth: 1.5))
-                .shadow(color: Color.night.opacity(0.05), radius: 10, y: 5)
+                .shadow(color: Color.cardShadow, radius: 10, y: 5)
                 .padding(.top, 6)
             Spacer(minLength: 0)
         }

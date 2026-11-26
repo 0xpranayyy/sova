@@ -434,12 +434,16 @@ struct UpNextCard: View {
 
     @Environment(AppRouter.self) private var router
     private let tone = StickerTone.yellow
+    /// Soft butter by day, soft lavender at night, with text tinted to match.
+    private var night: Bool { DayPart.current.isNight }
+    private var cardFill: Color { night ? Color(hex: 0xE6DEFF) : Color(hex: 0xFFF3A6) }
+    private var cardInk: Color { night ? Color(hex: 0x3A2595) : tone.deep }
 
     var body: some View {
         HStack(spacing: 14) {
             Button(action: complete) {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    .strokeBorder(tone.deep, lineWidth: 3)
+                    .strokeBorder(cardInk, lineWidth: 3)
                     .frame(width: 34, height: 34)
                     .contentShape(Rectangle().inset(by: -8))
             }
@@ -468,18 +472,18 @@ struct UpNextCard: View {
                     Image(systemName: "arrow.turn.up.right")
                         .font(.system(size: 14, weight: .heavy))
                         .frame(width: 36, height: 36)
-                        .background(tone.deep.opacity(0.12), in: .circle)
+                        .background(Color.white, in: .circle)
                         .contentShape(Circle().inset(by: -4))
                 }
                 .buttonStyle(.pressable)
                 .accessibilityLabel(String(localized: "Move to tomorrow"))
             }
         }
-        .foregroundStyle(tone.deep)
+        .foregroundStyle(cardInk)
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity, minHeight: 78, alignment: .leading)
-        .background(tone.fill, in: .rect(cornerRadius: Radius.tile, style: .continuous))
+        .background(cardFill, in: .rect(cornerRadius: Radius.card, style: .continuous))
         .contentShape(.rect)
         .onTapGesture(perform: onOpen)
     }
@@ -550,7 +554,7 @@ struct RitualCard: View {
                     .font(.system(size: done ? 24 : 18, weight: .semibold))
                     .foregroundStyle(done ? ink : (tone == .indigo ? Color.white : tone.deep))
                     .frame(width: done ? nil : 36, height: done ? nil : 36)
-                    .background(done ? Color.clear : tone.fill, in: .rect(cornerRadius: 12, style: .continuous))
+                    .background(done ? Color.clear : tone.fill.opacity(0.35), in: .rect(cornerRadius: 12, style: .continuous))
                 Spacer()
                 check(tone: tone, done: done)
                     .padding(-7)
@@ -574,7 +578,9 @@ struct RitualCard: View {
                     .font(.allo(size: 12, weight: .heavy, relativeTo: .caption2).monospacedDigit())
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color.white.opacity(0.45), in: .capsule)
+                    .foregroundStyle(StickerTone.indigo.fill)
+                    .background(Color.white, in: .capsule)
+                    .rotationEffect(.degrees(6))
                     .contentTransition(.numericText())
                     .padding(.top, 4)
             }
@@ -620,22 +626,20 @@ struct RitualCard: View {
 
     @ViewBuilder
     private func tileBackground(_ tone: StickerTone, done: Bool) -> some View {
-        let shape = RoundedRectangle(cornerRadius: Radius.tile, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
         if done {
             filledBackground(tone)
         } else {
-            shape.fill(Color.surface.shadow(.drop(color: Color.night.opacity(0.05), radius: 10, y: 5)))
-            shape.strokeBorder(Color.hairline, lineWidth: 1.5)
+            shape.fill(Color.surface.shadow(.drop(color: Color.cardShadow, radius: 10, y: 5)))
         }
     }
 
     @ViewBuilder
     private func filledBackground(_ tone: StickerTone) -> some View {
-        let shape = RoundedRectangle(cornerRadius: Radius.tile, style: .continuous)
-        shape.fill(tone.fill.shadow(.drop(color: tone.shadow, radius: 12, y: 7)))
-        shape.fill(LinearGradient(colors: [Color.white.opacity(0.24), .clear], startPoint: .top, endPoint: .center))
-        shape.strokeBorder(LinearGradient(colors: [Color.white.opacity(0.55), .clear],
-                                          startPoint: .top, endPoint: .center), lineWidth: 1.2)
+        // A die-cut sticker: flat color, a white border and a soft shadow.
+        let shape = RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+        shape.fill(tone.fill.shadow(.drop(color: Color.cardShadow, radius: 10, y: 6)))
+        shape.strokeBorder(Color.white, lineWidth: 3)
     }
 }
 
