@@ -20,6 +20,7 @@ struct DayHeaderCard: View {
     @State private var cheers = 0
     @State private var owlFrame: CGRect = .zero
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var scheme
 
     private var progress: Double { total == 0 ? 0 : Double(done) / Double(total) }
     private var allDone: Bool { total > 0 && done == total }
@@ -62,7 +63,7 @@ struct DayHeaderCard: View {
     }
 
     private func hero(part: DayPart) -> some View {
-        let harmony: Harmony = part.harmony
+        let harmony: Harmony = part.harmony(dark: scheme == .dark)
         return ZStack(alignment: .topLeading) {
             harmony.bg
             DayScene(part: part, harmony: harmony)

@@ -32,6 +32,19 @@ struct Harmony: Equatable {
                 isDark: false)
     }
 
+    /// A deep harmony: a calm deep color with pale text of the same hue and
+    /// yellow accents. Dusk, and every part of the day in dark mode.
+    static func deep(hue: Double, saturation: Double, lightness: Double) -> Harmony {
+        Harmony(bg: .hsl(hue, saturation, lightness),
+                top: .hsl(hue, saturation + 0.02, lightness - 0.06),
+                pill: .hsl(hue, saturation - 0.04, lightness + 0.08),
+                soft: .hsl(hue, saturation - 0.04, lightness + 0.13),
+                ink: .hsl(hue, 0.55, 0.95),
+                mute: .hsl(hue, 0.30, 0.80),
+                accent: StickerTone.yellow.fill,
+                isDark: true)
+    }
+
     /// Night is the app icon: Sova indigo, white text and yellow accents.
     static let night = Harmony(bg: Color(hex: 0x2B1677), top: Color(hex: 0x22105F), pill: Color(hex: 0x3A2595),
                                soft: Color(hex: 0x4A35A8), ink: .white, mute: Color(hex: 0xB9AEF0),
@@ -47,22 +60,27 @@ enum DayPart: CaseIterable {
         case 5..<8: .dawn
         case 8..<12: .morning
         case 12..<17: .afternoon
-        case 17..<21: .evening
+        case 17..<20: .evening
         default: .night
         }
     }
 
     static var current: DayPart { at(.now) }
 
-    var harmony: Harmony {
+    /// The hero's colors. Evening is dusk (deep teal); night is Sova indigo.
+    /// In dark mode the daytime colors go deep too, so the card never glows
+    /// on a dark screen.
+    func harmony(dark: Bool = false) -> Harmony {
         switch self {
-        case .dawn: .light(hue: 0.14, saturation: 0.80, lightness: 0.84)
-        case .morning: .light(hue: 0.07, saturation: 0.85, lightness: 0.83)
-        case .afternoon: .light(hue: 0.43, saturation: 0.48, lightness: 0.80)
-        case .evening: .light(hue: 0.55, saturation: 0.62, lightness: 0.80)
+        case .dawn: dark ? .deep(hue: 0.12, saturation: 0.40, lightness: 0.30) : .light(hue: 0.14, saturation: 0.80, lightness: 0.84)
+        case .morning: dark ? .deep(hue: 0.05, saturation: 0.38, lightness: 0.32) : .light(hue: 0.07, saturation: 0.85, lightness: 0.83)
+        case .afternoon: dark ? .deep(hue: 0.43, saturation: 0.32, lightness: 0.28) : .light(hue: 0.43, saturation: 0.48, lightness: 0.80)
+        case .evening: .deep(hue: 0.55, saturation: 0.45, lightness: 0.30)
         case .night: .night
         }
     }
+
+    var harmony: Harmony { harmony() }
 
     var greeting: String {
         switch self {

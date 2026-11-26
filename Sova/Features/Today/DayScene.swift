@@ -55,7 +55,7 @@ struct DayScene: View {
             circle(&context, CGPoint(x: w * 0.85, y: 46), 26, Self.yellow)
             cloud(&context, CGPoint(x: w * 0.67, y: 80))
         case .evening:
-            circle(&context, CGPoint(x: w * 0.69, y: h - 70), 58, StickerTone.orange.fill.opacity(0.25))
+            circle(&context, CGPoint(x: w * 0.69, y: h - 70), 58, StickerTone.orange.fill.opacity(0.3))
             circle(&context, CGPoint(x: w * 0.69, y: h - 70), 44, Self.yellow)
             sparkle(&context, CGPoint(x: w * 0.9, y: 36), 11, .white)
         case .night:
